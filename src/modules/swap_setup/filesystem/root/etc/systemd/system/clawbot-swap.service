@@ -1,0 +1,18 @@
+[Unit]
+Description=ClawbotOS Swap File Creation
+After=local-fs.target
+Before=open-webui.service picoclaw.service openclaw.service
+ConditionPathExists=!/swapfile
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash -c '\
+    fallocate -l 2048M /swapfile && \
+    chmod 600 /swapfile && \
+    mkswap /swapfile && \
+    swapon /swapfile && \
+    echo "/swapfile none swap sw 0 0" >> /etc/fstab'
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,68 @@
+# ClawbotOS nginx reverse proxy configuration
+# Serves Open WebUI on port 80 and provides API endpoint proxying
+
+upstream openwebui_backend {
+    server 127.0.0.1:8888;
+}
+
+upstream picoclaw_backend {
+    server 127.0.0.1:8080;
+}
+
+upstream openclaw_backend {
+    server 127.0.0.1:8081;
+}
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name clawbot.local _;
+
+    client_max_body_size 50M;
+
+    # Open WebUI -- main dashboard at root
+    location / {
+        proxy_pass http://openwebui_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket support for chat streaming
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+    }
+
+    # PicoClaw API proxy
+    location /api/picoclaw/ {
+        proxy_pass http://picoclaw_backend/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # OpenClaw API proxy (when enabled)
+    location /api/openclaw/ {
+        proxy_pass http://openclaw_backend/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 '{"status":"ok","service":"clawbotos"}';
+        add_header Content-Type application/json;
+    }
+
+    # Static error page
+    error_page 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+        internal;
+    }
+}

@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+#### ClawbotOS swap setup for 1GB RAM optimization
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+echo_green "Configuring ${SWAP_SIZE_MB}MB swap for 1GB RAM board ..."
+
+## Step 1: Disable any existing swap
+swapoff -a 2>/dev/null || true
+## END Step 1
+
+## Step 2: Disable armbian zram (not suitable for heavy workloads)
+if [[ -f /etc/default/armbian-zram-config ]]; then
+    echo_green "Disabling armbian zram ..."
+    sed -i 's/ENABLED=true/ENABLED=false/' /etc/default/armbian-zram-config
+fi
+systemctl_if_exists disable armbian-zram-config.service || true
+## END Step 2
+
+## Step 3: Install swap creation service (runs on first boot)
+echo_green "Installing swap setup service ..."
+unpack /filesystem/root / root
+## END Step 3
+
+## Step 4: Configure sysctl for swappiness
+echo_green "Setting vm.swappiness=${SWAP_SWAPPINESS} ..."
+echo "vm.swappiness=${SWAP_SWAPPINESS}" > /etc/sysctl.d/99-clawbot-swap.conf
+## END Step 4
+
+## Step 5: Memory optimizations for 1GB RAM
+echo_green "Applying memory optimizations ..."
+cat > /etc/sysctl.d/99-clawbot-memory.conf << 'SYSCTL_EOF'
+# ClawbotOS memory optimizations for 1GB RAM
+vm.swappiness=60
+vm.vfs_cache_pressure=200
+vm.dirty_ratio=10
+vm.dirty_background_ratio=5
+vm.min_free_kbytes=16384
+vm.overcommit_memory=1
+SYSCTL_EOF
+## END Step 5
+
+## Step 6: Enable the first-boot swap creation service
+systemctl_if_exists enable clawbot-swap.service
+## END Step 6
+
+echo_green "Swap configuration ... DONE!"

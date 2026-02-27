@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#### ClawbotOS first-boot wizard module
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+echo_green "Installing ClawbotOS first-boot wizard ..."
+
+## Step 1: Install dialog dependencies
+# shellcheck disable=SC2086
+check_install_pkgs ${CLAWBOT_WIZARD_DEPS}
+## END Step 1
+
+## Step 2: Unpack filesystem overlay
+unpack /filesystem/root /
+## END Step 2
+
+## Step 3: Make wizard executable
+chmod +x /usr/local/bin/clawbot-firstboot
+## END Step 3
+
+## Step 4: Create sentinel file
+touch /.firstboot_clawbot
+## END Step 4
+
+## Step 5: Enable the first-boot service
+systemctl_if_exists enable clawbot-firstboot.service
+## END Step 5
+
+echo_green "Installing ClawbotOS first-boot wizard ... DONE!"

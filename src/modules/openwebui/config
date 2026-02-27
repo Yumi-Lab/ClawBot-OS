@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#### Open WebUI - Web Dashboard for AI Agents
+####
+#### https://github.com/open-webui/open-webui
+#### This File is distributed under GPLv3
+####
+
+# shellcheck disable=all
+
+[[ -n "$OPENWEBUI_DEPS" ]] || OPENWEBUI_DEPS="python3 python3-pip python3-venv python3-dev \
+build-essential libffi-dev libssl-dev"
+[[ -n "$OPENWEBUI_PORT" ]] || OPENWEBUI_PORT="8888"
+# Backend URL -- points to PicoClaw by default
+[[ -n "$OPENWEBUI_BACKEND_URL" ]] || OPENWEBUI_BACKEND_URL="http://127.0.0.1:8080"

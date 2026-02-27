@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+#### ClawbotOS branding module
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+if [[ "${DEBIAN_FRONTEND}" != "noninteractive" ]]; then
+    export DEBIAN_FRONTEND=noninteractive
+fi
+
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+## Step 1: Create ClawbotOS release file
+echo_green "Creating ClawbotOS release file ..."
+
+function get_parent {
+    grep VERSION_CODENAME /etc/os-release | cut -d '=' -f2
+}
+
+echo "${DIST_NAME} release ${DIST_VERSION} ($(get_parent))" > /etc/"${DIST_NAME,,}"-release
+## END Step 1
+
+## Step 2: Symlink for distro detection (Moonraker/agent compatibility)
+if [[ -f "/etc/armbian-release" ]]; then
+    echo_green "Apply release file workaround (armbian based image) ..."
+    ln -sf /etc/"${DIST_NAME,,}"-release /etc/aaaa-release
+fi
+## END Step 2
+
+## Step 3: Install ClawbotOS dependencies
+echo_green "Installing ClawbotOS utility packages ..."
+apt-get update --allow-releaseinfo-change
+# shellcheck disable=SC2086
+check_install_pkgs ${CLAWBOT_DEPS}
+## END Step 3
+
+## Step 4: Set hostname to clawbot
+echo_green "Setting hostname to 'clawbot' ..."
+echo "clawbot" > /etc/hostname
+sed -i 's/127.0.1.1.*/127.0.1.1\tclawbot/' /etc/hosts
+## END Step 4
+
+## Step 5: Configure avahi for mDNS (clawbot.local)
+echo_green "Configuring mDNS (clawbot.local) ..."
+if [[ -f /etc/avahi/avahi-daemon.conf ]]; then
+    sed -i 's/#host-name=.*/host-name=clawbot/' /etc/avahi/avahi-daemon.conf
+fi
+## END Step 5
+
+## Step 6: Install agent switching script
+echo_green "Installing clawbot-switch-agent utility ..."
+cat > /usr/local/bin/clawbot-switch-agent << 'SWITCH_EOF'
+#!/usr/bin/env bash
+# ClawbotOS - Switch between PicoClaw and OpenClaw agents
+set -e
+
+case "$1" in
+    picoclaw)
+        systemctl stop openclaw.service 2>/dev/null || true
+        systemctl disable openclaw.service 2>/dev/null || true
+        systemctl enable picoclaw.service
+        systemctl start picoclaw.service
+        sed -i 's|OPENAI_API_BASE_URL=http://127.0.0.1:8081|OPENAI_API_BASE_URL=http://127.0.0.1:8080|' \
+            /etc/systemd/system/open-webui.service
+        systemctl daemon-reload
+        systemctl restart open-webui.service
+        echo "Switched to PicoClaw (port 8080)"
+        ;;
+    openclaw)
+        systemctl stop picoclaw.service 2>/dev/null || true
+        systemctl disable picoclaw.service 2>/dev/null || true
+        systemctl enable openclaw.service
+        systemctl start openclaw.service
+        sed -i 's|OPENAI_API_BASE_URL=http://127.0.0.1:8080|OPENAI_API_BASE_URL=http://127.0.0.1:8081|' \
+            /etc/systemd/system/open-webui.service
+        systemctl daemon-reload
+        systemctl restart open-webui.service
+        echo "Switched to OpenClaw (port 8081)"
+        ;;
+    status)
+        echo "=== ClawbotOS Service Status ==="
+        echo "PicoClaw:  $(systemctl is-active picoclaw.service 2>/dev/null || echo 'not installed')"
+        echo "OpenClaw:  $(systemctl is-active openclaw.service 2>/dev/null || echo 'not installed')"
+        echo "Open WebUI: $(systemctl is-active open-webui.service 2>/dev/null || echo 'not installed')"
+        echo "nginx:     $(systemctl is-active nginx.service 2>/dev/null || echo 'not installed')"
+        ;;
+    *)
+        echo "Usage: clawbot-switch-agent {picoclaw|openclaw|status}"
+        echo ""
+        echo "  picoclaw  - Switch to PicoClaw (lightweight, <10MB RAM)"
+        echo "  openclaw  - Switch to OpenClaw (full-featured, ~500MB RAM)"
+        echo "  status    - Show status of all ClawbotOS services"
+        exit 1
+        ;;
+esac
+SWITCH_EOF
+chmod +x /usr/local/bin/clawbot-switch-agent
+## END Step 6
+
+echo_green "ClawbotOS branding applied."

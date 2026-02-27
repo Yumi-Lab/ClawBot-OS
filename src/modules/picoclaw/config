@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#### PicoClaw - Lightweight AI Agent by Sipeed
+####
+#### https://github.com/sipeed/picoclaw
+#### This File is distributed under GPLv3
+####
+
+# shellcheck disable=all
+
+[[ -n "$PICOCLAW_REPO" ]] || PICOCLAW_REPO="https://github.com/sipeed/picoclaw.git"
+[[ -n "$PICOCLAW_REPO_BRANCH" ]] || PICOCLAW_REPO_BRANCH="main"
+
+# Architecture for precompiled binary download
+[[ -n "$PICOCLAW_ARCH" ]] || PICOCLAW_ARCH="arm"
+# Download URL pattern for releases
+[[ -n "$PICOCLAW_RELEASE_URL" ]] || PICOCLAW_RELEASE_URL="https://github.com/sipeed/picoclaw/releases/latest/download"
+
+# Gateway port
+[[ -n "$PICOCLAW_PORT" ]] || PICOCLAW_PORT="8080"
+
+# Dependencies
+[[ -n "$PICOCLAW_DEPS" ]] || PICOCLAW_DEPS="git curl ca-certificates"

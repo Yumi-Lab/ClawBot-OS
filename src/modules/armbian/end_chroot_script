@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#### ClawbotOS cleanup for armbian images
+####
+#### Based on work of Stephan Wendel aka KwadFan
+#### Modified for ClawbotOS by Yumi Lab
+####
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+# Source error handling, leave this in place
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+## Clean up
+## Step 1: Remove autologin and lock root account
+if [[ -f "/etc/systemd/system/getty@.service.d/override.conf" ]]; then
+    rm -f /etc/systemd/system/getty@.service.d/override.conf
+fi
+## END
+
+## Step 2: Disable autologin on serial console
+if [[ -f "/etc/systemd/system/serial-getty@.service.d/override.conf" ]]; then
+    sed -i 's/--autologin root //' /etc/systemd/system/serial-getty@.service.d/override.conf
+fi
+## END
+
+## Step 3: Delete root passwd
+sudo passwd -d root
+## END
+
+## Step 4: Lock root account
+sudo passwd -l root
+## END
+
+## Step 5: Remove passwdless sudo
+sed -i '/'"${BASE_USER}"' ALL=(ALL:ALL) NOPASSWD:ALL/d' /etc/sudoers
+## END

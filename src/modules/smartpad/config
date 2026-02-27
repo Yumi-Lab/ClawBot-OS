@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#### ClawbotOS SmartPad-specific tweaks (touchscreen variant)
+####
+#### Based on work of Stephan Wendel aka KwadFan
+#### Modified for ClawbotOS by Yumi Lab
+####
+#### This File is distributed under GPLv3
+####
+
+# shellcheck disable=all
+
+[[ -n "$SMARTPAD_CONFIG_TXT_FILE" ]] || SMARTPAD_CONFIG_TXT_FILE="/boot/armbianEnv.txt"
+[[ -n "$SMARTPAD_PLYMOUTH_REPO" ]] || SMARTPAD_PLYMOUTH_REPO="https://github.com/Yumi-Lab/plymouth-themes.git"
+[[ -n "$SMARTPAD_PLYMOUTH_THEME" ]] || SMARTPAD_PLYMOUTH_THEME="hexagon_alt"

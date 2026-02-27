@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#### ClawbotOS nginx reverse proxy
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+# shellcheck disable=all
+
+[[ -n "$NGINX_DEPS" ]] || NGINX_DEPS="nginx"

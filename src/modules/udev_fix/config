@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#### ClawbotOS udev_fix
+####
+#### Based on work of Stephan Wendel aka KwadFan
+#### This File is distributed under GPLv3
+####
+
+#### Fix for udev not creating symlinks for serial devices.
+#### See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1035094
+
+#shellcheck disable=all
+
+[[ -n "${UDEV_FIX_RAW_RULE_FILE}" ]] || UDEV_FIX_RAW_RULE_FILE="https://raw.githubusercontent.com/systemd/systemd/main/rules.d/60-serial.rules"
+[[ -n "${UDEV_FIX_OUTPUT_FILE}" ]] || UDEV_FIX_OUTPUT_FILE="/etc/udev/rules.d/60-serial.rules"
+[[ -n "${UDEV_FIX_PKGS}" ]] || UDEV_FIX_PKGS="systemd udev"

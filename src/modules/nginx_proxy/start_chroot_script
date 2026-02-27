@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#### ClawbotOS nginx reverse proxy module
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+echo_green "Installing nginx reverse proxy ..."
+
+## Step 1: Install nginx
+apt-get update --allow-releaseinfo-change
+# shellcheck disable=SC2086
+check_install_pkgs ${NGINX_DEPS}
+## END Step 1
+
+## Step 2: Deploy configuration files
+echo_green "Deploying nginx configuration ..."
+unpack /filesystem/root /
+## END Step 2
+
+## Step 3: Remove default site
+rm -f /etc/nginx/sites-enabled/default
+## END Step 3
+
+## Step 4: Enable clawbot site
+ln -sf /etc/nginx/sites-available/clawbot /etc/nginx/sites-enabled/clawbot
+## END Step 4
+
+## Step 5: Optimize log rotation (14d -> 2d)
+if [[ -f /etc/logrotate.d/nginx ]]; then
+    sed -i 's/rotate 14/rotate 2/' /etc/logrotate.d/nginx
+fi
+## END Step 5
+
+## Step 6: Enable nginx
+echo_green "Enabling nginx.service ..."
+systemctl_if_exists enable nginx.service
+## END Step 6
+
+echo_green "Installing nginx reverse proxy ... DONE!"

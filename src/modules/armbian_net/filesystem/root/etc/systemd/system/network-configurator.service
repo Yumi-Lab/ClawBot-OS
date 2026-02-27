@@ -1,0 +1,17 @@
+# ClawbotOS network-configurator
+# Based on armbian's armbian-firstrun-config service
+
+[Unit]
+Description=ClawbotOS network configurator
+Wants=network-online.target
+After=network.target network-online.target
+ConditionPathExists=/boot/network_config.txt
+
+[Service]
+Type=idle
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/network-configurator
+TimeoutStartSec=2min
+
+[Install]
+WantedBy=multi-user.target

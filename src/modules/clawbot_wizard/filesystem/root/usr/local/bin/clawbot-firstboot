@@ -1,0 +1,197 @@
+#!/usr/bin/env bash
+#### ClawbotOS First-Boot Setup Wizard
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+set -e
+
+DIALOG="$(command -v dialog)"
+BT="ClawbotOS Setup Wizard"
+WT=20
+WW=70
+
+# Switch to TTY2
+chvt 2 2>/dev/null || true
+
+welcome_msg() {
+    "${DIALOG}" --backtitle "${BT}" --title "Welcome to ClawbotOS" \
+        --no-cancel --msgbox "\
+Welcome to ClawbotOS for your Yumi Lab board!
+
+This wizard will help you configure your AI assistant.
+
+The setup will:
+  1. Configure your AI provider API key
+  2. Choose your default AI agent
+  3. Start all services
+
+Press OK to continue..." ${WT} ${WW}
+}
+
+configure_api_key() {
+    local provider api_key model base_url
+
+    # Ask for LLM provider
+    provider=$("${DIALOG}" --backtitle "${BT}" --title "LLM Provider" \
+        --menu "Select your LLM provider:" ${WT} ${WW} 7 \
+        "openai"     "OpenAI (GPT-4o, etc.)" \
+        "anthropic"  "Anthropic (Claude)" \
+        "openrouter" "OpenRouter (multi-provider)" \
+        "deepseek"   "DeepSeek" \
+        "ollama"     "Ollama (running on another machine)" \
+        "custom"     "Custom OpenAI-compatible endpoint" \
+        "skip"       "Skip for now (configure later)" \
+        3>&1 1>&2 2>&3) || provider="skip"
+
+    if [[ "${provider}" == "skip" ]]; then
+        return
+    fi
+
+    # Ask for API key
+    api_key=$("${DIALOG}" --backtitle "${BT}" --title "API Key" \
+        --insecure --passwordbox "Enter your ${provider} API key:" \
+        10 ${WW} 3>&1 1>&2 2>&3) || api_key=""
+
+    if [[ -z "${api_key}" ]]; then
+        return
+    fi
+
+    # Set defaults based on provider
+    case "${provider}" in
+        openai)
+            model="gpt-4o"
+            base_url="https://api.openai.com/v1"
+            ;;
+        anthropic)
+            model="claude-sonnet-4-20250514"
+            base_url="https://api.anthropic.com/v1"
+            ;;
+        openrouter)
+            model="anthropic/claude-sonnet-4-20250514"
+            base_url="https://openrouter.ai/api/v1"
+            ;;
+        deepseek)
+            model="deepseek-chat"
+            base_url="https://api.deepseek.com/v1"
+            ;;
+        ollama)
+            base_url=$("${DIALOG}" --backtitle "${BT}" --title "Ollama URL" \
+                --inputbox "Enter Ollama server URL:" 10 ${WW} \
+                "http://192.168.1.100:11434" 3>&1 1>&2 2>&3) || base_url=""
+            model="llama3"
+            ;;
+        custom)
+            base_url=$("${DIALOG}" --backtitle "${BT}" --title "Custom API URL" \
+                --inputbox "Enter API base URL:" 10 ${WW} 3>&1 1>&2 2>&3) || base_url=""
+            model=$("${DIALOG}" --backtitle "${BT}" --title "Model Name" \
+                --inputbox "Enter model name:" 10 ${WW} 3>&1 1>&2 2>&3) || model=""
+            ;;
+    esac
+
+    # Write PicoClaw config
+    cat > /home/pi/.picoclaw/config.json << PICOEOF
+{
+  "gateway": {
+    "host": "0.0.0.0",
+    "port": 8080
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "~/.picoclaw/workspace",
+      "max_tokens": 4096,
+      "temperature": 0.7
+    }
+  },
+  "model_list": [
+    {
+      "model_name": "default",
+      "model": "${model}",
+      "api_key": "${api_key}",
+      "base_url": "${base_url}",
+      "request_timeout": 120
+    }
+  ],
+  "tools": {
+    "web": {
+      "duckduckgo": {
+        "enabled": true,
+        "max_results": 5
+      }
+    }
+  },
+  "log_level": "info"
+}
+PICOEOF
+    chown pi:pi /home/pi/.picoclaw/config.json
+    chmod 600 /home/pi/.picoclaw/config.json
+
+    # Also write OpenClaw config (in case user switches later)
+    cat > /home/pi/.openclaw/openclaw.json << CLAWEOF
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8081
+  },
+  "llm": {
+    "provider": "${provider}",
+    "api_key": "${api_key}",
+    "model": "${model}"
+  }
+}
+CLAWEOF
+    chown pi:pi /home/pi/.openclaw/openclaw.json
+    chmod 600 /home/pi/.openclaw/openclaw.json
+}
+
+choose_agent() {
+    local choice
+    choice=$("${DIALOG}" --backtitle "${BT}" --title "Default AI Agent" \
+        --menu "Choose your default AI agent:" ${WT} ${WW} 2 \
+        "picoclaw" "PicoClaw - lightweight, <10MB RAM (RECOMMENDED)" \
+        "openclaw" "OpenClaw - full-featured, ~500MB RAM" \
+        3>&1 1>&2 2>&3) || choice="picoclaw"
+
+    if [[ "${choice}" == "openclaw" ]]; then
+        systemctl disable picoclaw.service 2>/dev/null || true
+        systemctl enable openclaw.service 2>/dev/null || true
+        # Update Open WebUI backend URL
+        sed -i 's|OPENAI_API_BASE_URL=http://127.0.0.1:8080|OPENAI_API_BASE_URL=http://127.0.0.1:8081|' \
+            /etc/systemd/system/open-webui.service
+        systemctl daemon-reload
+    fi
+}
+
+finish_setup() {
+    "${DIALOG}" --backtitle "${BT}" --title "Setup Complete!" \
+        --no-cancel --msgbox "\
+ClawbotOS setup is complete!
+
+Access your AI dashboard at:
+    http://clawbot.local
+
+SSH access:
+    User: pi
+    Password: yumi
+
+The device will now reboot to apply changes.
+
+Thank you for choosing ClawbotOS!" ${WT} ${WW}
+}
+
+# --- MAIN ---
+
+welcome_msg
+configure_api_key
+choose_agent
+finish_setup
+
+# Cleanup: disable firstboot
+systemctl --quiet disable clawbot-firstboot.service 2>/dev/null || true
+rm -f /.firstboot_clawbot
+
+# Reboot
+reboot
+
+exit 0

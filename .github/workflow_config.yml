@@ -1,0 +1,21 @@
+#### Configure workflow matrix for ClawbotOS
+####
+#### Based on work of Stephan Wendel aka KwadFan
+#### Modified for ClawbotOS by Yumi Lab
+####
+#### This File is distributed under GPLv3
+####
+
+#### NOTE: Use entries according to their directory/file structure in 'config'
+####       e.g. armbian/smartpad
+
+# Build test matrix (pushes/PRs to develop)
+buildtest:
+  - armbian/smartpad
+  # Future boards:
+  # - armbian/smartpi
+
+# Release build matrix
+release:
+  - armbian/smartpad
+  # - armbian/smartpi

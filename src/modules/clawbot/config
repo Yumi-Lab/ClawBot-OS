@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#### ClawbotOS branding module
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+# shellcheck disable=all
+
+# System utilities for AI assistant management and debugging
+[[ -n "$CLAWBOT_DEPS" ]] || CLAWBOT_DEPS="wavemon htop nano usbutils ncdu \
+lsof curl wget jq toilet dialog whiptail"

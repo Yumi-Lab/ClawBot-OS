@@ -1,0 +1,20 @@
+[Unit]
+Description=PicoClaw AI Gateway
+After=network-online.target clawbot-swap.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi
+ExecStart=/usr/local/bin/picoclaw gateway
+Restart=on-failure
+RestartSec=5
+# Memory limit to protect 1GB system
+MemoryMax=50M
+MemoryHigh=30M
+Environment=HOME=/home/pi
+
+[Install]
+WantedBy=multi-user.target

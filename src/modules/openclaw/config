@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#### OpenClaw - Full-featured AI Agent (Node.js)
+####
+#### https://github.com/openclaw/openclaw
+#### This File is distributed under GPLv3
+####
+
+# shellcheck disable=all
+
+[[ -n "$OPENCLAW_NODE_VERSION" ]] || OPENCLAW_NODE_VERSION="22"
+[[ -n "$OPENCLAW_DEPS" ]] || OPENCLAW_DEPS="git curl"
+# OpenClaw gateway port (when active)
+[[ -n "$OPENCLAW_PORT" ]] || OPENCLAW_PORT="8081"

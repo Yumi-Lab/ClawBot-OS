@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+#### ClawbotOS SmartPad-specific tweaks
+####
+#### Based on work of Stephan Wendel aka KwadFan
+#### Modified for ClawbotOS by Yumi Lab
+####
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+### Helper func
+is_board_type() {
+    local board releasefile
+    board=""
+    releasefile="/etc/armbian-release"
+    if [[ -f "${releasefile}" ]]; then
+        board="$(grep "BOARD=" "${releasefile}" | cut -d'=' -f2)"
+    fi
+    echo "${board}"
+}
+
+[[ -n "${BASE_USER}" ]] || BASE_USER="pi"
+
+echo_green "Apply SmartPad specific patches..."
+unpack /filesystem/root /
+if [[ -f /etc/X11/xorg.conf.d/03-smartpad-rotate-touch.conf ]]; then
+    rm -fv /etc/X11/xorg.conf.d/03-smartpad-rotate-touch.conf
+fi
+echo_green "Apply SmartPad specific patches... [DONE]"
+
+### Enable Serial and SPI connections by default
+if [[ "$(is_board_type)" == "smartpad" ]]; then
+    echo_green "Enable Serial and SPI interface on SmartPad..."
+    echo "overlays=spi-spidev uart1 uart2" >> "${SMARTPAD_CONFIG_TXT_FILE}"
+    echo "param_spidev_spi_bus=1" >> "${SMARTPAD_CONFIG_TXT_FILE}"
+    echo_green "Enable Serial and SPI interface on SmartPad... DONE!"
+fi
+
+### Install Plymouth theme from Yumi Lab repo
+echo_green "Install Yumi Lab Plymouth theme on SmartPad..."
+
+smartpad_install_theme() {
+    local src dest
+    dest="/usr/share/plymouth/themes/"
+    src="/home/${BASE_USER}/$(basename "${SMARTPAD_PLYMOUTH_REPO/.git/}")"
+    src="${src}/pack_2/hexagon_alt"
+    if [[ -d "${src}" ]]; then
+        sudo cp -vr "${src}" "${dest}"
+    fi
+    echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ..."
+    sudo plymouth-set-default-theme "${SMARTPAD_PLYMOUTH_THEME}" || true
+}
+
+pushd "/home/${BASE_USER}" &>/dev/null || exit 1
+sudo -u "${BASE_USER}" git clone "${SMARTPAD_PLYMOUTH_REPO}" || true
+smartpad_install_theme
+popd &>/dev/null || exit 1
+
+echo_green "Install Yumi Lab Plymouth theme on SmartPad... [DONE]"
+
+### Enable firstboot service for SmartPad
+echo_green "Enable SmartPad first boot service..."
+if [[ -f /usr/local/bin/firstboot ]]; then
+    chmod +x /usr/local/bin/firstboot
+fi
+systemctl_if_exists enable firstboot.service || true
+
+echo_green "SmartPad module ... DONE!"

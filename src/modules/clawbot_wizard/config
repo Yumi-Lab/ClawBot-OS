@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#### ClawbotOS First-Boot Setup Wizard
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+# shellcheck disable=all
+
+[[ -n "$CLAWBOT_WIZARD_DEPS" ]] || CLAWBOT_WIZARD_DEPS="dialog"

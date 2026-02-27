@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#### ClawbotOS swap configuration for 1GB RAM boards
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+# shellcheck disable=all
+
+[[ -n "$SWAP_SIZE_MB" ]] || SWAP_SIZE_MB="2048"
+[[ -n "$SWAP_FILE" ]] || SWAP_FILE="/swapfile"
+[[ -n "$SWAP_SWAPPINESS" ]] || SWAP_SWAPPINESS="60"

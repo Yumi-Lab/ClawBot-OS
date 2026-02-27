@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+#### ClawbotOS Specific Tweaks for armbian images
+####
+#### Based on work of Stephan Wendel aka KwadFan
+#### Modified for ClawbotOS by Yumi Lab
+####
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+# Source error handling, leave this in place
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+### Helper func
+is_board_type() {
+    local board releasefile
+    board=""
+    releasefile="/etc/armbian-release"
+    if [[ -f "${releasefile}" ]]; then
+        board="$(grep "BOARD=" "${releasefile}" | cut -d'=' -f2)"
+    fi
+    echo "${board}"
+}
+
+# Base User groups
+if_group_exists_run() {
+    group=$1
+    if grep -q "${group}" /etc/group; then
+        "${@:2}"
+    fi
+}
+
+# passwordless sudo during install
+# Will be removed in cleanup (end_chroot_script)
+echo "${BASE_USER} ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+## Step 1: Install armbian specific packages
+apt update
+# shellcheck disable=SC2086
+check_install_pkgs ${ARMBIAN_DEPS}
+## END Step 1
+
+## Step 2: Manage groups
+### Substep 1: Create group for gpio usage
+sudo groupadd gpio || true
+### END Substep 1
+
+### Substep 2: Set default groups
+if_group_exists_run i2c usermod -aG i2c "${BASE_USER}"
+usermod -aG video,audio,plugdev,games,netdev,sudo,systemd-journal,gpio "${BASE_USER}"
+### END Substep 2
+## END Step 2
+
+## Step 3: patch sshd_config
+sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i 's/^X11Forwarding/#X11Forwarding/' /etc/ssh/sshd_config
+sed -i 's/^#MaxAuthTries 6/MaxAuthTries 3/' /etc/ssh/sshd_config
+## END Step 3
+
+## Step 4: Try patching first login in build stage
+if [[ -f "/root/.not_logged_in_yet" ]]; then
+    rm -f /root/.not_logged_in_yet
+fi
+## END Step 4
+
+## Step 5: Patch dynamic motd
+echo_green "Patch dynamic motd ..."
+unpack /filesystem/root /
+chmod +x /etc/update-motd.d/*
+if [[ -f "/etc/default/armbian-motd" ]]; then
+    sed -i 's/MOTD_DISABLE=""/MOTD_DISABLE="header"/' /etc/default/armbian-motd
+fi
+## END Step 5
+
+## Step 6: Remove unattended-upgrades
+echo_green "Remove 'unattended-upgrades' service ..."
+sudo apt-get remove --purge --yes unattended-upgrades || true
+## END Step 6

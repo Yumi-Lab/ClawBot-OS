@@ -1,0 +1,26 @@
+[Unit]
+Description=Open WebUI - AI Chat Dashboard
+After=network-online.target picoclaw.service clawbot-swap.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi
+ExecStartPre=/bin/sleep 5
+ExecStart=/home/pi/open-webui-venv/bin/open-webui serve \
+    --host 127.0.0.1 \
+    --port 8888
+Restart=on-failure
+RestartSec=15
+# Open WebUI is memory hungry -- swap must be available
+MemoryMax=1200M
+MemoryHigh=900M
+Environment=HOME=/home/pi
+Environment=DATA_DIR=/home/pi/open-webui-data
+Environment=OPENAI_API_BASE_URL=http://127.0.0.1:8080
+Environment=WEBUI_AUTH=false
+
+[Install]
+WantedBy=multi-user.target
