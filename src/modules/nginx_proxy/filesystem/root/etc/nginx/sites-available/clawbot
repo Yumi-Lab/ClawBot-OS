@@ -52,6 +52,18 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
     }
 
+    # ClawbotOS system dashboard (static)
+    location /dashboard {
+        alias /home/pi/clawbot-dashboard;
+        index index.html;
+        try_files $uri $uri/ /dashboard/index.html;
+    }
+
+    # Open WebUI redirect
+    location /openwebui {
+        return 301 /;
+    }
+
     # Health check endpoint
     location /health {
         access_log off;
