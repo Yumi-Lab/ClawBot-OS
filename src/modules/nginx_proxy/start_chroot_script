@@ -14,10 +14,10 @@ install_cleanup_trap
 
 echo_green "Installing nginx reverse proxy ..."
 
-## Step 1: Install nginx
+## Step 1: Install nginx (force reinstall to ensure service unit exists)
 apt-get update --allow-releaseinfo-change
 # shellcheck disable=SC2086
-check_install_pkgs ${NGINX_DEPS}
+apt-get install --yes --reinstall ${NGINX_DEPS}
 ## END Step 1
 
 ## Step 2: Deploy configuration files
