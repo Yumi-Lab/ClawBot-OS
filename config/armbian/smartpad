@@ -11,7 +11,7 @@ DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/downloa
 BASE_IMAGE_ENLARGEROOT=6000
 
 # Module chain for SmartPad (with touchscreen)
-MODULES="base(udev_fix,armbian(armbian_net,clawbot,swap_setup,picoclaw,openclaw,openwebui,nginx_proxy,smartpad,clawbot_wizard))"
+MODULES="base(udev_fix,armbian(armbian_net,clawbot,swap_setup,picoclaw,openclaw,nginx_proxy,smartpad,clawbot_wizard))"
 
 # export Variables
 export BASE_ARCH

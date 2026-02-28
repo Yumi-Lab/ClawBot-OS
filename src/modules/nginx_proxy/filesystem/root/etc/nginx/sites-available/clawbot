@@ -1,9 +1,5 @@
 # ClawbotOS nginx reverse proxy configuration
-# Serves Open WebUI on port 80 and provides API endpoint proxying
-
-upstream openwebui_backend {
-    server 127.0.0.1:8888;
-}
+# Serves the static dashboard on port 80 and provides API endpoint proxying
 
 upstream picoclaw_backend {
     server 127.0.0.1:8080;
@@ -20,20 +16,11 @@ server {
 
     client_max_body_size 50M;
 
-    # Open WebUI -- main dashboard at root
+    # ClawbotOS dashboard (static HTML) -- main interface at root
     location / {
-        proxy_pass http://openwebui_backend;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # WebSocket support for chat streaming
-        proxy_read_timeout 300s;
-        proxy_send_timeout 300s;
+        root /home/pi/clawbot-dashboard;
+        index index.html;
+        try_files $uri $uri/ /index.html;
     }
 
     # PicoClaw API proxy
@@ -42,6 +29,12 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        # SSE/streaming support for chat
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_buffering off;
     }
 
     # OpenClaw API proxy (when enabled)
@@ -50,18 +43,12 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-    }
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-    # ClawbotOS system dashboard (static)
-    location /dashboard {
-        alias /home/pi/clawbot-dashboard;
-        index index.html;
-        try_files $uri $uri/ /dashboard/index.html;
-    }
-
-    # Open WebUI redirect
-    location /openwebui {
-        return 301 /;
+        # SSE/streaming support for chat
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_buffering off;
     }
 
     # Health check endpoint

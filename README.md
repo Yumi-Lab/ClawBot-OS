@@ -10,8 +10,8 @@ Built with the same architecture as [YumiOS](https://github.com/Yumi-Lab/YumiOS)
 |-----------|-------------|-----------|
 | **[PicoClaw](https://github.com/sipeed/picoclaw)** | Ultra-lightweight AI agent (Go, by Sipeed) | ~10MB |
 | **[OpenClaw](https://github.com/openclaw/openclaw)** | Full-featured AI agent (Node.js) | ~500MB |
-| **[Open WebUI](https://github.com/open-webui/open-webui)** | ChatGPT-like web dashboard | ~800MB |
-| **nginx** | Reverse proxy on port 80 | ~5MB |
+| **ClawbotOS Dashboard** | Static web dashboard with chat, monitoring, config | ~0MB (nginx) |
+| **nginx** | Reverse proxy + static file server on port 80 | ~5MB |
 
 PicoClaw is active by default. OpenClaw is installed but disabled. Both connect to external LLM APIs (OpenAI, Anthropic, OpenRouter, DeepSeek, Ollama, etc.).
 
@@ -43,7 +43,7 @@ Insert the SD card and power on. The first-boot wizard will:
 ### 3. Access the Dashboard
 
 Open your browser and go to:
-- **http://clawbot.local** - AI Chat Dashboard (Open WebUI)
+- **http://clawbot.local** - ClawbotOS Dashboard (chat, monitoring, config)
 - **http://clawbot.local:8080** - PicoClaw API (direct)
 
 ### 4. SSH Access
@@ -80,7 +80,7 @@ sudo clawbot-switch-agent status
 ```
 User Browser (port 80)
        |
-    [nginx]  -----> /             --> Open WebUI (:8888)
+    [nginx]  -----> /             --> Static Dashboard (HTML/CSS/JS)
        |     -----> /api/picoclaw --> PicoClaw   (:8080)
        |     -----> /api/openclaw --> OpenClaw   (:8081)
        |
@@ -90,6 +90,8 @@ User Browser (port 80)
   (OpenAI, Claude, etc.)
 ```
 
+The dashboard is a static single-page application served directly by nginx. It communicates with the active AI agent via the `/api/` endpoints. No heavy Python/Node.js UI server needed.
+
 ## Memory Optimization (1GB RAM)
 
 - 2GB swap file (created on first boot)
@@ -97,6 +99,7 @@ User Browser (port 80)
 - Aggressive sysctl tuning (`vm.swappiness=60`, `vm.vfs_cache_pressure=200`)
 - systemd MemoryMax limits per service
 - Only one AI agent active at a time (`Conflicts=` directive)
+- Static dashboard (0 MB RAM overhead vs ~800MB for Open WebUI)
 
 ## Build System
 
@@ -111,8 +114,7 @@ base -> udev_fix -> armbian (
     swap_setup,     # 2GB swap + sysctl tuning
     picoclaw,       # PicoClaw binary + systemd
     openclaw,       # OpenClaw + Node.js (disabled)
-    openwebui,      # Open WebUI + Python venv
-    nginx_proxy,    # Reverse proxy
+    nginx_proxy,    # Reverse proxy + static dashboard
     [smartpad],     # SmartPad only: touchscreen, Plymouth
     clawbot_wizard  # First-boot setup wizard
 )
@@ -138,7 +140,6 @@ GitHub Actions builds images automatically on push to `develop`. See `.github/wo
 - [CustomPiOS](https://github.com/guysoft/CustomPiOS) - Build framework
 - [PicoClaw](https://github.com/sipeed/picoclaw) - Lightweight AI agent by Sipeed
 - [OpenClaw](https://github.com/openclaw/openclaw) - Full-featured AI agent
-- [Open WebUI](https://github.com/open-webui/open-webui) - Web dashboard
 
 ## License
 

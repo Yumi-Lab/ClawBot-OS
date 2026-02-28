@@ -66,28 +66,21 @@ case "$1" in
         systemctl disable openclaw.service 2>/dev/null || true
         systemctl enable picoclaw.service
         systemctl start picoclaw.service
-        sed -i 's|OPENAI_API_BASE_URL=http://127.0.0.1:8081|OPENAI_API_BASE_URL=http://127.0.0.1:8080|' \
-            /etc/systemd/system/open-webui.service
-        systemctl daemon-reload
-        systemctl restart open-webui.service
         echo "Switched to PicoClaw (port 8080)"
+        echo "Dashboard: http://clawbot.local"
         ;;
     openclaw)
         systemctl stop picoclaw.service 2>/dev/null || true
         systemctl disable picoclaw.service 2>/dev/null || true
         systemctl enable openclaw.service
         systemctl start openclaw.service
-        sed -i 's|OPENAI_API_BASE_URL=http://127.0.0.1:8080|OPENAI_API_BASE_URL=http://127.0.0.1:8081|' \
-            /etc/systemd/system/open-webui.service
-        systemctl daemon-reload
-        systemctl restart open-webui.service
         echo "Switched to OpenClaw (port 8081)"
+        echo "Dashboard: http://clawbot.local"
         ;;
     status)
         echo "=== ClawbotOS Service Status ==="
         echo "PicoClaw:  $(systemctl is-active picoclaw.service 2>/dev/null || echo 'not installed')"
         echo "OpenClaw:  $(systemctl is-active openclaw.service 2>/dev/null || echo 'not installed')"
-        echo "Open WebUI: $(systemctl is-active open-webui.service 2>/dev/null || echo 'not installed')"
         echo "nginx:     $(systemctl is-active nginx.service 2>/dev/null || echo 'not installed')"
         ;;
     *)
