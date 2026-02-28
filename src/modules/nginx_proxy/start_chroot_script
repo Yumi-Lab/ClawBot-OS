@@ -14,10 +14,10 @@ install_cleanup_trap
 
 echo_green "Installing nginx reverse proxy ..."
 
-## Step 1: Install nginx (force reinstall to ensure service unit exists)
+## Step 1: Install nginx (purge stale packages from base image, then clean install)
 apt-get update --allow-releaseinfo-change
-# shellcheck disable=SC2086
-apt-get install --yes --reinstall ${NGINX_DEPS}
+apt-get purge -y nginx nginx-common nginx-core nginx-full nginx-light 2>/dev/null || true
+apt-get install -y nginx
 ## END Step 1
 
 ## Step 2: Deploy configuration files
@@ -42,7 +42,12 @@ fi
 
 ## Step 6: Enable nginx
 echo_green "Enabling nginx.service ..."
-systemctl_if_exists enable nginx.service
+if [[ -f /lib/systemd/system/nginx.service ]]; then
+    systemctl_if_exists enable nginx.service || \
+        ln -sf /lib/systemd/system/nginx.service /etc/systemd/system/multi-user.target.wants/nginx.service
+else
+    echo_green "WARNING: nginx.service unit not found, skipping enable"
+fi
 ## END Step 6
 
 echo_green "Installing nginx reverse proxy ... DONE!"
