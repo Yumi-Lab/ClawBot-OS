@@ -7,7 +7,9 @@
 
 # shellcheck disable=all
 
-[[ -n "$OPENCLAW_NODE_VERSION" ]] || OPENCLAW_NODE_VERSION="22"
-[[ -n "$OPENCLAW_DEPS" ]] || OPENCLAW_DEPS="git curl"
+# Full Node.js version for direct binary download (NodeSource dropped armhf)
+[[ -n "$OPENCLAW_NODE_MAJOR" ]] || OPENCLAW_NODE_MAJOR="22"
+[[ -n "$OPENCLAW_NODE_VERSION" ]] || OPENCLAW_NODE_VERSION="22.16.0"
+[[ -n "$OPENCLAW_DEPS" ]] || OPENCLAW_DEPS="git curl xz-utils"
 # OpenClaw gateway port (when active)
 [[ -n "$OPENCLAW_PORT" ]] || OPENCLAW_PORT="8081"

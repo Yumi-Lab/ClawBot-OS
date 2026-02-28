@@ -20,16 +20,17 @@ apt-get update --allow-releaseinfo-change
 check_install_pkgs ${OPENCLAW_DEPS}
 ## END Step 1
 
-## Step 2: Install Node.js 22 via NodeSource
-echo_green "Installing Node.js ${OPENCLAW_NODE_VERSION} ..."
-curl -fsSL "https://deb.nodesource.com/setup_${OPENCLAW_NODE_VERSION}.x" | bash -
-apt-get install -y nodejs
-## END Step 2
-
-## Step 3: Verify node version
+## Step 2: Install Node.js via official binary (NodeSource dropped armhf support)
+echo_green "Installing Node.js v${OPENCLAW_NODE_VERSION} from nodejs.org ..."
+NODE_TARBALL="node-v${OPENCLAW_NODE_VERSION}-linux-armv7l.tar.xz"
+NODE_URL="https://nodejs.org/dist/v${OPENCLAW_NODE_VERSION}/${NODE_TARBALL}"
+curl -fsSL -o "/tmp/${NODE_TARBALL}" "${NODE_URL}"
+tar -xJf "/tmp/${NODE_TARBALL}" -C /usr/local --strip-components=1
+rm -f "/tmp/${NODE_TARBALL}"
+# Verify install
 echo_green "Node.js version: $(node --version)"
 echo_green "npm version: $(npm --version)"
-## END Step 3
+## END Step 2
 
 ## Step 4: Install OpenClaw globally
 echo_green "Installing OpenClaw via npm ..."
