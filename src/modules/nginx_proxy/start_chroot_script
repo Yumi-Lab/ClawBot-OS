@@ -25,7 +25,8 @@ echo_green "Deploying nginx configuration ..."
 unpack /filesystem/root /
 ## END Step 2
 
-## Step 3: Remove default site
+## Step 3: Remove default site, ensure sites-enabled exists
+mkdir -p /etc/nginx/sites-enabled
 rm -f /etc/nginx/sites-enabled/default
 ## END Step 3
 
