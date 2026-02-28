@@ -34,7 +34,12 @@ echo_green "npm version: $(npm --version)"
 
 ## Step 4: Install OpenClaw globally
 echo_green "Installing OpenClaw via npm ..."
-npm install -g openclaw@latest
+# node-llama-cpp native build may fail on armhf -- allow postinstall failures
+# ClawbotOS uses external LLM APIs, not local inference
+npm install -g openclaw@latest || {
+    echo_green "Full install failed, retrying without native builds ..."
+    npm install -g openclaw@latest --ignore-scripts
+}
 ## END Step 4
 
 ## Step 5: Create config directory
