@@ -20,20 +20,21 @@ apt-get update --allow-releaseinfo-change
 check_install_pkgs ${OPENWEBUI_DEPS}
 ## END Step 1
 
-## Step 2: Create Python virtual environment
+## Step 2: Create Python virtual environment (as root, fix ownership later)
 echo_green "Creating Python virtual environment ..."
 pushd "/home/${BASE_USER}" &> /dev/null || exit 1
-sudo -u "${BASE_USER}" python3 -m venv "/home/${BASE_USER}/open-webui-venv"
+python3 -m venv "/home/${BASE_USER}/open-webui-venv"
 ## END Step 2
 
 ## Step 3: Install Open WebUI via pip in venv
 echo_green "Installing Open WebUI via pip (this may take a while) ..."
-sudo -u "${BASE_USER}" "/home/${BASE_USER}/open-webui-venv/bin/pip" install --upgrade pip
-sudo -u "${BASE_USER}" "/home/${BASE_USER}/open-webui-venv/bin/pip" install open-webui
+"/home/${BASE_USER}/open-webui-venv/bin/pip" install --upgrade pip
+"/home/${BASE_USER}/open-webui-venv/bin/pip" install open-webui
 ## END Step 3
 
-## Step 4: Create data directory
+## Step 4: Create data directory and fix ownership
 mkdir -p "/home/${BASE_USER}/open-webui-data"
+chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/open-webui-venv"
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/open-webui-data"
 ## END Step 4
 
