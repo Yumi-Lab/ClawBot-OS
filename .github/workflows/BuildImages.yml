@@ -23,6 +23,10 @@ on:
 
   workflow_dispatch:
 
+  # Triggered by SmartPi-armbian Release.yml when a new base image is published
+  repository_dispatch:
+    types: [smartpi-armbian-release]
+
 # Allow to stop obsolete workflows
 concurrency:
   group: ci-build-${{ github.ref }}-1
@@ -67,9 +71,9 @@ jobs:
           BASE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/${TAG}"
 
           SMARTPI1_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
-            --jq '.assets[] | select(.name | test("smartpi1-bookworm-server.*\\.img\\.xz$")) | .name')
+            --jq '.assets[] | select(.name | test("smartpi1-bookworm.*server.*\\.img\\.xz$")) | .name')
           SMARTPAD_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
-            --jq '.assets[] | select(.name | test("smartpad-bookworm-server.*\\.img\\.xz$")) | .name')
+            --jq '.assets[] | select(.name | test("smartpad-bookworm.*server.*\\.img\\.xz$")) | .name')
 
           echo "SmartPi-armbian release: ${TAG}"
           echo "Smart Pi One image: ${SMARTPI1_IMG}"

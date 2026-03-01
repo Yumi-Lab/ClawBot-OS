@@ -6,8 +6,8 @@
 # SmartPad — Armbian Bookworm server image
 # These URLs are automatically overridden by the CI workflow (resolve-base-image step)
 # to always use the latest SmartPi-armbian release.
-DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/1.5.2/Yumi-smartpad-bookworm-server-2025-02-28-0654.img.xz"
-DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/1.5.2/Yumi-smartpad-bookworm-server-2025-02-28-0654.img.xz.sha256"
+DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/1.6.0/Yumi-smartpad-bookworm-debian12-server-2026-03-01-1826.img.xz"
+DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/1.6.0/Yumi-smartpad-bookworm-debian12-server-2026-03-01-1826.img.xz.sha256"
 
 # SmartPad needs more disk space (touchscreen UI + Plymouth)
 BASE_IMAGE_ENLARGEROOT=6000
