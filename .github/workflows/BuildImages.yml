@@ -23,10 +23,6 @@ on:
 
   workflow_dispatch:
 
-  # Triggered by SmartPi-armbian Release.yml when a new base image is published
-  repository_dispatch:
-    types: [smartpi-armbian-release]
-
 # Allow to stop obsolete workflows
 concurrency:
   group: ci-build-${{ github.ref }}-1
