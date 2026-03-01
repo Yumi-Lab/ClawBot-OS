@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Shebang for better file detection
 
-# Download Base Url -- Smart Pi One Armbian Bookworm server image
-DOWNLOAD_BASE_URL="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/20240302-2147"
+# Smart Pi One (H3) — Armbian Bookworm server image
+# These URLs are automatically overridden by the CI workflow (resolve-base-image step)
+# to always use the latest SmartPi-armbian release.
+DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/1.5.2/Yumi-smartpi1-bookworm-server-2025-02-28-0654.img.xz"
+DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/1.5.2/Yumi-smartpi1-bookworm-server-2025-02-28-0654.img.xz.sha256"
 
 # Base User
 BASE_ADD_USER="yes"
@@ -26,7 +29,8 @@ BASE_RELEASE_COMPRESS=no
 MODULES="base,udev_fix,armbian(armbian_net,clawbot,swap_setup,picoclaw,openclaw,nginx_proxy,telegram_bot,clawbot_wizard)"
 
 # export Variables
-export DOWNLOAD_BASE_URL
+export DOWNLOAD_URL_IMAGE
+export DOWNLOAD_URL_CHECKSUM
 export BASE_ADD_USER
 export BASE_USER
 export BASE_USER_PASSWORD

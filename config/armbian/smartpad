@@ -3,9 +3,11 @@
 # shellcheck enable=require-variable-braces
 # shellcheck disable=SC2034
 
-# Image source for SmartPad
-DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/20240302-2147/Yumi-smartpad-bookworm-server.img.xz.sha256"
-DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/20240302-2147/Yumi-smartpad-bookworm-server.img.xz"
+# SmartPad — Armbian Bookworm server image
+# These URLs are automatically overridden by the CI workflow (resolve-base-image step)
+# to always use the latest SmartPi-armbian release.
+DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/1.5.2/Yumi-smartpad-bookworm-server-2025-02-28-0654.img.xz"
+DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/1.5.2/Yumi-smartpad-bookworm-server-2025-02-28-0654.img.xz.sha256"
 
 # SmartPad needs more disk space (touchscreen UI + Plymouth)
 BASE_IMAGE_ENLARGEROOT=6000

@@ -59,6 +59,34 @@ jobs:
           path: repository
           submodules: true
 
+      - name: Resolve latest SmartPi-armbian base image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest --jq '.tag_name')
+          BASE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/${TAG}"
+
+          SMARTPI1_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
+            --jq '.assets[] | select(.name | test("smartpi1-bookworm-server.*\\.img\\.xz$")) | .name')
+          SMARTPAD_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
+            --jq '.assets[] | select(.name | test("smartpad-bookworm-server.*\\.img\\.xz$")) | .name')
+
+          echo "SmartPi-armbian release: ${TAG}"
+          echo "Smart Pi One image: ${SMARTPI1_IMG}"
+          echo "SmartPad image:     ${SMARTPAD_IMG}"
+
+          # Patch Smart Pi One config
+          sed -i "s|DOWNLOAD_URL_IMAGE=.*smartpi1.*|DOWNLOAD_URL_IMAGE=\"${BASE}/${SMARTPI1_IMG}\"|" \
+            repository/config/armbian/default
+          sed -i "s|DOWNLOAD_URL_CHECKSUM=.*smartpi1.*|DOWNLOAD_URL_CHECKSUM=\"${BASE}/${SMARTPI1_IMG}.sha256\"|" \
+            repository/config/armbian/default
+
+          # Patch SmartPad config
+          sed -i "s|DOWNLOAD_URL_IMAGE=.*smartpad.*|DOWNLOAD_URL_IMAGE=\"${BASE}/${SMARTPAD_IMG}\"|" \
+            repository/config/armbian/smartpad
+          sed -i "s|DOWNLOAD_URL_CHECKSUM=.*smartpad.*|DOWNLOAD_URL_CHECKSUM=\"${BASE}/${SMARTPAD_IMG}.sha256\"|" \
+            repository/config/armbian/smartpad
+
       - name: Build image
         id: build
         uses: ./repository/.github/actions/build
