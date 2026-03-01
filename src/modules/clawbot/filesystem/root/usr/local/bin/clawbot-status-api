@@ -14,23 +14,20 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 PORT = 8089
 PICOCLAW_CONFIG = "/home/pi/.picoclaw/config.json"
-OPENCLAW_CONFIG = "/home/pi/.openclaw/openclaw.json"
 
 # Whitelist of files that can be read/written via the API
 ALLOWED_FILES = {
     "/home/pi/.picoclaw/config.json",
-    "/home/pi/.openclaw/openclaw.json",
     "/home/pi/.clawbot-telegram.env",
     "/etc/nginx/sites-available/clawbot",
     "/etc/nginx/nginx.conf",
     "/etc/systemd/system/picoclaw.service",
-    "/etc/systemd/system/openclaw.service",
     "/etc/systemd/system/clawbot-telegram.service",
 }
 
 # Whitelist of services for log streaming
 ALLOWED_LOG_SERVICES = {
-    "picoclaw", "openclaw", "nginx", "clawbot-telegram",
+    "picoclaw", "nginx", "clawbot-telegram",
     "clawbot-status-api", "clawbot-swap",
 }
 
@@ -165,7 +162,7 @@ def get_network():
 
 def get_services():
     services = {}
-    for svc in ["picoclaw", "openclaw", "nginx", "clawbot-telegram"]:
+    for svc in ["picoclaw", "nginx", "clawbot-telegram"]:
         try:
             r = subprocess.run(
                 ["systemctl", "is-active", f"{svc}.service"],
@@ -258,7 +255,7 @@ def update_picoclaw_config(provider, model, api_key, base_url):
 def service_action(service, action):
     if action not in ("start", "stop", "restart"):
         return False
-    if service not in ("picoclaw", "openclaw", "nginx", "clawbot-telegram"):
+    if service not in ("picoclaw", "nginx", "clawbot-telegram"):
         return False
     try:
         subprocess.run(

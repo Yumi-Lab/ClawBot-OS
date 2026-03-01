@@ -1,7 +1,7 @@
 [Unit]
 Description=ClawbotOS Swap File Creation
 After=local-fs.target
-Before=picoclaw.service openclaw.service
+Before=picoclaw.service
 ConditionPathExists=!/swapfile
 
 [Service]

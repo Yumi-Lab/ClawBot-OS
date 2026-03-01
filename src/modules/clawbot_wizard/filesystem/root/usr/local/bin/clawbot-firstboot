@@ -25,8 +25,7 @@ This wizard will help you configure your AI assistant.
 The setup will:
   1. Configure WiFi (optional)
   2. Configure your AI provider API key
-  3. Choose your default AI agent
-  4. Start all services
+  3. Start all services
 
 Press OK to continue..." ${WT} ${WW}
 }
@@ -178,37 +177,6 @@ PICOEOF
     chown pi:pi /home/pi/.picoclaw/config.json
     chmod 600 /home/pi/.picoclaw/config.json
 
-    # Also write OpenClaw config (in case user switches later)
-    cat > /home/pi/.openclaw/openclaw.json << CLAWEOF
-{
-  "server": {
-    "host": "0.0.0.0",
-    "port": 8081
-  },
-  "llm": {
-    "provider": "${provider}",
-    "api_key": "${api_key}",
-    "model": "${model}"
-  }
-}
-CLAWEOF
-    chown pi:pi /home/pi/.openclaw/openclaw.json
-    chmod 600 /home/pi/.openclaw/openclaw.json
-}
-
-choose_agent() {
-    local choice
-    choice=$("${DIALOG}" --backtitle "${BT}" --title "Default AI Agent" \
-        --menu "Choose your default AI agent:" ${WT} ${WW} 2 \
-        "picoclaw" "PicoClaw - lightweight, <10MB RAM (RECOMMENDED)" \
-        "openclaw" "OpenClaw - full-featured, ~500MB RAM" \
-        3>&1 1>&2 2>&3) || choice="picoclaw"
-
-    if [[ "${choice}" == "openclaw" ]]; then
-        systemctl disable picoclaw.service 2>/dev/null || true
-        systemctl enable openclaw.service 2>/dev/null || true
-        systemctl daemon-reload
-    fi
 }
 
 finish_setup() {
@@ -233,7 +201,6 @@ Thank you for choosing ClawbotOS!" ${WT} ${WW}
 welcome_msg
 configure_wifi
 configure_api_key
-choose_agent
 finish_setup
 
 # Cleanup: disable firstboot

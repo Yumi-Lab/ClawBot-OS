@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
 ClawbotOS Telegram Bot
-Bridges Telegram messages to the active AI agent (PicoClaw / OpenClaw).
+Bridges Telegram messages to PicoClaw.
 Config: /home/pi/.clawbot-telegram.env
   TELEGRAM_TOKEN=<bot_token>
   ALLOWED_USERS=<comma-separated chat IDs, empty = allow all>
-  AGENT=picoclaw|openclaw   (default: picoclaw)
   AGENT_URL=http://127.0.0.1:8080  (optional override)
 """
 
@@ -26,10 +25,7 @@ log = logging.getLogger(__name__)
 
 ENV_FILE = "/home/pi/.clawbot-telegram.env"
 
-AGENT_URLS = {
-    "picoclaw": "http://127.0.0.1:8080",
-    "openclaw": "http://127.0.0.1:8081",
-}
+AGENT_URL_DEFAULT = "http://127.0.0.1:8080"
 
 
 def load_env():
@@ -107,10 +103,9 @@ def main():
     allowed_raw = env.get("ALLOWED_USERS", "")
     allowed = set(allowed_raw.split(",")) - {""} if allowed_raw else set()
 
-    agent_name = env.get("AGENT", "picoclaw").lower()
-    agent_url = env.get("AGENT_URL", "") or AGENT_URLS.get(agent_name, AGENT_URLS["picoclaw"])
+    agent_url = env.get("AGENT_URL", "") or AGENT_URL_DEFAULT
 
-    log.info("ClawbotOS Telegram bot started. Agent: %s (%s)", agent_name, agent_url)
+    log.info("ClawbotOS Telegram bot started. Agent URL: %s", agent_url)
     if allowed:
         log.info("Allowed user IDs: %s", allowed)
     else:
@@ -130,8 +125,7 @@ def main():
             log.info("Token reloaded.")
         allowed_raw = env.get("ALLOWED_USERS", "")
         allowed = set(allowed_raw.split(",")) - {""} if allowed_raw else set()
-        agent_name = env.get("AGENT", "picoclaw").lower()
-        agent_url = env.get("AGENT_URL", "") or AGENT_URLS.get(agent_name, AGENT_URLS["picoclaw"])
+        agent_url = env.get("AGENT_URL", "") or AGENT_URL_DEFAULT
 
         result = tg_request(token, "getUpdates", {
             "offset": offset, "timeout": 30, "allowed_updates": ["message"]
@@ -159,7 +153,7 @@ def main():
             if text == "/start":
                 histories.pop(chat_id, None)
                 send_message(token, chat_id,
-                    f"ClawbotOS AI Bot\nConnected to: {agent_name}\n\nSend me any message to chat with the AI.\nUse /reset to start a new conversation.")
+                    "ClawbotOS AI Bot\n\nSend me any message to chat with the AI.\nUse /reset to start a new conversation.")
                 continue
 
             if text == "/reset":
@@ -178,8 +172,7 @@ def main():
                         f"CPU: {stats.get('cpu', '?')}%\n"
                         f"RAM: {stats.get('ram', '?')}%\n"
                         f"Disk: {stats.get('disk', '?')}%\n"
-                        f"Temp: {stats.get('temp', '?')}°C\n"
-                        f"Agent: {agent_name}"
+                        f"Temp: {stats.get('temp', '?')}°C"
                     )
                 except Exception:
                     status_text = "Could not retrieve system status."

@@ -9,11 +9,10 @@ Built with the same architecture as [YumiOS](https://github.com/Yumi-Lab/YumiOS)
 | Component | Description | RAM Usage |
 |-----------|-------------|-----------|
 | **[PicoClaw](https://github.com/sipeed/picoclaw)** | Ultra-lightweight AI agent (Go, by Sipeed) | ~10MB |
-| **[OpenClaw](https://github.com/openclaw/openclaw)** | Full-featured AI agent (Node.js) | ~500MB |
 | **ClawbotOS Dashboard** | Static web dashboard with chat, monitoring, config | ~0MB (nginx) |
 | **nginx** | Reverse proxy + static file server on port 80 | ~5MB |
 
-PicoClaw is active by default. OpenClaw is installed but disabled. Both connect to external LLM APIs (OpenAI, Anthropic, OpenRouter, DeepSeek, Ollama, etc.).
+PicoClaw connects to external LLM APIs (OpenAI, Anthropic, OpenRouter, DeepSeek, Ollama, etc.).
 
 ## Supported Boards
 
@@ -37,14 +36,13 @@ sudo dd if=ClawbotOS-*.img of=/dev/sdX bs=4M status=progress
 Insert the SD card and power on. The first-boot wizard will:
 1. Create a 2GB swap file
 2. Ask for your LLM provider and API key
-3. Let you choose between PicoClaw (recommended) and OpenClaw
-4. Reboot to apply settings
+3. Reboot to apply settings
 
 ### 3. Access the Dashboard
 
 Open your browser and go to:
-- **http://clawbot.local** - ClawbotOS Dashboard (chat, monitoring, config)
-- **http://clawbot.local:8080** - PicoClaw API (direct)
+- **http://clawbot.local** — ClawbotOS Dashboard (chat, monitoring, config)
+- **http://clawbot.local:8080** — PicoClaw API (direct)
 
 ### 4. SSH Access
 
@@ -62,19 +60,6 @@ Edit `/boot/network_config.txt.template`:
 3. Enter your WiFi SSID and password
 4. Reboot
 
-## Agent Switching
-
-```bash
-# Switch to OpenClaw (full-featured, ~500MB RAM)
-sudo clawbot-switch-agent openclaw
-
-# Switch back to PicoClaw (lightweight, ~10MB RAM)
-sudo clawbot-switch-agent picoclaw
-
-# Check status
-sudo clawbot-switch-agent status
-```
-
 ## Architecture
 
 ```
@@ -82,9 +67,8 @@ User Browser (port 80)
        |
     [nginx]  -----> /             --> Static Dashboard (HTML/CSS/JS)
        |     -----> /api/picoclaw --> PicoClaw   (:8080)
-       |     -----> /api/openclaw --> OpenClaw   (:8081)
        |
-  PicoClaw / OpenClaw
+   PicoClaw
        |
    External LLM API
   (OpenAI, Claude, etc.)
@@ -98,8 +82,7 @@ The dashboard is a static single-page application served directly by nginx. It c
 - Armbian zram disabled
 - Aggressive sysctl tuning (`vm.swappiness=60`, `vm.vfs_cache_pressure=200`)
 - systemd MemoryMax limits per service
-- Only one AI agent active at a time (`Conflicts=` directive)
-- Static dashboard (0 MB RAM overhead vs ~800MB for Open WebUI)
+- Static dashboard (0 MB RAM overhead vs Open WebUI alternatives)
 
 ## Build System
 
@@ -113,9 +96,9 @@ base -> udev_fix -> armbian (
     clawbot,        # Branding, hostname, mDNS
     swap_setup,     # 2GB swap + sysctl tuning
     picoclaw,       # PicoClaw binary + systemd
-    openclaw,       # OpenClaw + Node.js (disabled)
     nginx_proxy,    # Reverse proxy + static dashboard
     [smartpad],     # SmartPad only: touchscreen, Plymouth
+    telegram_bot,   # Telegram bridge
     clawbot_wizard  # First-boot setup wizard
 )
 ```
@@ -139,7 +122,6 @@ GitHub Actions builds images automatically on push to `develop`. See `.github/wo
 - [MainsailOS](https://github.com/mainsail-crew/MainsailOS) - Upstream project
 - [CustomPiOS](https://github.com/guysoft/CustomPiOS) - Build framework
 - [PicoClaw](https://github.com/sipeed/picoclaw) - Lightweight AI agent by Sipeed
-- [OpenClaw](https://github.com/openclaw/openclaw) - Full-featured AI agent
 
 ## License
 
