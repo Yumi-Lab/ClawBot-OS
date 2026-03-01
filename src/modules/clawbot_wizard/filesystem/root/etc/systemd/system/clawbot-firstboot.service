@@ -1,7 +1,7 @@
 [Unit]
 Description=ClawbotOS First Boot Configuration
 After=basic.target clawbot-swap.service
-Before=multi-user.target picoclaw.service openclaw.service open-webui.service
+Before=multi-user.target picoclaw.service openclaw.service
 ConditionPathExists=/.firstboot_clawbot
 
 [Service]

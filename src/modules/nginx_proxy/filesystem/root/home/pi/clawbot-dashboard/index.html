@@ -844,14 +844,6 @@ body::after {
           </div>
         </div>
         <div class="svc-row">
-          <div class="svc-dot active" id="sd-openwebui"></div>
-          <span class="svc-name">open-webui.service</span>
-          <div class="svc-actions">
-            <button class="svc-btn" onclick="svcAction('openwebui','restart')">Restart</button>
-            <button class="svc-btn danger" onclick="svcAction('openwebui','stop')">Stop</button>
-          </div>
-        </div>
-        <div class="svc-row">
           <div class="svc-dot active" id="sd-nginx"></div>
           <span class="svc-name">nginx.service</span>
           <div class="svc-actions">
@@ -905,10 +897,6 @@ body::after {
           Send
         </button>
       </div>
-      <a class="chat-link" href="/openwebui" target="_blank">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        Open full dashboard (Open WebUI)
-      </a>
     </div>
 
   </div>
@@ -933,7 +921,7 @@ function setGauge(id, pct, max) {
 // === SIMULATED DATA (replace with real API calls) ===
 const state = {
   agent: 'picoclaw',
-  services: { picoclaw: true, openclaw: false, openwebui: true, nginx: true },
+  services: { picoclaw: true, openclaw: false, nginx: true },
   config: { provider: 'openai', apikey: '', model: 'gpt-4o', baseurl: '' }
 };
 

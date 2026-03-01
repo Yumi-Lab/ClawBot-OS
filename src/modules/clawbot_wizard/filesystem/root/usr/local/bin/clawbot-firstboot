@@ -156,9 +156,6 @@ choose_agent() {
     if [[ "${choice}" == "openclaw" ]]; then
         systemctl disable picoclaw.service 2>/dev/null || true
         systemctl enable openclaw.service 2>/dev/null || true
-        # Update Open WebUI backend URL
-        sed -i 's|OPENAI_API_BASE_URL=http://127.0.0.1:8080|OPENAI_API_BASE_URL=http://127.0.0.1:8081|' \
-            /etc/systemd/system/open-webui.service
         systemctl daemon-reload
     fi
 }
