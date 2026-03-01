@@ -51,6 +51,15 @@ server {
         proxy_buffering off;
     }
 
+    # System status API (CPU, RAM, disk, temp, uptime, services)
+    location /api/system/ {
+        proxy_pass http://127.0.0.1:8089/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_read_timeout 10s;
+        add_header Access-Control-Allow-Origin *;
+    }
+
     # Health check endpoint
     location /health {
         access_log off;

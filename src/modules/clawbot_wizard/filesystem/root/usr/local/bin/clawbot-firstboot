@@ -23,11 +23,62 @@ Welcome to ClawbotOS for your Yumi Lab board!
 This wizard will help you configure your AI assistant.
 
 The setup will:
-  1. Configure your AI provider API key
-  2. Choose your default AI agent
-  3. Start all services
+  1. Configure WiFi (optional)
+  2. Configure your AI provider API key
+  3. Choose your default AI agent
+  4. Start all services
 
 Press OK to continue..." ${WT} ${WW}
+}
+
+configure_wifi() {
+    # Check if nmcli is available
+    if ! command -v nmcli &>/dev/null; then
+        return
+    fi
+
+    # Ask user if they want to configure WiFi
+    "${DIALOG}" --backtitle "${BT}" --title "WiFi Configuration" \
+        --yesno "Do you want to connect to a WiFi network?\n\n(Select No to use Ethernet only)" \
+        10 ${WW} || return
+
+    # Get SSID
+    local ssid
+    ssid=$("${DIALOG}" --backtitle "${BT}" --title "WiFi - Network Name" \
+        --inputbox "Enter WiFi network name (SSID):" \
+        10 ${WW} 3>&1 1>&2 2>&3) || return
+
+    if [[ -z "${ssid}" ]]; then
+        return
+    fi
+
+    # Get password
+    local password
+    password=$("${DIALOG}" --backtitle "${BT}" --title "WiFi - Password" \
+        --insecure --passwordbox "Enter WiFi password for '${ssid}':\n(Leave empty for open network)" \
+        10 ${WW} 3>&1 1>&2 2>&3) || return
+
+    # Connect using nmcli
+    "${DIALOG}" --backtitle "${BT}" --title "WiFi - Connecting..." \
+        --infobox "Connecting to '${ssid}'..." 5 ${WW}
+
+    if [[ -n "${password}" ]]; then
+        nmcli device wifi connect "${ssid}" password "${password}" 2>/dev/null || true
+    else
+        nmcli device wifi connect "${ssid}" 2>/dev/null || true
+    fi
+
+    sleep 3
+
+    # Check if connected
+    if nmcli -t -f STATE general 2>/dev/null | grep -q "connected"; then
+        "${DIALOG}" --backtitle "${BT}" --title "WiFi" \
+            --msgbox "Connected to '${ssid}' successfully!" 8 ${WW}
+    else
+        "${DIALOG}" --backtitle "${BT}" --title "WiFi" \
+            --msgbox "Could not connect to '${ssid}'.\nCheck the password and try again via:\n  nmcli device wifi connect \"${ssid}\"" \
+            10 ${WW}
+    fi
 }
 
 configure_api_key() {
@@ -180,6 +231,7 @@ Thank you for choosing ClawbotOS!" ${WT} ${WW}
 # --- MAIN ---
 
 welcome_msg
+configure_wifi
 configure_api_key
 choose_agent
 finish_setup

@@ -40,6 +40,13 @@ apt-get update --allow-releaseinfo-change
 check_install_pkgs ${CLAWBOT_DEPS}
 ## END Step 3
 
+## Step 3b: Install clawbot-status-api and enable it
+echo_green "Installing ClawbotOS status API ..."
+unpack /filesystem/root /
+chmod +x /usr/local/bin/clawbot-status-api
+systemctl_if_exists enable clawbot-status-api.service
+## END Step 3b
+
 ## Step 4: Set hostname to clawbot
 echo_green "Setting hostname to 'clawbot' ..."
 echo "clawbot" > /etc/hostname
