@@ -303,6 +303,21 @@ def write_file(path, content):
         return False, str(e)
 
 
+def update_dashboard(check_only=False):
+    """Run clawbot-update-dashboard and return parsed JSON result."""
+    cmd = ["/usr/local/bin/clawbot-update-dashboard"]
+    if check_only:
+        cmd.append("--check")
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=40)
+        output = result.stdout.strip()
+        return json.loads(output) if output else {"error": result.stderr.strip()}
+    except subprocess.TimeoutExpired:
+        return {"error": "timeout"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 def get_logs(service, lines=100):
     """Get recent logs for a service via journalctl."""
     if service not in ALLOWED_LOG_SERVICES:
@@ -363,6 +378,10 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self.send_json(200, {"path": path, "content": content})
 
+        elif parsed.path == "/dashboard-version":
+            result = update_dashboard(check_only=True)
+            self.send_json(200, result)
+
         elif parsed.path == "/logs":
             service = qs.get("service", [""])[0]
             lines = qs.get("lines", ["100"])[0]
@@ -417,6 +436,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(200, {"ok": True})
             except Exception as e:
                 self.send_json(500, {"error": str(e)})
+
+        elif path == "/update-dashboard":
+            result = update_dashboard(check_only=False)
+            self.send_json(200, result)
+            return
 
         elif path == "/service":
             svc = data.get("service", "")

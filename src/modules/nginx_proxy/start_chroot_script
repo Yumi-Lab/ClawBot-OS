@@ -20,10 +20,29 @@ apt-get purge -y nginx nginx-common nginx-core nginx-full nginx-light 2>/dev/nul
 apt-get install -y nginx
 ## END Step 1
 
-## Step 2: Deploy configuration files
+## Step 2: Deploy configuration files and dashboard
 echo_green "Deploying nginx configuration ..."
 unpack /filesystem/root /
-## END Step 2
+
+## Step 2b: Try to fetch latest dashboard from GitHub (fallback to bundled)
+DASHBOARD_REPO="Yumi-Lab/clawbot-interface"
+DASHBOARD_DIR="/home/pi/clawbot-dashboard"
+mkdir -p "${DASHBOARD_DIR}"
+echo_green "Fetching latest dashboard from GitHub ..."
+if curl -fsSL --max-time 30 \
+    "https://github.com/${DASHBOARD_REPO}/releases/latest/download/index.html" \
+    -o "${DASHBOARD_DIR}/index.html.tmp" 2>/dev/null; then
+    mv "${DASHBOARD_DIR}/index.html.tmp" "${DASHBOARD_DIR}/index.html"
+    curl -fsSL --max-time 10 \
+        "https://github.com/${DASHBOARD_REPO}/releases/latest/download/VERSION" \
+        -o "${DASHBOARD_DIR}/VERSION" 2>/dev/null || true
+    echo_green "Dashboard fetched from GitHub releases."
+else
+    echo_green "GitHub unreachable — using bundled dashboard (can update later via clawbot-update-dashboard)."
+    echo "0.0.0" > "${DASHBOARD_DIR}/VERSION"
+fi
+chown -R pi:pi "${DASHBOARD_DIR}"
+## END Step 2b
 
 ## Step 3: Remove default site, ensure sites-enabled exists
 mkdir -p /etc/nginx/sites-enabled

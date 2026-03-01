@@ -40,10 +40,11 @@ apt-get update --allow-releaseinfo-change
 check_install_pkgs ${CLAWBOT_DEPS}
 ## END Step 3
 
-## Step 3b: Install clawbot-status-api and enable it
-echo_green "Installing ClawbotOS status API ..."
+## Step 3b: Install clawbot-status-api, updater and enable service
+echo_green "Installing ClawbotOS status API and dashboard updater ..."
 unpack /filesystem/root /
 chmod +x /usr/local/bin/clawbot-status-api
+chmod +x /usr/local/bin/clawbot-update-dashboard
 systemctl_if_exists enable clawbot-status-api.service
 ## END Step 3b
 

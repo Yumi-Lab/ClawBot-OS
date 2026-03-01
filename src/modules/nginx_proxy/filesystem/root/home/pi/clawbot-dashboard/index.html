@@ -608,6 +608,22 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           </div>
         </div>
 
+        <!-- Dashboard update -->
+        <div class="setup-card" id="sc-update">
+          <div class="setup-h">
+            <div class="setup-ico">⬆️</div>
+            <div class="setup-badge opt" id="sb-update">Checking...</div>
+          </div>
+          <div class="setup-title">Dashboard Update</div>
+          <div class="setup-desc">Update the dashboard without reflashing the OS. Updates are pulled from <strong>Yumi-Lab/clawbot-interface</strong> on GitHub.</div>
+          <div class="setup-key-val" id="sv-update">Local: — · Remote: —</div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="setup-go" onclick="checkDashboardUpdate()">Check</button>
+            <button class="setup-go" id="btn-do-update" onclick="doUpdate()" style="display:none;border-color:#00ff8844;color:var(--ok);background:#00ff8811">Update now</button>
+          </div>
+          <div class="setup-desc" id="update-msg" style="color:var(--td);margin-top:2px"></div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -874,6 +890,59 @@ function updateSetupStatus() {
   if (ip && ip !== '---.---') $id('sv-ssh').innerHTML = `ssh pi@${ip}<br>Password: yumi`;
 }
 
+// ═══ DASHBOARD UPDATER ═══
+async function checkDashboardUpdate() {
+  $id('sb-update').textContent = 'Checking...';
+  $id('sv-update').textContent = 'Contacting GitHub...';
+  try {
+    const r = await fetch('/api/system/dashboard-version', {signal: AbortSignal.timeout(12000)});
+    if (!r.ok) throw new Error('API error');
+    const d = await r.json();
+    if (d.error) { $id('sv-update').textContent = 'Error: ' + d.error; return; }
+    $id('sv-update').textContent = `Local: v${d.local} · Remote: v${d.remote}`;
+    if (d.update_available) {
+      $id('sb-update').className = 'setup-badge warn';
+      $id('sb-update').textContent = '↑ Update available';
+      $id('btn-do-update').style.display = '';
+      $id('update-msg').textContent = `v${d.local} → v${d.remote}`;
+    } else {
+      $id('sb-update').className = 'setup-badge ok';
+      $id('sb-update').textContent = '✓ Up to date';
+      $id('btn-do-update').style.display = 'none';
+      $id('update-msg').textContent = 'Latest version installed.';
+    }
+  } catch(e) {
+    $id('sb-update').textContent = 'Offline';
+    $id('sv-update').textContent = 'Cannot reach GitHub (no internet?)';
+  }
+}
+
+async function doUpdate() {
+  $id('btn-do-update').disabled = true;
+  $id('update-msg').textContent = 'Downloading... please wait.';
+  try {
+    const r = await fetch('/api/system/update-dashboard', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:'{}',
+      signal: AbortSignal.timeout(45000)
+    });
+    const d = await r.json();
+    if (d.updated) {
+      $id('sb-update').className = 'setup-badge ok';
+      $id('sb-update').textContent = '✓ Updated!';
+      $id('sv-update').textContent = `v${d.from} → v${d.to}`;
+      $id('update-msg').textContent = 'Reload the page to use the new version.';
+      $id('btn-do-update').style.display = 'none';
+      setTimeout(() => location.reload(), 2500);
+    } else {
+      $id('update-msg').textContent = d.message || d.error || 'No update applied.';
+      $id('btn-do-update').disabled = false;
+    }
+  } catch(e) {
+    $id('update-msg').textContent = 'Update failed: ' + e.message;
+    $id('btn-do-update').disabled = false;
+  }
+}
+
 // ═══ FILE EDITOR ═══
 const FILE_SVC_MAP = {
   '/home/pi/.picoclaw/config.json': 'picoclaw',
@@ -1064,6 +1133,8 @@ updateModelBar();
 updateSetupStatus();
 refreshStats();
 setInterval(refreshStats, 5000);
+// Check for dashboard updates in background (after 3s to not block init)
+setTimeout(checkDashboardUpdate, 3000);
 
 // Show Setup panel first if API key not yet configured
 if (!S.cfg.apikey) {
