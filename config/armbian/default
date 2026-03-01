@@ -23,7 +23,7 @@ BASE_BOOT_MOUNT_PATH="/boot/"
 BASE_RELEASE_COMPRESS=no
 
 # Module chain for Smart Pi One (headless)
-MODULES="base,udev_fix,armbian(armbian_net,clawbot,swap_setup,picoclaw,openclaw,nginx_proxy,clawbot_wizard)"
+MODULES="base,udev_fix,armbian(armbian_net,clawbot,swap_setup,picoclaw,openclaw,nginx_proxy,telegram_bot,clawbot_wizard)"
 
 # export Variables
 export DOWNLOAD_BASE_URL

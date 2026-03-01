@@ -16,6 +16,24 @@ PORT = 8089
 PICOCLAW_CONFIG = "/home/pi/.picoclaw/config.json"
 OPENCLAW_CONFIG = "/home/pi/.openclaw/openclaw.json"
 
+# Whitelist of files that can be read/written via the API
+ALLOWED_FILES = {
+    "/home/pi/.picoclaw/config.json",
+    "/home/pi/.openclaw/openclaw.json",
+    "/home/pi/.clawbot-telegram.env",
+    "/etc/nginx/sites-available/clawbot",
+    "/etc/nginx/nginx.conf",
+    "/etc/systemd/system/picoclaw.service",
+    "/etc/systemd/system/openclaw.service",
+    "/etc/systemd/system/clawbot-telegram.service",
+}
+
+# Whitelist of services for log streaming
+ALLOWED_LOG_SERVICES = {
+    "picoclaw", "openclaw", "nginx", "clawbot-telegram",
+    "clawbot-status-api", "clawbot-swap",
+}
+
 
 def _read_proc(path):
     try:
@@ -147,7 +165,7 @@ def get_network():
 
 def get_services():
     services = {}
-    for svc in ["picoclaw", "openclaw", "nginx"]:
+    for svc in ["picoclaw", "openclaw", "nginx", "clawbot-telegram"]:
         try:
             r = subprocess.run(
                 ["systemctl", "is-active", f"{svc}.service"],
@@ -240,7 +258,7 @@ def update_picoclaw_config(provider, model, api_key, base_url):
 def service_action(service, action):
     if action not in ("start", "stop", "restart"):
         return False
-    if service not in ("picoclaw", "openclaw", "nginx"):
+    if service not in ("picoclaw", "openclaw", "nginx", "clawbot-telegram"):
         return False
     try:
         subprocess.run(
@@ -250,6 +268,55 @@ def service_action(service, action):
         return True
     except Exception:
         return False
+
+
+def read_file(path):
+    """Read file content if path is whitelisted."""
+    if path not in ALLOWED_FILES:
+        return None, "forbidden"
+    try:
+        with open(path) as f:
+            return f.read(), None
+    except FileNotFoundError:
+        return "", None  # Return empty string for missing files
+    except Exception as e:
+        return None, str(e)
+
+
+def write_file(path, content):
+    """Write file content if path is whitelisted."""
+    if path not in ALLOWED_FILES:
+        return False, "forbidden"
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            f.write(content)
+        # Restrict permissions for credential files
+        if path.endswith((".json", ".env")):
+            os.chmod(path, 0o600)
+            try:
+                subprocess.run(["chown", "pi:pi", path], timeout=3)
+            except Exception:
+                pass
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+
+def get_logs(service, lines=100):
+    """Get recent logs for a service via journalctl."""
+    if service not in ALLOWED_LOG_SERVICES:
+        return None, "forbidden"
+    try:
+        lines = min(max(int(lines), 1), 500)
+        result = subprocess.run(
+            ["journalctl", "-u", f"{service}.service", "-n", str(lines),
+             "--no-pager", "--output=short-iso"],
+            capture_output=True, text=True, timeout=5
+        )
+        return result.stdout, None
+    except Exception as e:
+        return None, str(e)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -273,11 +340,42 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if self.path == "/stats":
+        from urllib.parse import urlparse, parse_qs, unquote
+
+        parsed = urlparse(self.path)
+        qs = parse_qs(parsed.query)
+
+        if parsed.path == "/stats":
             try:
                 self.send_json(200, get_stats())
             except Exception as e:
                 self.send_json(500, {"error": str(e)})
+
+        elif parsed.path == "/file":
+            path = unquote(qs.get("path", [""])[0])
+            if not path:
+                self.send_json(400, {"error": "missing path"})
+                return
+            content, err = read_file(path)
+            if err:
+                code = 403 if err == "forbidden" else 500
+                self.send_json(code, {"error": err})
+            else:
+                self.send_json(200, {"path": path, "content": content})
+
+        elif parsed.path == "/logs":
+            service = qs.get("service", [""])[0]
+            lines = qs.get("lines", ["100"])[0]
+            if not service:
+                self.send_json(400, {"error": "missing service"})
+                return
+            content, err = get_logs(service, lines)
+            if err:
+                code = 403 if err == "forbidden" else 500
+                self.send_json(code, {"error": err})
+            else:
+                self.send_json(200, {"service": service, "logs": content})
+
         else:
             self.send_json(404, {"error": "not found"})
 
@@ -291,7 +389,24 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(400, {"error": "invalid JSON"})
             return
 
-        if self.path == "/config":
+        from urllib.parse import urlparse
+        path = urlparse(self.path).path
+
+        if path == "/file":
+            file_path = data.get("path", "")
+            content = data.get("content", "")
+            if not file_path:
+                self.send_json(400, {"error": "missing path"})
+                return
+            ok, err = write_file(file_path, content)
+            if err:
+                code = 403 if err == "forbidden" else 500
+                self.send_json(code, {"error": err})
+            else:
+                self.send_json(200, {"ok": True})
+            return
+
+        elif path == "/config":
             try:
                 update_picoclaw_config(
                     provider=data.get("provider", "openai"),
@@ -303,7 +418,7 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as e:
                 self.send_json(500, {"error": str(e)})
 
-        elif self.path == "/service":
+        elif path == "/service":
             svc = data.get("service", "")
             action = data.get("action", "")
             ok = service_action(svc, action)

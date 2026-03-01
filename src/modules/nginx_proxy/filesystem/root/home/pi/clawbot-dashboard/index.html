@@ -6,1291 +6,792 @@
 <title>ClawbotOS</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050a0e;--bg-d:#0a1118;--bg-c:#0d1a24;--bg-ch:#112230;--bg-i:#081018;
+  --br:#1a3040;--br-g:#0ff3;--tp:#e0f0f8;--ts:#6a8fa8;--td:#3a5a70;
+  --ac:#00ffe0;--ac-d:#00ffe033;--ac-m:#00ffe066;--ac2:#00b8ff;
+  --ok:#00ff88;--wn:#ffaa00;--er:#ff3860;
+  --fm:'Outfit',sans-serif;--fmo:'JetBrains Mono',monospace;
+  --r:8px;--rl:14px;--sbw:230px;--sbwc:60px;--tbh:52px;
+  --tr:.25s cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%}
+body{font-family:var(--fm);background:var(--bg);color:var(--tp);overflow:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 0%,#00ffe008 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,#00b8ff06 0%,transparent 50%);pointer-events:none;z-index:0}
 
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* APP SHELL */
+.app{position:relative;z-index:1;display:flex;height:100vh;overflow:hidden}
 
-:root {
-  --bg-void: #050a0e;
-  --bg-deep: #0a1118;
-  --bg-card: #0d1a24;
-  --bg-card-hover: #112230;
-  --bg-input: #081018;
-  --border: #1a3040;
-  --border-glow: #0ff3;
-  --text-primary: #e0f0f8;
-  --text-secondary: #6a8fa8;
-  --text-dim: #3a5a70;
-  --accent: #00ffe0;
-  --accent-dim: #00ffe033;
-  --accent-mid: #00ffe066;
-  --accent2: #00b8ff;
-  --accent3: #ff3860;
-  --success: #00ff88;
-  --warning: #ffaa00;
-  --danger: #ff3860;
-  --font-display: 'Outfit', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --radius: 8px;
-  --radius-lg: 14px;
-  --sb-w: 230px;
-  --sb-w-collapsed: 60px;
-  --topbar-h: 52px;
-  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* SIDEBAR */
+.sb{width:var(--sbw);flex-shrink:0;display:flex;flex-direction:column;background:var(--bg-c);border-right:1px solid var(--br);transition:width var(--tr);overflow:hidden;position:relative;z-index:10}
+.sb.col{width:var(--sbwc)}
+.sb-top{display:flex;align-items:center;gap:12px;padding:14px 12px;border-bottom:1px solid var(--br);min-height:var(--tbh);flex-shrink:0}
+.sb-hbg{width:36px;height:36px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;background:transparent;border:1px solid var(--br);border-radius:var(--r);cursor:pointer;transition:var(--tr)}
+.sb-hbg:hover{border-color:var(--ac);background:var(--ac-d)}
+.sb-hbg span{display:block;width:16px;height:2px;background:var(--ts);border-radius:2px;transition:var(--tr)}
+.sb-hbg:hover span{background:var(--ac)}
+.sb-brand{display:flex;flex-direction:column;gap:1px;overflow:hidden;white-space:nowrap;transition:opacity var(--tr)}
+.sb.col .sb-brand{opacity:0;pointer-events:none}
+.sb-title{font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1}
+.sb-sub{font-family:var(--fmo);font-size:.58rem;color:var(--td);letter-spacing:2px;text-transform:uppercase}
 
-html, body { height: 100%; }
-body {
-  font-family: var(--font-display);
-  background: var(--bg-void);
-  color: var(--text-primary);
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+/* NAV */
+.sb-nav{flex:1;display:flex;flex-direction:column;gap:3px;padding:8px;overflow-y:auto}
+.sb-item{display:flex;align-items:center;gap:11px;padding:9px 9px;border-radius:var(--r);border:1px solid transparent;background:transparent;color:var(--ts);font-family:var(--fm);font-size:.83rem;font-weight:500;cursor:pointer;transition:var(--tr);text-align:left;white-space:nowrap;width:100%}
+.sb-item:hover{background:var(--bg-i);color:var(--tp);border-color:var(--br)}
+.sb-item.active{background:var(--ac-d);color:var(--ac);border-color:var(--ac-m)}
+.sb-item svg{width:17px;height:17px;flex-shrink:0}
+.sb-item .lbl{transition:opacity var(--tr)}
+.sb.col .lbl{opacity:0;width:0;overflow:hidden}
+.sb-sep{height:1px;background:var(--br);margin:4px 0}
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 20% 0%, #00ffe008 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, #00b8ff06 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
+/* SIDEBAR FOOTER */
+.sb-ft{padding:8px 8px 12px;border-top:1px solid var(--br);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.sb-st{display:flex;align-items:center;gap:9px;padding:5px 7px;border-radius:var(--r)}
+.sb-si{font-size:.8rem;flex-shrink:0;width:17px;text-align:center}
+.sb-stx{display:flex;flex-direction:column;gap:1px;overflow:hidden;white-space:nowrap;transition:opacity var(--tr)}
+.sb.col .sb-stx{opacity:0}
+.sb-sl{font-family:var(--fmo);font-size:.52rem;color:var(--td);text-transform:uppercase;letter-spacing:1.5px}
+.sb-sv{font-family:var(--fmo);font-size:.68rem;font-weight:500;color:var(--ts)}
 
-/* === APP SHELL === */
-.app {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
+/* CONTENT */
+.cnt{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-/* === SIDEBAR === */
-.sidebar {
-  width: var(--sb-w);
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-card);
-  border-right: 1px solid var(--border);
-  transition: width var(--transition);
-  overflow: hidden;
-  position: relative;
-  z-index: 10;
-}
-.sidebar.collapsed { width: var(--sb-w-collapsed); }
+/* TOPBAR */
+.tb{height:var(--tbh);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--bg-c);border-bottom:1px solid var(--br);position:relative}
+.tb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--ac-m),transparent)}
+.tb-l{display:flex;align-items:center;gap:12px}
+.tb-t{font-family:var(--fmo);font-size:.75rem;font-weight:600;color:var(--ac);text-transform:uppercase;letter-spacing:2px}
+.tb-a{font-family:var(--fmo);font-size:.63rem;color:var(--td);background:var(--bg-i);padding:2px 8px;border-radius:4px;border:1px solid var(--br)}
+.tb-s{font-family:var(--fmo);font-size:.6rem;font-weight:600;color:var(--ok);letter-spacing:1px}
+.tb-s.off{color:var(--er)}
 
-.sb-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 12px;
-  border-bottom: 1px solid var(--border);
-  min-height: var(--topbar-h);
-  flex-shrink: 0;
-}
+/* PANELS */
+.pnl{display:none;flex:1;overflow:hidden}
+.pnl.active{display:flex;flex-direction:column}
 
-.sb-hamburger {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: var(--transition);
-  padding: 0;
-}
-.sb-hamburger:hover { border-color: var(--accent); background: var(--accent-dim); }
-.sb-hamburger span {
-  display: block;
-  width: 16px;
-  height: 2px;
-  background: var(--text-secondary);
-  border-radius: 2px;
-  transition: var(--transition);
-}
-.sb-hamburger:hover span { background: var(--accent); }
+/* ─── CHAT ─── */
+.chat-wrap{display:flex;flex-direction:column;height:100%;background:var(--bg)}
+.chat-msgs{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.chat-row{display:flex;gap:11px;align-items:flex-start;animation:mIn .3s ease}
+.chat-row.user{flex-direction:row-reverse}
+@keyframes mIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.chat-av{width:30px;height:30px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;background:var(--bg-c);border:1px solid var(--br)}
+.chat-av.bot{background:var(--ac-d);border-color:var(--ac-m)}
+.chat-bub{max-width:72%;padding:11px 15px;border-radius:11px;font-size:.87rem;line-height:1.6}
+.chat-row.bot .chat-bub{background:var(--bg-c);border:1px solid var(--br);color:var(--tp);border-radius:2px 11px 11px 11px;white-space:pre-wrap}
+.chat-row.user .chat-bub{background:var(--ac-d);border:1px solid var(--ac-m);color:var(--ac);font-family:var(--fmo);font-size:.78rem;border-radius:11px 2px 11px 11px}
+.chat-bub.streaming::after{content:'▊';animation:bl .7s infinite;color:var(--ac);margin-left:2px}
+.chat-bub.err{color:var(--er);border-color:#ff386033}
+@keyframes bl{50%{opacity:0}}
+.chat-ft{flex-shrink:0;background:var(--bg-c);border-top:1px solid var(--br);padding:11px 18px 15px}
+.chat-mb{font-family:var(--fmo);font-size:.6rem;color:var(--td);margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.chat-mb::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);animation:pd 2s infinite}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:.4}}
+.chat-ir{display:flex;gap:9px;align-items:flex-end}
+.chat-inp{flex:1;padding:11px 15px;background:var(--bg-i);border:1px solid var(--br);border-radius:var(--r);color:var(--tp);font-family:var(--fm);font-size:.88rem;outline:none;resize:none;max-height:120px;min-height:42px;transition:var(--tr);line-height:1.4}
+.chat-inp:focus{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac-d)}
+.chat-inp::placeholder{color:var(--td)}
+.chat-snd{width:42px;height:42px;background:var(--ac);border:none;border-radius:var(--r);color:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);flex-shrink:0}
+.chat-snd:hover{box-shadow:0 0 20px var(--ac-d);transform:scale(1.05)}
+.chat-snd:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.chat-snd svg{width:17px;height:17px}
 
-.sb-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  overflow: hidden;
-  white-space: nowrap;
-  transition: opacity var(--transition);
-}
-.sidebar.collapsed .sb-brand { opacity: 0; pointer-events: none; }
-.sb-title {
-  font-size: 1.1rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.1;
-}
-.sb-sub {
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  color: var(--text-dim);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
+/* ─── PANEL SCROLL ─── */
+.pscr{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:18px;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.sec-t{font-family:var(--fmo);font-size:.63rem;font-weight:600;color:var(--ac);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.sec-t::before{content:'';width:6px;height:6px;background:var(--ac);border-radius:1px;transform:rotate(45deg);box-shadow:0 0 8px var(--ac)}
+.card{background:var(--bg-c);border:1px solid var(--br);border-radius:var(--rl);padding:16px;position:relative;overflow:hidden}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 10%,var(--br) 50%,transparent 90%)}
 
-/* === SIDEBAR NAV === */
-.sb-nav {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 8px;
-  overflow-y: auto;
-}
+/* GAUGES */
+.gg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.gi{display:flex;flex-direction:column;align-items:center;gap:7px}
+.gr{width:76px;height:76px;position:relative}
+.gr svg{width:100%;height:100%;transform:rotate(-90deg)}
+.gr .tk{fill:none;stroke:var(--bg-i);stroke-width:5}
+.gr .fl{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1s ease,stroke .5s ease;filter:drop-shadow(0 0 4px currentColor)}
+.gr .vt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fmo);font-size:.95rem;font-weight:700}
+.gr .un{font-size:.55rem;font-weight:400;color:var(--td)}
+.gl{font-family:var(--fmo);font-size:.58rem;color:var(--ts);text-transform:uppercase;letter-spacing:1.5px}
+.ni{margin-top:12px;padding-top:12px;border-top:1px solid var(--br);display:flex;gap:16px;flex-wrap:wrap}
+.nd-row{display:flex;align-items:center;gap:6px}
+.nd{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);animation:pd 2s infinite}
+.nd.off{background:var(--td);box-shadow:none;animation:none}
+.nl{font-family:var(--fmo);font-size:.63rem;color:var(--ts)}
 
-.sb-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 10px;
-  border-radius: var(--radius);
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-  text-align: left;
-  white-space: nowrap;
-  width: 100%;
-}
-.sb-item:hover { background: var(--bg-input); color: var(--text-primary); border-color: var(--border); }
-.sb-item.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-mid); }
-.sb-item svg { width: 18px; height: 18px; flex-shrink: 0; }
-.sb-item .sb-label { transition: opacity var(--transition); }
-.sidebar.collapsed .sb-label { opacity: 0; width: 0; overflow: hidden; }
+/* SERVICES */
+.ag-row{display:flex;align-items:center;gap:13px;padding:11px 15px;background:var(--bg-i);border-radius:var(--r);border:1px solid var(--br);margin-bottom:12px}
+.ag-inf{flex:1}
+.ag-nm{font-weight:700;font-size:.93rem}
+.ag-sb{font-family:var(--fmo);font-size:.58rem;color:var(--td)}
+.tgl{position:relative;width:52px;height:28px;cursor:pointer}
+.tgl input{display:none}
+.tgl-tk{position:absolute;inset:0;background:var(--bg);border:1px solid var(--br);border-radius:14px;transition:var(--tr)}
+.tgl input:checked+.tgl-tk{background:var(--ac-d);border-color:var(--ac)}
+.tgl-th{position:absolute;top:3px;left:3px;width:22px;height:22px;background:var(--ts);border-radius:50%;transition:var(--tr)}
+.tgl input:checked~.tgl-th{left:27px;background:var(--ac);box-shadow:0 0 12px var(--ac-d)}
+.svc-l{display:flex;flex-direction:column;gap:7px}
+.svc-r{display:flex;align-items:center;gap:9px;padding:9px 13px;background:var(--bg-i);border-radius:var(--r);border:1px solid transparent;transition:border-color var(--tr)}
+.svc-r:hover{border-color:var(--br)}
+.svc-d{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.svc-d.on{background:var(--ok);box-shadow:0 0 8px #00ff8866;animation:pd 2s infinite}
+.svc-d.off{background:var(--td)}
+.svc-n{flex:1;font-family:var(--fmo);font-size:.73rem;font-weight:500}
+.svc-s{font-family:var(--fmo);font-size:.58rem;color:var(--td);margin-right:7px}
+.svc-acts{display:flex;gap:4px}
+.sb-btn{padding:3px 9px;font-family:var(--fmo);font-size:.55rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;border:1px solid var(--br);border-radius:4px;background:transparent;color:var(--ts);cursor:pointer;transition:var(--tr)}
+.sb-btn:hover{border-color:var(--ac);color:var(--ac);background:var(--ac-d)}
+.sb-btn.dng:hover{border-color:var(--er);color:var(--er);background:#ff386018}
 
-/* === SIDEBAR FOOTER === */
-.sb-footer {
-  padding: 10px 8px 14px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex-shrink: 0;
-}
+/* CONFIG/SETTINGS */
+.cfg-form{display:flex;flex-direction:column;gap:12px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-family:var(--fmo);font-size:.6rem;color:var(--td);text-transform:uppercase;letter-spacing:1.5px}
+.fi,.fs{padding:9px 13px;background:var(--bg-i);border:1px solid var(--br);border-radius:var(--r);color:var(--tp);font-family:var(--fmo);font-size:.78rem;outline:none;transition:var(--tr);-webkit-appearance:none}
+.fi:focus,.fs:focus{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac-d)}
+.fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a8fa8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.model-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
+.mc{padding:3px 9px;font-family:var(--fmo);font-size:.58rem;background:var(--bg-i);border:1px solid var(--br);border-radius:12px;color:var(--td);cursor:pointer;transition:var(--tr)}
+.mc:hover{border-color:var(--ac);color:var(--ac)}
+.btn-save{align-self:flex-start;padding:9px 26px;background:linear-gradient(135deg,var(--ac),var(--ac2));border:none;border-radius:var(--r);color:var(--bg);font-family:var(--fmo);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;cursor:pointer;transition:var(--tr)}
+.btn-save:hover{box-shadow:0 0 20px var(--ac-d),0 4px 16px #0006}
+.btn-save:active{transform:scale(.97)}
+.info-box{padding:9px 13px;background:var(--ac-d);border:1px solid var(--ac-m);border-radius:var(--r);font-family:var(--fmo);font-size:.68rem;color:var(--ac);line-height:1.5}
+.warn-box{padding:9px 13px;background:#ffaa0011;border:1px solid #ffaa0033;border-radius:var(--r);font-family:var(--fmo);font-size:.68rem;color:var(--wn);line-height:1.5}
+.divider{height:1px;background:var(--br);margin:4px 0}
 
-.sb-stat {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  border-radius: var(--radius);
-}
-.sb-stat-icon {
-  font-size: 0.85rem;
-  flex-shrink: 0;
-  width: 18px;
-  text-align: center;
-}
-.sb-stat-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  overflow: hidden;
-  white-space: nowrap;
-  transition: opacity var(--transition);
-}
-.sidebar.collapsed .sb-stat-text { opacity: 0; }
-.sb-stat-label {
-  font-family: var(--font-mono);
-  font-size: 0.52rem;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-.sb-stat-val {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
+/* ─── FILES PANEL ─── */
+.files-wrap{display:flex;flex:1;overflow:hidden;min-width:0}
+.files-tree{width:220px;flex-shrink:0;border-right:1px solid var(--br);display:flex;flex-direction:column;overflow-y:auto;padding:8px;gap:2px;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.file-group-label{font-family:var(--fmo);font-size:.55rem;color:var(--td);text-transform:uppercase;letter-spacing:2px;padding:8px 8px 4px;border-top:1px solid var(--br);margin-top:4px}
+.file-group-label:first-child{border-top:none;margin-top:0}
+.file-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);border:1px solid transparent;cursor:pointer;transition:var(--tr);color:var(--ts)}
+.file-item:hover{background:var(--bg-i);border-color:var(--br);color:var(--tp)}
+.file-item.active{background:var(--ac-d);border-color:var(--ac-m);color:var(--ac)}
+.file-item svg{width:14px;height:14px;flex-shrink:0;opacity:.6}
+.file-item.active svg{opacity:1}
+.file-item-name{font-family:var(--fmo);font-size:.7rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* === MAIN CONTENT === */
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-width: 0;
-}
+.file-editor{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.file-editor-top{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--br);background:var(--bg-c);flex-shrink:0}
+.file-path{font-family:var(--fmo);font-size:.68rem;color:var(--ts);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-btns{display:flex;gap:6px;flex-shrink:0}
+.file-btn{padding:5px 14px;font-family:var(--fmo);font-size:.62rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--br);border-radius:var(--r);background:transparent;color:var(--ts);cursor:pointer;transition:var(--tr)}
+.file-btn:hover{border-color:var(--ac);color:var(--ac);background:var(--ac-d)}
+.file-btn.primary{background:linear-gradient(135deg,var(--ac),var(--ac2));border:none;color:var(--bg)}
+.file-btn.primary:hover{box-shadow:0 0 16px var(--ac-d)}
+.file-textarea{flex:1;width:100%;padding:16px 18px;background:var(--bg-i);border:none;color:var(--tp);font-family:var(--fmo);font-size:.78rem;line-height:1.7;outline:none;resize:none;tab-size:2;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.file-placeholder{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--td)}
+.file-placeholder svg{width:40px;height:40px;opacity:.3}
+.file-placeholder p{font-family:var(--fmo);font-size:.72rem}
 
-/* === TOPBAR === */
-.topbar {
-  height: var(--topbar-h);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  position: relative;
-}
-.topbar::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent-mid), transparent);
-}
-.topbar-left { display: flex; align-items: center; gap: 12px; }
-.topbar-title {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-.topbar-agent {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--text-dim);
-  background: var(--bg-input);
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-}
-.topbar-right { display: flex; align-items: center; gap: 12px; }
-.status-chip {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 600;
-  color: var(--success);
-  letter-spacing: 1px;
-}
-.status-chip.stopped { color: var(--danger); }
+/* ─── LOGS PANEL ─── */
+.logs-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.logs-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--br);background:var(--bg-c);flex-shrink:0}
+.logs-svc-btns{display:flex;gap:6px}
+.log-svc-btn{padding:5px 14px;font-family:var(--fmo);font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;border:1px solid var(--br);border-radius:var(--r);background:transparent;color:var(--ts);cursor:pointer;transition:var(--tr)}
+.log-svc-btn:hover{border-color:var(--ac);color:var(--ac);background:var(--ac-d)}
+.log-svc-btn.active{background:var(--ac-d);color:var(--ac);border-color:var(--ac-m)}
+.log-auto{display:flex;align-items:center;gap:6px;margin-left:auto;font-family:var(--fmo);font-size:.62rem;color:var(--td);cursor:pointer}
+.log-auto input{accent-color:var(--ac)}
+.logs-out{flex:1;overflow-y:auto;padding:14px 18px;font-family:var(--fmo);font-size:.72rem;line-height:1.8;color:var(--ts);white-space:pre-wrap;word-break:break-all;scrollbar-width:thin;scrollbar-color:var(--br) transparent;background:var(--bg)}
+.log-line.err{color:var(--er)}
+.log-line.wrn{color:var(--wn)}
+.log-line.ok{color:var(--ok)}
 
-/* === PANELS === */
-.panel {
-  display: none;
-  flex: 1;
-  overflow: hidden;
-}
-.panel.active { display: flex; flex-direction: column; }
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;background:var(--bg-c);border:1px solid var(--ac);border-radius:var(--r);color:var(--ac);font-family:var(--fmo);font-size:.73rem;box-shadow:0 0 20px var(--ac-d);z-index:1000;animation:tIn .3s ease,tOut .3s ease 2.7s forwards}
+.toast.err{border-color:var(--er);color:var(--er)}
+@keyframes tIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tOut{from{opacity:1}to{opacity:0;transform:translateY(20px)}}
 
-/* === CHAT PANEL === */
-.chat-wrap {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: var(--bg-void);
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.chat-row {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  animation: msgIn 0.3s ease;
-}
-.chat-row.user { flex-direction: row-reverse; }
-
-@keyframes msgIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.chat-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-}
-.chat-avatar.bot-av { background: var(--accent-dim); border-color: var(--accent-mid); }
-.chat-avatar.user-av { background: #1a2a40; border-color: var(--border); }
-
-.chat-bubble {
-  max-width: 70%;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 0.88rem;
-  line-height: 1.6;
-}
-.chat-row.bot .chat-bubble {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  border-radius: 2px 12px 12px 12px;
-}
-.chat-row.user .chat-bubble {
-  background: var(--accent-dim);
-  border: 1px solid var(--accent-mid);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  border-radius: 12px 2px 12px 12px;
-}
-.chat-row.bot .chat-bubble.streaming::after {
-  content: '▊';
-  animation: blink 0.7s infinite;
-  color: var(--accent);
-  margin-left: 2px;
-}
-@keyframes blink { 50% { opacity: 0; } }
-
-.chat-bubble.error { color: var(--danger); border-color: #ff386033; }
-
-.chat-footer {
-  flex-shrink: 0;
-  background: var(--bg-card);
-  border-top: 1px solid var(--border);
-  padding: 12px 20px 16px;
-}
-.chat-model-bar {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: var(--text-dim);
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.chat-model-bar::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 6px var(--success);
-  animation: pulse-dot 2s infinite;
-}
-@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-.chat-input-row {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-}
-.chat-input {
-  flex: 1;
-  padding: 12px 16px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-primary);
-  font-family: var(--font-display);
-  font-size: 0.9rem;
-  outline: none;
-  resize: none;
-  max-height: 120px;
-  min-height: 44px;
-  transition: var(--transition);
-  line-height: 1.4;
-}
-.chat-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
-.chat-input::placeholder { color: var(--text-dim); }
-.chat-send {
-  width: 44px;
-  height: 44px;
-  background: var(--accent);
-  border: none;
-  border-radius: var(--radius);
-  color: var(--bg-void);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-  flex-shrink: 0;
-}
-.chat-send:hover { box-shadow: 0 0 20px var(--accent-dim); transform: scale(1.05); }
-.chat-send:active { transform: scale(0.97); }
-.chat-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.chat-send svg { width: 18px; height: 18px; }
-
-/* === PANEL CONTENT (monitor, services, config) === */
-.panel-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.section-title {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.section-title::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--accent);
-  border-radius: 1px;
-  transform: rotate(45deg);
-  box-shadow: 0 0 8px var(--accent);
-}
-
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  position: relative;
-  overflow: hidden;
-}
-.card::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 10%, var(--border) 50%, transparent 90%);
-}
-
-/* === GAUGES === */
-.gauge-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-.gauge-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.gauge-ring { width: 80px; height: 80px; position: relative; }
-.gauge-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.gauge-ring .track { fill: none; stroke: var(--bg-input); stroke-width: 5; }
-.gauge-ring .fill {
-  fill: none;
-  stroke-width: 5;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 1s ease, stroke 0.5s ease;
-  filter: drop-shadow(0 0 4px currentColor);
-}
-.gauge-ring .value-text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  font-weight: 700;
-}
-.gauge-ring .unit { font-size: 0.55rem; font-weight: 400; color: var(--text-dim); }
-.gauge-label {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-.net-info {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.net-item { display: flex; align-items: center; gap: 6px; }
-.net-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 6px var(--success); animation: pulse-dot 2s infinite; }
-.net-dot.off { background: var(--text-dim); box-shadow: none; animation: none; }
-.net-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-secondary); }
-
-/* === SERVICES === */
-.agent-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  background: var(--bg-input);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  margin-bottom: 14px;
-}
-.agent-info { flex: 1; }
-.agent-name-main { font-weight: 700; font-size: 0.95rem; }
-.agent-name-sub { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); }
-.toggle { position: relative; width: 52px; height: 28px; cursor: pointer; }
-.toggle input { display: none; }
-.toggle-track {
-  position: absolute;
-  inset: 0;
-  background: var(--bg-void);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  transition: var(--transition);
-}
-.toggle input:checked + .toggle-track { background: var(--accent-dim); border-color: var(--accent); }
-.toggle-thumb {
-  position: absolute;
-  top: 3px; left: 3px;
-  width: 22px; height: 22px;
-  background: var(--text-secondary);
-  border-radius: 50%;
-  transition: var(--transition);
-}
-.toggle input:checked ~ .toggle-thumb { left: 27px; background: var(--accent); box-shadow: 0 0 12px var(--accent-dim); }
-
-.services-list { display: flex; flex-direction: column; gap: 8px; }
-.svc-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: var(--bg-input);
-  border-radius: var(--radius);
-  border: 1px solid transparent;
-  transition: border-color var(--transition);
-}
-.svc-row:hover { border-color: var(--border); }
-.svc-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.svc-dot.active { background: var(--success); box-shadow: 0 0 8px #00ff8866; animation: pulse-dot 2s infinite; }
-.svc-dot.inactive { background: var(--text-dim); }
-.svc-name { flex: 1; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; }
-.svc-status { font-family: var(--font-mono); font-size: 0.6rem; margin-right: 8px; color: var(--text-dim); }
-.svc-actions { display: flex; gap: 4px; }
-.svc-btn {
-  padding: 4px 10px;
-  font-family: var(--font-mono);
-  font-size: 0.55rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: var(--transition);
-}
-.svc-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-.svc-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: #ff386018; }
-
-/* === CONFIG === */
-.config-form { display: flex; flex-direction: column; gap: 14px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; }
-.form-input, .form-select {
-  padding: 10px 14px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  outline: none;
-  transition: var(--transition);
-  -webkit-appearance: none;
-}
-.form-input:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
-.form-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a8fa8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
-}
-.model-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
-}
-.model-chip {
-  padding: 3px 10px;
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: var(--transition);
-}
-.model-chip:hover { border-color: var(--accent); color: var(--accent); }
-
-.btn-save {
-  align-self: flex-start;
-  padding: 10px 28px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border: none;
-  border-radius: var(--radius);
-  color: var(--bg-void);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  cursor: pointer;
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-.btn-save:hover { box-shadow: 0 0 20px var(--accent-dim), 0 4px 16px #0006; }
-.btn-save:active { transform: scale(0.97); }
-
-.config-info-box {
-  padding: 10px 14px;
-  background: var(--accent-dim);
-  border: 1px solid var(--accent-mid);
-  border-radius: var(--radius);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--accent);
-  line-height: 1.5;
-}
-
-/* === TOAST === */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 12px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  box-shadow: 0 0 20px var(--accent-dim);
-  z-index: 1000;
-  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
-}
-.toast.err { border-color: var(--danger); color: var(--danger); box-shadow: 0 0 20px #ff386022; }
-@keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(20px); } }
-
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; }
-  .sidebar.collapsed { width: 0; border-right: none; }
-  .gauge-grid { grid-template-columns: repeat(2, 1fr); }
-}
+@media(max-width:768px){.sb{position:fixed;left:0;top:0;bottom:0;z-index:100}.sb.col{width:0;border:none}.gg{grid-template-columns:repeat(2,1fr)}.files-tree{width:160px}}
 </style>
 </head>
 <body>
-
 <div class="app">
 
-  <!-- ============ SIDEBAR ============ -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sb-top">
-      <button class="sb-hamburger" onclick="toggleSidebar()" title="Toggle sidebar">
-        <span></span><span></span><span></span>
-      </button>
-      <div class="sb-brand">
-        <span class="sb-title">ClawbotOS</span>
-        <span class="sb-sub">AI Assistant Hub</span>
-      </div>
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sb" id="sb">
+  <div class="sb-top">
+    <button class="sb-hbg" onclick="toggleSB()" title="Toggle sidebar">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sb-brand">
+      <span class="sb-title">ClawbotOS</span>
+      <span class="sb-sub">AI Assistant Hub</span>
     </div>
+  </div>
 
-    <nav class="sb-nav">
-      <button class="sb-item active" id="nav-chat" onclick="showPanel('chat')" title="Chat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-        <span class="sb-label">Chat</span>
-      </button>
-      <button class="sb-item" id="nav-monitor" onclick="showPanel('monitor')" title="System Monitor">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-        <span class="sb-label">System</span>
-      </button>
-      <button class="sb-item" id="nav-services" onclick="showPanel('services')" title="Services">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/>
-        </svg>
-        <span class="sb-label">Services</span>
-      </button>
-      <button class="sb-item" id="nav-config" onclick="showPanel('config')" title="Settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-        <span class="sb-label">Settings</span>
-      </button>
-    </nav>
+  <nav class="sb-nav">
+    <button class="sb-item active" id="nav-chat" onclick="show('chat')" title="Chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="lbl">Chat</span>
+    </button>
+    <button class="sb-item" id="nav-files" onclick="show('files')" title="Files">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span class="lbl">Files</span>
+    </button>
+    <button class="sb-item" id="nav-logs" onclick="show('logs')" title="Logs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H5l-3 3V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="14" y2="14"/></svg>
+      <span class="lbl">Logs</span>
+    </button>
+    <div class="sb-sep"></div>
+    <button class="sb-item" id="nav-monitor" onclick="show('monitor')" title="System Monitor">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span class="lbl">System</span>
+    </button>
+    <button class="sb-item" id="nav-services" onclick="show('services')" title="Services">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      <span class="lbl">Services</span>
+    </button>
+    <button class="sb-item" id="nav-config" onclick="show('config')" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="lbl">Settings</span>
+    </button>
+  </nav>
 
-    <div class="sb-footer">
-      <div class="sb-stat">
-        <span class="sb-stat-icon">🖥</span>
-        <div class="sb-stat-text">
-          <span class="sb-stat-label">Host</span>
-          <span class="sb-stat-val" id="sb-host">clawbot</span>
-        </div>
-      </div>
-      <div class="sb-stat">
-        <span class="sb-stat-icon">🌐</span>
-        <div class="sb-stat-text">
-          <span class="sb-stat-label">IP</span>
-          <span class="sb-stat-val" id="sb-ip">---.---</span>
-        </div>
-      </div>
-      <div class="sb-stat">
-        <span class="sb-stat-icon">⏱</span>
-        <div class="sb-stat-text">
-          <span class="sb-stat-label">Uptime</span>
-          <span class="sb-stat-val" id="sb-uptime">--:--:--</span>
-        </div>
-      </div>
+  <div class="sb-ft">
+    <div class="sb-st"><span class="sb-si">🖥</span><div class="sb-stx"><span class="sb-sl">Host</span><span class="sb-sv" id="sb-host">clawbot</span></div></div>
+    <div class="sb-st"><span class="sb-si">🌐</span><div class="sb-stx"><span class="sb-sl">IP</span><span class="sb-sv" id="sb-ip">---.---</span></div></div>
+    <div class="sb-st"><span class="sb-si">⏱</span><div class="sb-stx"><span class="sb-sl">Uptime</span><span class="sb-sv" id="sb-uptime">--:--:--</span></div></div>
+  </div>
+</aside>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="cnt">
+  <div class="tb">
+    <div class="tb-l">
+      <span class="tb-t" id="tb-title">Chat</span>
+      <span class="tb-a" id="tb-agent">PicoClaw · port 8080</span>
     </div>
-  </aside>
+    <span class="tb-s" id="tb-status">● RUNNING</span>
+  </div>
 
-  <!-- ============ MAIN CONTENT ============ -->
-  <div class="content">
-
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <div class="topbar-left">
-        <span class="topbar-title" id="topbar-title">Chat</span>
-        <span class="topbar-agent" id="topbar-agent">PicoClaw · port 8080</span>
-      </div>
-      <div class="topbar-right">
-        <span class="status-chip" id="topbar-status">● RUNNING</span>
-      </div>
-    </div>
-
-    <!-- ===== CHAT PANEL ===== -->
-    <div class="panel active" id="panel-chat">
-      <div class="chat-wrap">
-        <div class="chat-messages" id="chat-messages">
-          <div class="chat-row bot">
-            <div class="chat-avatar bot-av">🤖</div>
-            <div class="chat-bubble">Hello! I'm your ClawbotOS assistant. How can I help you today?</div>
-          </div>
+  <!-- ─── CHAT ─── -->
+  <div class="pnl active" id="pnl-chat">
+    <div class="chat-wrap">
+      <div class="chat-msgs" id="chat-msgs">
+        <div class="chat-row bot">
+          <div class="chat-av bot">🤖</div>
+          <div class="chat-bub">Hello! I'm your ClawbotOS assistant. How can I help you today?</div>
         </div>
-        <div class="chat-footer">
-          <div class="chat-model-bar" id="chat-model-bar">picoclaw · connecting...</div>
-          <div class="chat-input-row">
-            <textarea class="chat-input" id="chat-input" rows="1"
-              placeholder="Ask your AI assistant..."
-              onkeydown="handleChatKey(event)"
-              oninput="autoResize(this)"></textarea>
-            <button class="chat-send" id="chat-send" onclick="sendChat()" title="Send (Enter)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-              </svg>
-            </button>
-          </div>
+      </div>
+      <div class="chat-ft">
+        <div class="chat-mb" id="chat-mb">picoclaw · connecting...</div>
+        <div class="chat-ir">
+          <textarea class="chat-inp" id="chat-inp" rows="1" placeholder="Ask your AI assistant..." onkeydown="chatKey(event)" oninput="autoH(this)"></textarea>
+          <button class="chat-snd" id="chat-snd" onclick="sendChat()" title="Send (Enter)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ===== MONITOR PANEL ===== -->
-    <div class="panel" id="panel-monitor">
-      <div class="panel-scroll">
-        <div class="card">
-          <div class="section-title">System Monitor</div>
-          <div class="gauge-grid">
-            <div class="gauge-item">
-              <div class="gauge-ring" id="g-cpu">
-                <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="32"/><circle class="fill" cx="40" cy="40" r="32" stroke="var(--accent)"/></svg>
-                <div class="value-text"><span id="v-cpu">--</span><span class="unit">%</span></div>
-              </div>
-              <div class="gauge-label">CPU</div>
-            </div>
-            <div class="gauge-item">
-              <div class="gauge-ring" id="g-ram">
-                <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="32"/><circle class="fill" cx="40" cy="40" r="32" stroke="var(--accent2)"/></svg>
-                <div class="value-text"><span id="v-ram">--</span><span class="unit">%</span></div>
-              </div>
-              <div class="gauge-label">RAM</div>
-            </div>
-            <div class="gauge-item">
-              <div class="gauge-ring" id="g-disk">
-                <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="32"/><circle class="fill" cx="40" cy="40" r="32" stroke="#ff9f43"/></svg>
-                <div class="value-text"><span id="v-disk">--</span><span class="unit">%</span></div>
-              </div>
-              <div class="gauge-label">Disk</div>
-            </div>
-            <div class="gauge-item">
-              <div class="gauge-ring" id="g-temp">
-                <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="32"/><circle class="fill" cx="40" cy="40" r="32" stroke="var(--danger)"/></svg>
-                <div class="value-text"><span id="v-temp">--</span><span class="unit">°</span></div>
-              </div>
-              <div class="gauge-label">Temp</div>
+  <!-- ─── FILES ─── -->
+  <div class="pnl" id="pnl-files">
+    <div class="files-wrap">
+      <div class="files-tree" id="files-tree">
+        <div class="file-group-label">AI Agents</div>
+        <div class="file-item" onclick="openFile('/home/pi/.picoclaw/config.json','PicoClaw Config')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="file-item-name">picoclaw/config.json</span>
+        </div>
+        <div class="file-item" onclick="openFile('/home/pi/.openclaw/openclaw.json','OpenClaw Config')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="file-item-name">openclaw/openclaw.json</span>
+        </div>
+        <div class="file-group-label">Integrations</div>
+        <div class="file-item" onclick="openFile('/home/pi/.clawbot-telegram.env','Telegram Config')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="file-item-name">.clawbot-telegram.env</span>
+        </div>
+        <div class="file-group-label">nginx</div>
+        <div class="file-item" onclick="openFile('/etc/nginx/sites-available/clawbot','nginx site config')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="file-item-name">sites-available/clawbot</span>
+        </div>
+        <div class="file-item" onclick="openFile('/etc/nginx/nginx.conf','nginx.conf')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="file-item-name">nginx.conf</span>
+        </div>
+        <div class="file-group-label">Systemd</div>
+        <div class="file-item" onclick="openFile('/etc/systemd/system/picoclaw.service','picoclaw.service')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="file-item-name">picoclaw.service</span>
+        </div>
+        <div class="file-item" onclick="openFile('/etc/systemd/system/openclaw.service','openclaw.service')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="file-item-name">openclaw.service</span>
+        </div>
+      </div>
+      <div class="file-editor" id="file-editor">
+        <div class="file-placeholder" id="file-ph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <p>Select a file to edit</p>
+        </div>
+        <div id="file-edit-area" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+          <div class="file-editor-top">
+            <span class="file-path" id="file-path-label">—</span>
+            <div class="file-btns">
+              <button class="file-btn" onclick="reloadFile()">Reload</button>
+              <button class="file-btn" onclick="reloadServiceAfterSave()" id="file-svc-reload" style="display:none">+ Reload service</button>
+              <button class="file-btn primary" onclick="saveFile()">Save</button>
             </div>
           </div>
-          <div class="net-info">
-            <div class="net-item"><div class="net-dot" id="nd-eth"></div><span class="net-label" id="nl-eth">eth0: --</span></div>
-            <div class="net-item"><div class="net-dot off" id="nd-wifi"></div><span class="net-label" id="nl-wifi">wlan0: --</span></div>
-            <div class="net-item"><div class="net-dot" id="nd-swap"></div><span class="net-label" id="nl-swap">swap: --</span></div>
-          </div>
+          <textarea class="file-textarea" id="file-content" spellcheck="false"></textarea>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ===== SERVICES PANEL ===== -->
-    <div class="panel" id="panel-services">
-      <div class="panel-scroll">
-        <div class="card">
-          <div class="section-title">Active Agent</div>
-          <div class="agent-toggle-row">
-            <div class="agent-info">
-              <div class="agent-name-main" id="agent-active-name">PicoClaw</div>
-              <div class="agent-name-sub" id="agent-active-desc">Go · &lt;10MB RAM · port 8080</div>
-            </div>
-            <label class="toggle" title="Toggle PicoClaw / OpenClaw">
-              <input type="checkbox" id="agent-toggle">
-              <div class="toggle-track"></div>
-              <div class="toggle-thumb"></div>
-            </label>
-          </div>
+  <!-- ─── LOGS ─── -->
+  <div class="pnl" id="pnl-logs">
+    <div class="logs-wrap">
+      <div class="logs-bar">
+        <div class="logs-svc-btns">
+          <button class="log-svc-btn active" onclick="selectLogSvc('picoclaw',this)">PicoClaw</button>
+          <button class="log-svc-btn" onclick="selectLogSvc('openclaw',this)">OpenClaw</button>
+          <button class="log-svc-btn" onclick="selectLogSvc('nginx',this)">nginx</button>
+          <button class="log-svc-btn" onclick="selectLogSvc('clawbot-status-api',this)">Status API</button>
+          <button class="log-svc-btn" onclick="selectLogSvc('clawbot-telegram',this)">Telegram</button>
         </div>
-        <div class="card">
-          <div class="section-title">Services</div>
-          <div class="services-list">
-            <div class="svc-row">
-              <div class="svc-dot active" id="sd-picoclaw"></div>
-              <span class="svc-name">picoclaw.service</span>
-              <span class="svc-status" id="ss-picoclaw">active</span>
-              <div class="svc-actions">
-                <button class="svc-btn" onclick="svcAction('picoclaw','restart')">Restart</button>
-                <button class="svc-btn danger" onclick="svcAction('picoclaw','stop')">Stop</button>
-              </div>
-            </div>
-            <div class="svc-row">
-              <div class="svc-dot inactive" id="sd-openclaw"></div>
-              <span class="svc-name">openclaw.service</span>
-              <span class="svc-status" id="ss-openclaw">inactive</span>
-              <div class="svc-actions">
-                <button class="svc-btn" onclick="svcAction('openclaw','start')">Start</button>
-              </div>
-            </div>
-            <div class="svc-row">
-              <div class="svc-dot active" id="sd-nginx"></div>
-              <span class="svc-name">nginx.service</span>
-              <span class="svc-status" id="ss-nginx">active</span>
-              <div class="svc-actions">
-                <button class="svc-btn" onclick="svcAction('nginx','restart')">Restart</button>
-              </div>
-            </div>
-          </div>
+        <label class="log-auto">
+          <input type="checkbox" id="log-auto" checked> Auto-refresh
+        </label>
+      </div>
+      <div class="logs-out" id="logs-out">Loading logs...</div>
+    </div>
+  </div>
+
+  <!-- ─── MONITOR ─── -->
+  <div class="pnl" id="pnl-monitor">
+    <div class="pscr">
+      <div class="card">
+        <div class="sec-t">System Monitor</div>
+        <div class="gg">
+          <div class="gi"><div class="gr" id="g-cpu"><svg viewBox="0 0 76 76"><circle class="tk" cx="38" cy="38" r="32"/><circle class="fl" cx="38" cy="38" r="32" stroke="var(--ac)"/></svg><div class="vt"><span id="v-cpu">--</span><span class="un">%</span></div></div><div class="gl">CPU</div></div>
+          <div class="gi"><div class="gr" id="g-ram"><svg viewBox="0 0 76 76"><circle class="tk" cx="38" cy="38" r="32"/><circle class="fl" cx="38" cy="38" r="32" stroke="var(--ac2)"/></svg><div class="vt"><span id="v-ram">--</span><span class="un">%</span></div></div><div class="gl">RAM</div></div>
+          <div class="gi"><div class="gr" id="g-disk"><svg viewBox="0 0 76 76"><circle class="tk" cx="38" cy="38" r="32"/><circle class="fl" cx="38" cy="38" r="32" stroke="#ff9f43"/></svg><div class="vt"><span id="v-disk">--</span><span class="un">%</span></div></div><div class="gl">Disk</div></div>
+          <div class="gi"><div class="gr" id="g-temp"><svg viewBox="0 0 76 76"><circle class="tk" cx="38" cy="38" r="32"/><circle class="fl" cx="38" cy="38" r="32" stroke="var(--er)"/></svg><div class="vt"><span id="v-temp">--</span><span class="un">°</span></div></div><div class="gl">Temp</div></div>
+        </div>
+        <div class="ni">
+          <div class="nd-row"><div class="nd" id="nd-eth"></div><span class="nl" id="nl-eth">eth0: --</span></div>
+          <div class="nd-row"><div class="nd off" id="nd-wifi"></div><span class="nl" id="nl-wifi">wlan0: --</span></div>
+          <div class="nd-row"><div class="nd" id="nd-swap"></div><span class="nl" id="nl-swap">swap: --</span></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ===== CONFIG PANEL ===== -->
-    <div class="panel" id="panel-config">
-      <div class="panel-scroll">
-        <div class="card">
-          <div class="section-title">LLM Configuration</div>
-          <div class="config-form">
-            <div class="form-group">
-              <label class="form-label" for="cfg-provider">LLM Provider</label>
-              <select class="form-select" id="cfg-provider" onchange="onProviderChange()">
-                <option value="openai">OpenAI</option>
-                <option value="anthropic">Anthropic (Claude)</option>
-                <option value="openrouter">OpenRouter</option>
-                <option value="deepseek">DeepSeek</option>
-                <option value="ollama">Ollama (remote)</option>
-                <option value="custom">Custom endpoint</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="cfg-model">Model</label>
-              <input class="form-input" type="text" id="cfg-model" placeholder="gpt-4o">
-              <div class="model-suggestions" id="model-suggestions"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="cfg-apikey">API Key</label>
-              <input class="form-input" type="password" id="cfg-apikey" placeholder="sk-...">
-            </div>
-            <div class="form-group" id="cfg-baseurl-group" style="display:none">
-              <label class="form-label" for="cfg-baseurl">Base URL</label>
-              <input class="form-input" type="text" id="cfg-baseurl" placeholder="https://api.example.com/v1">
-            </div>
-            <div class="config-info-box" id="cfg-info">
-              Configuration is saved to PicoClaw and takes effect immediately.
-            </div>
-            <button class="btn-save" onclick="saveConfig()">Save &amp; Apply</button>
+  <!-- ─── SERVICES ─── -->
+  <div class="pnl" id="pnl-services">
+    <div class="pscr">
+      <div class="card">
+        <div class="sec-t">Active Agent</div>
+        <div class="ag-row">
+          <div class="ag-inf">
+            <div class="ag-nm" id="ag-nm">PicoClaw</div>
+            <div class="ag-sb" id="ag-sb">Go · &lt;10MB RAM · port 8080</div>
           </div>
+          <label class="tgl" title="Toggle PicoClaw / OpenClaw">
+            <input type="checkbox" id="ag-tgl">
+            <div class="tgl-tk"></div><div class="tgl-th"></div>
+          </label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sec-t">Services</div>
+        <div class="svc-l">
+          <div class="svc-r"><div class="svc-d on" id="sd-picoclaw"></div><span class="svc-n">picoclaw.service</span><span class="svc-s" id="ss-picoclaw">active</span><div class="svc-acts"><button class="sb-btn" onclick="svcAct('picoclaw','restart')">Restart</button><button class="sb-btn dng" onclick="svcAct('picoclaw','stop')">Stop</button></div></div>
+          <div class="svc-r"><div class="svc-d off" id="sd-openclaw"></div><span class="svc-n">openclaw.service</span><span class="svc-s" id="ss-openclaw">inactive</span><div class="svc-acts"><button class="sb-btn" onclick="svcAct('openclaw','start')">Start</button></div></div>
+          <div class="svc-r"><div class="svc-d on" id="sd-nginx"></div><span class="svc-n">nginx.service</span><span class="svc-s" id="ss-nginx">active</span><div class="svc-acts"><button class="sb-btn" onclick="svcAct('nginx','restart')">Restart</button></div></div>
+          <div class="svc-r"><div class="svc-d off" id="sd-clawbot-telegram"></div><span class="svc-n">clawbot-telegram.service</span><span class="svc-s" id="ss-clawbot-telegram">inactive</span><div class="svc-acts"><button class="sb-btn" onclick="svcAct('clawbot-telegram','start')">Start</button><button class="sb-btn" onclick="svcAct('clawbot-telegram','restart')">Restart</button></div></div>
         </div>
       </div>
     </div>
+  </div>
 
-  </div><!-- /content -->
+  <!-- ─── SETTINGS ─── -->
+  <div class="pnl" id="pnl-config">
+    <div class="pscr">
+
+      <!-- LLM Config -->
+      <div class="card">
+        <div class="sec-t">LLM Configuration</div>
+        <div class="cfg-form">
+          <div class="fg"><label class="fl" for="cfg-p">LLM Provider</label>
+            <select class="fs" id="cfg-p" onchange="onProv()">
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic (Claude)</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="ollama">Ollama (remote)</option>
+              <option value="custom">Custom endpoint</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl" for="cfg-m">Model</label>
+            <input class="fi" type="text" id="cfg-m" placeholder="gpt-4o">
+            <div class="model-chips" id="m-chips"></div>
+          </div>
+          <div class="fg"><label class="fl" for="cfg-k">API Key</label><input class="fi" type="password" id="cfg-k" placeholder="sk-..."></div>
+          <div class="fg" id="cfg-url-g" style="display:none"><label class="fl" for="cfg-u">Base URL</label><input class="fi" type="text" id="cfg-u" placeholder="https://api.example.com/v1"></div>
+          <div class="info-box" id="cfg-info">Config saved to PicoClaw and takes effect after restart.</div>
+          <button class="btn-save" onclick="saveLLM()">Save &amp; Apply</button>
+        </div>
+      </div>
+
+      <!-- Telegram -->
+      <div class="card">
+        <div class="sec-t">Telegram Bot</div>
+        <div class="cfg-form">
+          <div class="warn-box">Install the <strong>clawbot-telegram</strong> module to enable. Once installed, configure your bot here and enable the service in the Services panel.</div>
+          <div class="fg"><label class="fl" for="tg-token">Bot Token</label><input class="fi" type="password" id="tg-token" placeholder="123456:ABC-DEF..."></div>
+          <div class="fg"><label class="fl" for="tg-users">Allowed User IDs <span style="font-size:.55rem;color:var(--td)">(comma-separated, leave empty = anyone)</span></label><input class="fi" type="text" id="tg-users" placeholder="123456789,987654321"></div>
+          <div class="fg"><label class="fl" for="tg-agent">AI Agent to use</label>
+            <select class="fs" id="tg-agent">
+              <option value="picoclaw">PicoClaw (port 8080)</option>
+              <option value="openclaw">OpenClaw (port 8081)</option>
+            </select>
+          </div>
+          <button class="btn-save" onclick="saveTelegram()">Save Telegram Config</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /cnt -->
 </div><!-- /app -->
 
 <script>
-// === STATE ===
-const state = {
+// ═══ STATE ═══
+const S = {
   agent: 'picoclaw',
-  sidebarCollapsed: false,
-  config: {
-    provider: localStorage.getItem('cfg_provider') || 'openai',
-    model: localStorage.getItem('cfg_model') || '',
-    apikey: localStorage.getItem('cfg_apikey') || '',
-    baseurl: localStorage.getItem('cfg_baseurl') || ''
+  sbCol: false,
+  cfg: {
+    provider: localStorage.getItem('cfg_p') || 'openai',
+    model:    localStorage.getItem('cfg_m') || '',
+    apikey:   localStorage.getItem('cfg_k') || '',
+    baseurl:  localStorage.getItem('cfg_u') || ''
   },
-  services: { picoclaw: true, openclaw: false, nginx: true },
-  stats: null
+  curFile: null,
+  curLogSvc: 'picoclaw',
+  logAutoRefresh: true,
+  logTimer: null
 };
-
 const chatHistory = [];
-let isStreaming = false;
+let streaming = false;
 
-// === MODEL SUGGESTIONS ===
-const MODEL_SUGGESTIONS = {
-  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-  anthropic: ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-haiku-4-5-20251001'],
-  openrouter: ['anthropic/claude-sonnet-4-6', 'openai/gpt-4o', 'google/gemini-pro'],
-  deepseek: ['deepseek-chat', 'deepseek-reasoner', 'deepseek-coder'],
-  ollama: ['llama3', 'mistral', 'phi3', 'gemma3'],
-  custom: []
+// ═══ MODEL SUGGESTIONS ═══
+const MODELS = {
+  openai:     ['gpt-4o','gpt-4o-mini','gpt-4-turbo','gpt-3.5-turbo'],
+  anthropic:  ['claude-opus-4-6','claude-sonnet-4-6','claude-haiku-4-5-20251001'],
+  openrouter: ['anthropic/claude-sonnet-4-6','openai/gpt-4o','google/gemini-flash-1.5'],
+  deepseek:   ['deepseek-chat','deepseek-reasoner','deepseek-coder'],
+  ollama:     ['llama3','mistral','phi3','gemma3','qwen2'],
+  custom:     []
 };
-
-const PROVIDER_DEFAULTS = {
-  openai:     { model: 'gpt-4o',                       baseurl: '' },
-  anthropic:  { model: 'claude-sonnet-4-6',             baseurl: '' },
-  openrouter: { model: 'anthropic/claude-sonnet-4-6',   baseurl: '' },
-  deepseek:   { model: 'deepseek-chat',                 baseurl: '' },
-  ollama:     { model: 'llama3',                        baseurl: 'http://192.168.1.100:11434/v1' },
-  custom:     { model: '',                              baseurl: '' }
+const PROV_DEFAULTS = {
+  openai:     {model:'gpt-4o',     url:''},
+  anthropic:  {model:'claude-sonnet-4-6', url:''},
+  openrouter: {model:'anthropic/claude-sonnet-4-6', url:''},
+  deepseek:   {model:'deepseek-chat', url:''},
+  ollama:     {model:'llama3',     url:'http://192.168.1.100:11434/v1'},
+  custom:     {model:'',           url:''}
 };
+const PANEL_TITLES = {chat:'Chat',files:'Files',logs:'Logs',monitor:'System Monitor',services:'Services',config:'Settings'};
 
-// === SIDEBAR ===
-function toggleSidebar() {
-  state.sidebarCollapsed = !state.sidebarCollapsed;
-  document.getElementById('sidebar').classList.toggle('collapsed', state.sidebarCollapsed);
+// ═══ SIDEBAR ═══
+function toggleSB() {
+  S.sbCol = !S.sbCol;
+  document.getElementById('sb').classList.toggle('col', S.sbCol);
 }
 
-// === PANELS ===
-const PANEL_TITLES = { chat: 'Chat', monitor: 'System Monitor', services: 'Services', config: 'Settings' };
-
-function showPanel(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+// ═══ PANELS ═══
+function show(name) {
+  document.querySelectorAll('.pnl').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('pnl-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
-  document.getElementById('topbar-title').textContent = PANEL_TITLES[name];
+  document.getElementById('tb-title').textContent = PANEL_TITLES[name];
+  if (name === 'logs') startLogRefresh();
+  else stopLogRefresh();
 }
 
-// === GAUGE RENDERING ===
+// ═══ GAUGES ═══
 const CIRC = 2 * Math.PI * 32;
-
-function setGauge(id, pct, maxVal) {
-  maxVal = maxVal || 100;
-  const ratio = Math.min(pct / maxVal, 1);
-  const el = document.querySelector('#' + id + ' .fill');
+function setG(id, pct, max) {
+  max = max || 100;
+  const ratio = Math.min(pct / max, 1);
+  const el = document.querySelector('#' + id + ' .fl');
   el.style.strokeDasharray = CIRC;
   el.style.strokeDashoffset = CIRC * (1 - ratio);
-  if (ratio > 0.85) el.style.stroke = 'var(--danger)';
-  else if (ratio > 0.65) el.style.stroke = 'var(--warning)';
+  if (ratio > .85) el.style.stroke = 'var(--er)';
+  else if (ratio > .65) el.style.stroke = 'var(--wn)';
+}
+function fmtUp(s) {
+  const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),sec=Math.floor(s%60);
+  if(d>0) return `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 
-function fmtUptime(seconds) {
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  if (d > 0) return `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
-
-// === SYSTEM STATS (real API) ===
+// ═══ SYSTEM STATS ═══
 async function fetchStats() {
   try {
-    const r = await fetch('/api/system/stats', { signal: AbortSignal.timeout(3000) });
-    if (!r.ok) return null;
-    return await r.json();
+    const r = await fetch('/api/system/stats', {signal: AbortSignal.timeout(4000)});
+    return r.ok ? await r.json() : null;
   } catch { return null; }
 }
-
-function applyStats(stats) {
-  if (!stats) return;
-
-  // Gauges
-  document.getElementById('v-cpu').textContent = stats.cpu ?? '--';
-  document.getElementById('v-ram').textContent = stats.ram ?? '--';
-  document.getElementById('v-disk').textContent = stats.disk ?? '--';
-  document.getElementById('v-temp').textContent = stats.temp ?? '--';
-  if (stats.cpu  != null) setGauge('g-cpu',  stats.cpu);
-  if (stats.ram  != null) setGauge('g-ram',  stats.ram);
-  if (stats.disk != null) setGauge('g-disk', stats.disk);
-  if (stats.temp != null) setGauge('g-temp', stats.temp, 80);
-
-  // Network
-  const eth = stats.eth_connected;
-  const wifi = stats.wifi_ssid;
-  document.getElementById('nd-eth').className = 'net-dot' + (eth ? '' : ' off');
-  document.getElementById('nl-eth').textContent = eth ? 'eth0: connected' : 'eth0: off';
-  document.getElementById('nd-wifi').className = 'net-dot' + (wifi ? '' : ' off');
-  document.getElementById('nl-wifi').textContent = wifi ? ('wlan0: ' + wifi) : 'wlan0: off';
-  const swapMB = stats.swap_mb ?? 0;
-  document.getElementById('nl-swap').textContent = swapMB > 0 ? `swap: ${swapMB}MB` : 'swap: none';
-
-  // Sidebar footer
-  if (stats.hostname) document.getElementById('sb-host').textContent = stats.hostname;
-  if (stats.ip) document.getElementById('sb-ip').textContent = stats.ip;
-  if (stats.uptime != null) document.getElementById('sb-uptime').textContent = fmtUptime(stats.uptime);
-
-  // Services
-  if (stats.services) {
-    Object.entries(stats.services).forEach(([svc, active]) => {
-      const dot = document.getElementById('sd-' + svc);
-      const ss  = document.getElementById('ss-' + svc);
-      if (dot) dot.className = 'svc-dot ' + (active ? 'active' : 'inactive');
-      if (ss)  ss.textContent = active ? 'active' : 'inactive';
+function applyStats(st) {
+  if (!st) return;
+  $('v-cpu').textContent = st.cpu ?? '--';
+  $('v-ram').textContent = st.ram ?? '--';
+  $('v-disk').textContent = st.disk ?? '--';
+  $('v-temp').textContent = st.temp ?? '--';
+  if (st.cpu  != null) setG('g-cpu',  st.cpu);
+  if (st.ram  != null) setG('g-ram',  st.ram);
+  if (st.disk != null) setG('g-disk', st.disk);
+  if (st.temp != null) setG('g-temp', st.temp, 80);
+  const eth = st.eth_connected, wifi = st.wifi_ssid;
+  $('nd-eth').className = 'nd' + (eth ? '' : ' off');
+  $('nl-eth').textContent = eth ? 'eth0: connected' : 'eth0: disconnected';
+  $('nd-wifi').className = 'nd' + (wifi ? '' : ' off');
+  $('nl-wifi').textContent = wifi ? 'wlan0: ' + wifi : 'wlan0: off';
+  $('nl-swap').textContent = (st.swap_mb||0) > 0 ? `swap: ${st.swap_mb}MB` : 'swap: none';
+  if (st.hostname) $('sb-host').textContent = st.hostname;
+  if (st.ip)       $('sb-ip').textContent = st.ip;
+  if (st.uptime != null) $('sb-uptime').textContent = fmtUp(st.uptime);
+  if (st.services) {
+    Object.entries(st.services).forEach(([svc, on]) => {
+      const dot = $(('sd-'+svc).replace('.','-')), ss = $(('ss-'+svc).replace('.','-'));
+      if (dot) dot.className = 'svc-d ' + (on ? 'on' : 'off');
+      if (ss)  ss.textContent = on ? 'active' : 'inactive';
     });
-    state.services = stats.services;
   }
-
-  // Topbar status
-  const picoRunning = stats.services?.picoclaw;
-  const tpStatus = document.getElementById('topbar-status');
-  tpStatus.textContent = picoRunning ? '● RUNNING' : '● STOPPED';
-  tpStatus.className = 'status-chip' + (picoRunning ? '' : ' stopped');
-
-  // Update chat model bar
-  updateChatModelBar();
+  const pico = st.services?.picoclaw;
+  $('tb-status').textContent = pico ? '● RUNNING' : '● STOPPED';
+  $('tb-status').className = 'tb-s' + (pico ? '' : ' off');
+  updateModelBar();
 }
+async function refreshStats() { applyStats(await fetchStats()); }
 
-async function refreshStats() {
-  const stats = await fetchStats();
-  applyStats(stats);
-}
-
-// === IP fallback: use browser URL ===
-function initIP() {
-  const hostname = window.location.hostname;
-  if (hostname && hostname !== 'localhost') {
-    document.getElementById('sb-ip').textContent = hostname;
-  }
-}
-
-// === AGENT TOGGLE ===
-document.getElementById('agent-toggle').addEventListener('change', function() {
-  const isOpenClaw = this.checked;
-  state.agent = isOpenClaw ? 'openclaw' : 'picoclaw';
-  document.getElementById('agent-active-name').textContent = isOpenClaw ? 'OpenClaw' : 'PicoClaw';
-  document.getElementById('agent-active-desc').textContent = isOpenClaw
-    ? 'Node.js \u2022 ~500MB RAM \u2022 port 8081'
-    : 'Go \u2022 <10MB RAM \u2022 port 8080';
-  document.getElementById('topbar-agent').textContent = isOpenClaw ? 'OpenClaw · port 8081' : 'PicoClaw · port 8080';
-  updateChatModelBar();
-  toast('Switched to ' + (isOpenClaw ? 'OpenClaw' : 'PicoClaw'));
+// ═══ AGENT TOGGLE ═══
+$id('ag-tgl').addEventListener('change', function() {
+  const oc = this.checked;
+  S.agent = oc ? 'openclaw' : 'picoclaw';
+  $('ag-nm').textContent = oc ? 'OpenClaw' : 'PicoClaw';
+  $('ag-sb').textContent = oc ? 'Node.js · ~500MB RAM · port 8081' : 'Go · <10MB RAM · port 8080';
+  $('tb-agent').textContent = oc ? 'OpenClaw · port 8081' : 'PicoClaw · port 8080';
+  updateModelBar();
+  toast('Switched to ' + (oc ? 'OpenClaw' : 'PicoClaw'));
 });
 
-// === SERVICE ACTIONS ===
-function svcAction(svc, action) {
-  toast(`${svc}: ${action}...`);
+// ═══ SERVICE ACTIONS ═══
+function svcAct(svc, action) {
+  toast(svc + ': ' + action + '...');
   fetch('/api/system/service', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ service: svc, action })
-  }).then(() => setTimeout(refreshStats, 1500))
-    .catch(() => {});
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({service: svc, action})
+  }).then(() => setTimeout(refreshStats, 1500)).catch(() => {});
 }
 
-// === CONFIG ===
-function onProviderChange() {
-  const p = document.getElementById('cfg-provider').value;
-  const showBase = ['ollama', 'custom'].includes(p);
-  document.getElementById('cfg-baseurl-group').style.display = showBase ? '' : 'none';
-
-  const defaults = PROVIDER_DEFAULTS[p] || {};
-  if (defaults.model && !document.getElementById('cfg-model').value) {
-    document.getElementById('cfg-model').value = defaults.model;
-  }
-  if (defaults.baseurl) {
-    document.getElementById('cfg-baseurl').value = defaults.baseurl;
-  }
-
-  // Model suggestions
-  const suggestions = MODEL_SUGGESTIONS[p] || [];
-  const container = document.getElementById('model-suggestions');
-  container.innerHTML = suggestions.map(m =>
-    `<button class="model-chip" onclick="selectModel('${m}')">${m}</button>`
-  ).join('');
+// ═══ LLM CONFIG ═══
+function onProv() {
+  const p = $id('cfg-p').value;
+  const showUrl = ['ollama','custom'].includes(p);
+  $id('cfg-url-g').style.display = showUrl ? '' : 'none';
+  const def = PROV_DEFAULTS[p] || {};
+  if (def.model && !$id('cfg-m').value) $id('cfg-m').value = def.model;
+  if (def.url) $id('cfg-u').value = def.url;
+  const chips = (MODELS[p] || []).map(m => `<button class="mc" onclick="setModel('${m}')">${m}</button>`).join('');
+  $('m-chips').innerHTML = chips;
 }
-
-function selectModel(model) {
-  document.getElementById('cfg-model').value = model;
+function setModel(m) { $id('cfg-m').value = m; }
+function loadCfg() {
+  $id('cfg-p').value = S.cfg.provider;
+  $id('cfg-m').value = S.cfg.model;
+  $id('cfg-k').value = S.cfg.apikey;
+  $id('cfg-u').value = S.cfg.baseurl;
+  onProv();
 }
-
-function loadConfigToForm() {
-  const cfg = state.config;
-  document.getElementById('cfg-provider').value = cfg.provider;
-  document.getElementById('cfg-model').value = cfg.model;
-  document.getElementById('cfg-apikey').value = cfg.apikey;
-  document.getElementById('cfg-baseurl').value = cfg.baseurl;
-  onProviderChange();
-}
-
-async function saveConfig() {
-  const provider = document.getElementById('cfg-provider').value;
-  const model    = document.getElementById('cfg-model').value;
-  const apikey   = document.getElementById('cfg-apikey').value;
-  const baseurl  = document.getElementById('cfg-baseurl').value;
-
-  state.config = { provider, model, apikey, baseurl };
-  localStorage.setItem('cfg_provider', provider);
-  localStorage.setItem('cfg_model', model);
-  localStorage.setItem('cfg_apikey', apikey);
-  localStorage.setItem('cfg_baseurl', baseurl);
-
-  // Attempt to update PicoClaw config via backend
+async function saveLLM() {
+  const p = $id('cfg-p').value, m = $id('cfg-m').value, k = $id('cfg-k').value, u = $id('cfg-u').value;
+  S.cfg = {provider:p, model:m, apikey:k, baseurl:u};
+  localStorage.setItem('cfg_p',p); localStorage.setItem('cfg_m',m);
+  localStorage.setItem('cfg_k',k); localStorage.setItem('cfg_u',u);
   try {
     const r = await fetch('/api/system/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provider, model, api_key: apikey, base_url: baseurl })
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({provider:p, model:m, api_key:k, base_url:u})
     });
+    toast(r.ok ? 'Config applied to PicoClaw' : 'Saved locally (restart PicoClaw to apply)');
+  } catch { toast('Saved locally (restart PicoClaw to apply)'); }
+  updateModelBar();
+}
+
+// ═══ TELEGRAM CONFIG ═══
+async function saveTelegram() {
+  const token = $id('tg-token').value;
+  const users = $id('tg-users').value;
+  const agent = $id('tg-agent').value;
+  if (!token) { toast('Bot token required', true); return; }
+  try {
+    const r = await fetch('/api/system/file', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        path: '/home/pi/.clawbot-telegram.env',
+        content: `TELEGRAM_BOT_TOKEN=${token}\nTELEGRAM_ALLOWED_USERS=${users}\nCLAWBOT_AGENT=${agent}\nCLAWBOT_AGENT_URL=http://127.0.0.1:${agent==='openclaw'?8081:8080}/v1/chat/completions\n`
+      })
+    });
+    toast(r.ok ? 'Telegram config saved — start clawbot-telegram.service' : 'Save failed: check status API');
+  } catch { toast('Save failed', true); }
+}
+
+// ═══ FILE EDITOR ═══
+const FILE_SVC_MAP = {
+  '/home/pi/.picoclaw/config.json': 'picoclaw',
+  '/home/pi/.openclaw/openclaw.json': 'openclaw',
+  '/etc/nginx/sites-available/clawbot': 'nginx',
+  '/etc/nginx/nginx.conf': 'nginx',
+  '/etc/systemd/system/picoclaw.service': 'picoclaw',
+  '/etc/systemd/system/openclaw.service': 'openclaw',
+  '/home/pi/.clawbot-telegram.env': 'clawbot-telegram'
+};
+
+async function openFile(path, name) {
+  document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  S.curFile = path;
+  $('file-path-label').textContent = name + '  (' + path + ')';
+  $('file-content').value = 'Loading...';
+  $id('file-ph').style.display = 'none';
+  const ea = $id('file-edit-area');
+  ea.style.display = 'flex';
+  const svc = FILE_SVC_MAP[path];
+  $id('file-svc-reload').style.display = svc ? '' : 'none';
+  $id('file-svc-reload').textContent = '+ Reload ' + (svc || '');
+  try {
+    const r = await fetch('/api/system/file?path=' + encodeURIComponent(path));
     if (r.ok) {
-      toast('Config saved and applied to PicoClaw');
+      const d = await r.json();
+      $id('file-content').value = d.content || '';
     } else {
-      toast('Config saved locally (apply via SSH to take effect)');
+      $id('file-content').value = '# File not found or not accessible\n# ' + path;
     }
-  } catch {
-    toast('Config saved locally (apply via SSH to take effect)');
-  }
-
-  updateChatModelBar();
+  } catch { $id('file-content').value = '# Error loading file'; }
 }
 
-function updateChatModelBar() {
-  const model = state.config.model || 'default';
-  const agent = state.agent;
-  document.getElementById('chat-model-bar').textContent = `${agent} · ${model}`;
+async function saveFile() {
+  if (!S.curFile) return;
+  const content = $id('file-content').value;
+  try {
+    const r = await fetch('/api/system/file', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({path: S.curFile, content})
+    });
+    toast(r.ok ? 'File saved' : 'Save failed');
+  } catch { toast('Save failed', true); }
 }
 
-// === CHAT ===
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+function reloadFile() { if (S.curFile) openFile(S.curFile, $('file-path-label').textContent.split('  ')[0]); }
+
+function reloadServiceAfterSave() {
+  const svc = FILE_SVC_MAP[S.curFile];
+  if (!svc) return;
+  svcAct(svc, 'restart');
 }
 
-function handleChatKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendChat();
-  }
+// ═══ LOGS ═══
+function selectLogSvc(svc, btn) {
+  S.curLogSvc = svc;
+  document.querySelectorAll('.log-svc-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  fetchLogs();
 }
 
-function scrollChat() {
-  const c = document.getElementById('chat-messages');
-  c.scrollTop = c.scrollHeight;
+async function fetchLogs() {
+  if (!S.logAutoRefresh && document.getElementById('pnl-logs').classList.contains('active')) return;
+  try {
+    const r = await fetch(`/api/system/logs?service=${S.curLogSvc}&lines=100`);
+    if (!r.ok) { $('logs-out').textContent = 'No logs available (service not running or status API not reachable)'; return; }
+    const d = await r.json();
+    const el = $('logs-out');
+    el.innerHTML = (d.lines || []).map(line => {
+      const l = line.toLowerCase();
+      let cls = '';
+      if (l.includes('error') || l.includes('err') || l.includes('failed') || l.includes('fatal')) cls = ' err';
+      else if (l.includes('warn')) cls = ' wrn';
+      else if (l.includes('start') || l.includes('ready') || l.includes('running')) cls = ' ok';
+      return `<span class="log-line${cls}">${escH(line)}</span>`;
+    }).join('\n');
+    el.scrollTop = el.scrollHeight;
+  } catch { $('logs-out').textContent = 'Status API not reachable. Is clawbot-status-api running?'; }
 }
 
-function addMessageRow(role) {
-  const container = document.getElementById('chat-messages');
+function startLogRefresh() {
+  fetchLogs();
+  S.logTimer = setInterval(() => {
+    if (document.getElementById('log-auto').checked) fetchLogs();
+  }, 3000);
+}
+function stopLogRefresh() { if (S.logTimer) { clearInterval(S.logTimer); S.logTimer = null; } }
+
+// ═══ CHAT ═══
+function updateModelBar() {
+  const m = S.cfg.model || 'default';
+  $('chat-mb').textContent = S.agent + ' · ' + m;
+}
+function autoH(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+function chatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }
+function scrollChat() { const c = $('chat-msgs'); c.scrollTop = c.scrollHeight; }
+
+function addRow(role) {
+  const c = $('chat-msgs');
   const row = document.createElement('div');
   row.className = 'chat-row ' + role;
-
-  const avatar = document.createElement('div');
-  avatar.className = 'chat-avatar ' + (role === 'bot' ? 'bot-av' : 'user-av');
-  avatar.textContent = role === 'bot' ? '🤖' : '👤';
-
-  const bubble = document.createElement('div');
-  bubble.className = 'chat-bubble';
-
-  row.appendChild(avatar);
-  row.appendChild(bubble);
-  container.appendChild(row);
-  scrollChat();
-  return bubble;
+  const av = document.createElement('div');
+  av.className = 'chat-av' + (role==='bot' ? ' bot' : '');
+  av.textContent = role==='bot' ? '🤖' : '👤';
+  const bub = document.createElement('div');
+  bub.className = 'chat-bub';
+  row.appendChild(av); row.appendChild(bub);
+  c.appendChild(row); scrollChat();
+  return bub;
 }
 
 async function sendChat() {
-  if (isStreaming) return;
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
+  if (streaming) return;
+  const inp = $id('chat-inp');
+  const msg = inp.value.trim();
   if (!msg) return;
-  input.value = '';
-  input.style.height = 'auto';
-
-  // Add user message
-  const userBubble = addMessageRow('user');
-  userBubble.textContent = msg;
-  chatHistory.push({ role: 'user', content: msg });
-
-  // Add bot message placeholder
-  const botBubble = addMessageRow('bot');
-  botBubble.classList.add('streaming');
-
-  isStreaming = true;
-  document.getElementById('chat-send').disabled = true;
-
+  inp.value = ''; inp.style.height = 'auto';
+  const ub = addRow('user'); ub.textContent = msg;
+  chatHistory.push({role:'user', content:msg});
+  const bb = addRow('bot'); bb.classList.add('streaming');
+  streaming = true; $id('chat-snd').disabled = true;
   try {
-    const endpoint = `/api/${state.agent}/v1/chat/completions`;
-    const model = state.config.model || 'default';
-
-    const headers = { 'Content-Type': 'application/json' };
-    if (state.config.apikey) {
-      headers['Authorization'] = 'Bearer ' + state.config.apikey;
-    }
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        model,
-        messages: chatHistory,
-        stream: true
-      })
+    const ep = `/api/${S.agent}/v1/chat/completions`;
+    const hdrs = {'Content-Type':'application/json'};
+    if (S.cfg.apikey) hdrs['Authorization'] = 'Bearer ' + S.cfg.apikey;
+    const res = await fetch(ep, {
+      method:'POST', headers:hdrs,
+      body: JSON.stringify({model: S.cfg.model || 'default', messages: chatHistory, stream:true})
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errText.slice(0, 200)}`);
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullContent = '';
-    let buf = '';
-
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0,200)}`);
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let full = '', buf = '';
     while (true) {
-      const { done, value } = await reader.read();
+      const {done, value} = await reader.read();
       if (done) break;
-
-      buf += decoder.decode(value, { stream: true });
+      buf += dec.decode(value, {stream:true});
       const lines = buf.split('\n');
-      buf = lines.pop(); // keep incomplete line in buffer
-
+      buf = lines.pop();
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const data = line.slice(6).trim();
@@ -1298,32 +799,25 @@ async function sendChat() {
         try {
           const json = JSON.parse(data);
           const delta = json.choices?.[0]?.delta?.content;
-          if (delta) {
-            fullContent += delta;
-            botBubble.textContent = fullContent;
-            scrollChat();
-          }
-        } catch { /* skip malformed chunks */ }
+          if (delta) { full += delta; bb.textContent = full; scrollChat(); }
+        } catch {}
       }
     }
-
-    if (!fullContent) fullContent = '(empty response from agent)';
-    botBubble.textContent = fullContent;
-    chatHistory.push({ role: 'assistant', content: fullContent });
-
-  } catch (err) {
-    botBubble.textContent = `⚠ ${err.message}`;
-    botBubble.classList.add('error');
-    chatHistory.pop(); // remove failed user message from history
+    if (!full) full = '(empty response)';
+    bb.textContent = full;
+    chatHistory.push({role:'assistant', content:full});
+  } catch(err) {
+    bb.textContent = '⚠ ' + err.message;
+    bb.classList.add('err');
+    chatHistory.pop();
   } finally {
-    botBubble.classList.remove('streaming');
-    isStreaming = false;
-    document.getElementById('chat-send').disabled = false;
+    bb.classList.remove('streaming');
+    streaming = false; $id('chat-snd').disabled = false;
     scrollChat();
   }
 }
 
-// === TOAST ===
+// ═══ TOAST ═══
 function toast(msg, isErr) {
   const el = document.createElement('div');
   el.className = 'toast' + (isErr ? ' err' : '');
@@ -1332,14 +826,19 @@ function toast(msg, isErr) {
   setTimeout(() => el.remove(), 3200);
 }
 
-// === INIT ===
-initIP();
-loadConfigToForm();
-updateChatModelBar();
+// ═══ HELPERS ═══
+function $(id) { return document.getElementById(id); }
+function $id(id) { return document.getElementById(id); }
+function escH(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// Initial stats fetch
+// ═══ INIT ═══
+// IP from browser
+const hn = window.location.hostname;
+if (hn && hn !== 'localhost') $('sb-ip').textContent = hn;
+
+loadCfg();
+updateModelBar();
 refreshStats();
-// Poll stats every 5s
 setInterval(refreshStats, 5000);
 </script>
 </body>

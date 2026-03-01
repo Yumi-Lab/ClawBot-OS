@@ -1,0 +1,20 @@
+[Unit]
+Description=ClawbotOS Telegram Bot
+After=network-online.target picoclaw.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/clawbot-telegram
+Restart=on-failure
+RestartSec=10
+User=root
+StandardOutput=journal
+StandardError=journal
+
+# The service reads /home/pi/.clawbot-telegram.env at runtime.
+# It will exit and stay down if TELEGRAM_TOKEN is not set.
+# Enable with: sudo systemctl enable --now clawbot-telegram.service
+
+[Install]
+WantedBy=multi-user.target
