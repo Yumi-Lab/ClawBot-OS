@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-CLOUD_API="https://api.clawbot.io/v1"
+CLOUD_API="https://clawbot-api.yumi-lab.com/v1"
 DEVICE_ID_FILE="/etc/clawbot/device-id"
 BOARD_FILE="/etc/clawbot/board"
 PROVISION_BIN="/usr/local/bin/clawbot-provision"

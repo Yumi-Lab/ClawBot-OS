@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-CLOUD_API="https://api.clawbot.io/v1"
+CLOUD_API="https://clawbot-api.yumi-lab.com/v1"
 DEVICE_ID_FILE="/etc/clawbot/device-id"
 BOARD_FILE="/etc/clawbot/board"
 PICOCLAW_CONFIG="/home/pi/.picoclaw/config.json"
@@ -85,7 +85,7 @@ fetch_provision_config() {
 apply_picoclaw_config() {
     local subscription_key="$1"
     local model="${2:-clawbot-smart}"
-    local base_url="${3:-https://api.clawbot.io/v1}"
+    local base_url="${3:-https://clawbot-api.yumi-lab.com/v1}"
 
     mkdir -p "$(dirname "${PICOCLAW_CONFIG}")"
     cat > "${PICOCLAW_CONFIG}" << PICOEOF
@@ -185,7 +185,7 @@ provision_from_cloud() {
     provisioned=$(echo "${config}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('provisioned','false'))" 2>/dev/null || echo "false")
 
     if [[ "${provisioned}" != "True" && "${provisioned}" != "true" ]]; then
-        info "Device not yet provisioned in cloud (scan QR code or visit clawbot.io/activate)"
+        info "Device not yet provisioned in cloud (scan QR code or visit clawbot-api.yumi-lab.com/activate)"
         return 1
     fi
 
@@ -195,7 +195,7 @@ provision_from_cloud() {
     local sub_key model base_url
     sub_key=$(echo "${config}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('subscription_key',''))" 2>/dev/null || true)
     model=$(echo "${config}"   | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('model','clawbot-smart'))" 2>/dev/null || echo "clawbot-smart")
-    base_url=$(echo "${config}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('base_url','https://api.clawbot.io/v1'))" 2>/dev/null || echo "https://api.clawbot.io/v1")
+    base_url=$(echo "${config}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('base_url','https://clawbot-api.yumi-lab.com/v1'))" 2>/dev/null || echo "https://clawbot-api.yumi-lab.com/v1")
 
     if [[ -n "${sub_key}" ]]; then
         apply_picoclaw_config "${sub_key}" "${model}" "${base_url}"
@@ -228,7 +228,7 @@ main() {
                 err "Usage: clawbot-provision --key <subscription-key>"
                 exit 1
             fi
-            apply_picoclaw_config "${key}" "clawbot-smart" "https://api.clawbot.io/v1"
+            apply_picoclaw_config "${key}" "clawbot-smart" "https://clawbot-api.yumi-lab.com/v1"
             info "Provisioned with explicit subscription key."
             exit 0
             ;;

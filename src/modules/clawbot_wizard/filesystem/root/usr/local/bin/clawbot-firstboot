@@ -86,7 +86,7 @@ configure_clawbot_cloud() {
     device_id=$(/usr/local/bin/clawbot-provision --device-id 2>/dev/null || \
                 cat /etc/clawbot/device-id 2>/dev/null || echo "unknown")
 
-    local activate_url="https://clawbot.io/activate?device_id=${device_id}"
+    local activate_url="https://clawbot-api.yumi-lab.com/activate?device_id=${device_id}"
 
     # Show QR code full-screen on TTY, then dialog on top
     clear
@@ -126,7 +126,7 @@ Not linked yet? Press NO to enter a subscription key manually." \
     local sub_key
     sub_key=$("${DIALOG}" --backtitle "${BT}" --title "Clawbot Cloud — Subscription Key" \
         --insecure --passwordbox \
-"Enter your Clawbot Cloud subscription key:\n(Get yours at clawbot.io/subscribe)" \
+"Enter your Clawbot Cloud subscription key:\n(Get yours at clawbot-api.yumi-lab.com/subscribe)" \
         10 ${WW} 3>&1 1>&2 2>&3) || sub_key=""
 
     if [[ -n "${sub_key}" ]]; then
