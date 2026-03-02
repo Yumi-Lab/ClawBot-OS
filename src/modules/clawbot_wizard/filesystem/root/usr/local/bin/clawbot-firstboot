@@ -80,6 +80,60 @@ configure_wifi() {
     fi
 }
 
+configure_clawbot_cloud() {
+    # Generate (or retrieve) device ID
+    local device_id
+    device_id=$(/usr/local/bin/clawbot-provision --device-id 2>/dev/null || \
+                cat /etc/clawbot/device-id 2>/dev/null || echo "unknown")
+
+    local activate_url="https://clawbot.io/activate?device_id=${device_id}"
+
+    # Show QR code full-screen on TTY, then dialog on top
+    clear
+    echo ""
+    echo "  ┌─────────────────────────────────────────────────────────────┐"
+    echo "  │          Clawbot Cloud — Link your device                   │"
+    echo "  │                                                             │"
+    echo "  │  Scan the QR code below with the Yumi-Lab app:             │"
+    echo "  └─────────────────────────────────────────────────────────────┘"
+    echo ""
+    if command -v qrencode &>/dev/null; then
+        qrencode -t utf8 -m 2 "${activate_url}" 2>/dev/null || true
+    fi
+    echo ""
+    echo "  URL : ${activate_url}"
+    echo "  ID  : ${device_id}"
+    echo ""
+
+    # Ask user: wait for scan or enter key manually
+    if "${DIALOG}" --backtitle "${BT}" --title "Clawbot Cloud — Activate" \
+        --yesno \
+"Scan the QR code above with the Yumi-Lab app to link this device.\n
+After linking, press YES to auto-configure.\n
+Not linked yet? Press NO to enter a subscription key manually." \
+        12 ${WW}; then
+        # Try cloud provisioning
+        if /usr/local/bin/clawbot-provision 2>/dev/null; then
+            return 0
+        fi
+        "${DIALOG}" --backtitle "${BT}" --title "Clawbot Cloud" \
+            --msgbox "Device not linked yet. Please scan the QR code first,\nthen run 'clawbot-provision' or reboot." \
+            8 ${WW}
+        return 0
+    fi
+
+    # Fallback: manual subscription key
+    local sub_key
+    sub_key=$("${DIALOG}" --backtitle "${BT}" --title "Clawbot Cloud — Subscription Key" \
+        --insecure --passwordbox \
+"Enter your Clawbot Cloud subscription key:\n(Get yours at clawbot.io/subscribe)" \
+        10 ${WW} 3>&1 1>&2 2>&3) || sub_key=""
+
+    if [[ -n "${sub_key}" ]]; then
+        /usr/local/bin/clawbot-provision --key "${sub_key}" 2>/dev/null || true
+    fi
+}
+
 configure_api_key() {
     local provider api_key model base_url
 
@@ -100,16 +154,16 @@ configure_api_key() {
         return
     fi
 
-    # Ask for key (label depends on provider)
+    # Clawbot Cloud: QR code activation flow
     if [[ "${provider}" == "clawbot" ]]; then
-        api_key=$("${DIALOG}" --backtitle "${BT}" --title "Clawbot Cloud — Subscription Key" \
-            --insecure --passwordbox "Enter your Clawbot Cloud subscription key:\n(Get yours at clawbot.io)" \
-            10 ${WW} 3>&1 1>&2 2>&3) || api_key=""
-    else
-        api_key=$("${DIALOG}" --backtitle "${BT}" --title "API Key" \
-            --insecure --passwordbox "Enter your ${provider} API key:" \
-            10 ${WW} 3>&1 1>&2 2>&3) || api_key=""
+        configure_clawbot_cloud
+        return
     fi
+
+    # Other providers: ask for API key
+    api_key=$("${DIALOG}" --backtitle "${BT}" --title "API Key" \
+        --insecure --passwordbox "Enter your ${provider} API key:" \
+        10 ${WW} 3>&1 1>&2 2>&3) || api_key=""
 
     if [[ -z "${api_key}" ]]; then
         return
@@ -117,10 +171,6 @@ configure_api_key() {
 
     # Set defaults based on provider
     case "${provider}" in
-        clawbot)
-            model="clawbot-smart"
-            base_url="https://api.clawbot.io/v1"
-            ;;
         openai)
             model="gpt-4o"
             base_url="https://api.openai.com/v1"

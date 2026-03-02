@@ -1,0 +1,13 @@
+[Unit]
+Description=ClawbotOS Cloud Heartbeat — every 5 minutes
+Requires=clawbot-heartbeat.service
+
+[Timer]
+# First ping 30s after boot (wait for network)
+OnBootSec=30s
+# Then every 5 minutes
+OnUnitActiveSec=5min
+Unit=clawbot-heartbeat.service
+
+[Install]
+WantedBy=timers.target

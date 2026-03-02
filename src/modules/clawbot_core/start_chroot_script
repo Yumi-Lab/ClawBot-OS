@@ -9,7 +9,7 @@ echo_green "Installing ClawbotCore ..."
 
 ## Step 1: Install dependencies
 apt-get update --allow-releaseinfo-change
-check_install_pkgs ${CLAWBOT_CORE_DEPS}
+check_install_pkgs ${CLAWBOT_CORE_DEPS} qrencode
 ## END Step 1
 
 ## Step 2: Clone repository
@@ -32,10 +32,14 @@ mkdir -p /home/pi/.clawbot/modules
 chown -R pi:pi /home/pi/.clawbot
 ## END Step 4
 
-## Step 5: Install systemd service
-echo_green "Enabling clawbot-core.service ..."
+## Step 5: Install systemd services and scripts
+echo_green "Installing systemd units and scripts ..."
 unpack /filesystem/root /
+chmod +x /usr/local/bin/clawbot-provision
+chmod +x /usr/local/bin/clawbot-heartbeat
+mkdir -p /etc/clawbot
 systemctl_if_exists enable clawbot-core.service
+systemctl_if_exists enable clawbot-heartbeat.timer
 ## END Step 5
 
 echo_green "Installing ClawbotCore ... DONE!"
