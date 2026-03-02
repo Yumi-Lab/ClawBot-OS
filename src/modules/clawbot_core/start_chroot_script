@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# shellcheck enable=require-variable-braces
+set -Ee
+
+source /common.sh
+install_cleanup_trap
+
+echo_green "Installing ClawbotCore ..."
+
+## Step 1: Install dependencies
+apt-get update --allow-releaseinfo-change
+check_install_pkgs ${CLAWBOT_CORE_DEPS}
+## END Step 1
+
+## Step 2: Clone repository
+echo_green "Cloning ClawbotCore from ${CLAWBOT_CORE_REPO} ..."
+git clone --depth=1 --branch "${CLAWBOT_CORE_BRANCH}" \
+    "${CLAWBOT_CORE_REPO}" /tmp/clawbot-core-src
+## END Step 2
+
+## Step 3: Install to /usr/local/lib/clawbot-core
+echo_green "Installing ClawbotCore to /usr/local/lib/clawbot-core ..."
+mkdir -p /usr/local/lib/clawbot-core
+cp -r /tmp/clawbot-core-src/clawbot_core/* /usr/local/lib/clawbot-core/
+cp -r /tmp/clawbot-core-src/store        /usr/local/lib/clawbot-core/
+chmod +x /usr/local/lib/clawbot-core/main.py
+rm -rf /tmp/clawbot-core-src
+## END Step 3
+
+## Step 4: Create modules directory for pi user
+mkdir -p /home/pi/.clawbot/modules
+chown -R pi:pi /home/pi/.clawbot
+## END Step 4
+
+## Step 5: Install systemd service
+echo_green "Enabling clawbot-core.service ..."
+unpack /filesystem/root /
+systemctl_if_exists enable clawbot-core.service
+## END Step 5
+
+echo_green "Installing ClawbotCore ... DONE!"
