@@ -7,7 +7,7 @@
 
 # shellcheck disable=all
 
-[[ -n "$PICOCLAW_REPO" ]] || PICOCLAW_REPO="https://github.com/sipeed/picoclaw.git"
+[[ -n "$PICOCLAW_REPO" ]] || PICOCLAW_REPO="https://github.com/Yumi-Lab/picoclaw.git"
 [[ -n "$PICOCLAW_REPO_BRANCH" ]] || PICOCLAW_REPO_BRANCH="main"
 
 # PicoClaw version
@@ -15,7 +15,7 @@
 # Architecture for precompiled binary download (armv6 is compatible with ARMv7/H3)
 [[ -n "$PICOCLAW_ARCH" ]] || PICOCLAW_ARCH="Linux_armv6"
 # Download URL pattern for releases (tar.gz format)
-[[ -n "$PICOCLAW_RELEASE_URL" ]] || PICOCLAW_RELEASE_URL="https://github.com/sipeed/picoclaw/releases/download/${PICOCLAW_VERSION}"
+[[ -n "$PICOCLAW_RELEASE_URL" ]] || PICOCLAW_RELEASE_URL="https://github.com/Yumi-Lab/picoclaw/releases/download/${PICOCLAW_VERSION}"
 # Tarball filename
 [[ -n "$PICOCLAW_TARBALL" ]] || PICOCLAW_TARBALL="picoclaw_${PICOCLAW_ARCH}.tar.gz"
 
