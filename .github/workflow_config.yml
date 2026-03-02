@@ -12,10 +12,9 @@
 # Build test matrix (pushes/PRs to develop)
 buildtest:
   - armbian/smartpad
-  # Future boards:
-  # - armbian/smartpi
+  - armbian/smartpi
 
 # Release build matrix
 release:
   - armbian/smartpad
-  # - armbian/smartpi
+  - armbian/smartpi
