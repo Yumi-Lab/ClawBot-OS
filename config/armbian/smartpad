@@ -28,7 +28,7 @@ BASE_BOOT_MOUNT_PATH="/boot/"
 BASE_RELEASE_COMPRESS=no
 
 # Module chain for SmartPad (with touchscreen)
-MODULES="base,udev_fix,armbian(armbian_net,clawbot,swap_setup,picoclaw,nginx_proxy,smartpad,clawbot_core,telegram_bot,clawbot_wizard)"
+MODULES="base(udev_fix,armbian(armbian_net,clawbot,swap_setup,picoclaw,nginx_proxy,smartpad,clawbot_core,telegram_bot,clawbot_wizard))"
 
 # export Variables
 export DOWNLOAD_URL_IMAGE
