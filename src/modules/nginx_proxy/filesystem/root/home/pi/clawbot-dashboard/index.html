@@ -450,6 +450,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="cfg-form">
           <div class="fg"><label class="fl" for="cfg-p">LLM Provider</label>
             <select class="fs" id="cfg-p" onchange="onProv()">
+              <option value="clawbot">Clawbot Cloud ✦ — Subscription</option>
               <option value="anthropic">Anthropic (Claude) — Recommended</option>
               <option value="openai">OpenAI (GPT-4o)</option>
               <option value="deepseek">DeepSeek — Budget</option>
@@ -462,7 +463,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <input class="fi" type="text" id="cfg-m" placeholder="gpt-4o">
             <div class="model-chips" id="m-chips"></div>
           </div>
-          <div class="fg"><label class="fl" for="cfg-k">API Key</label><input class="fi" type="password" id="cfg-k" placeholder="sk-..."></div>
+          <div class="fg"><label class="fl" id="cfg-k-lbl" for="cfg-k">API Key</label><input class="fi" type="password" id="cfg-k" placeholder="sk-..."></div>
           <div class="fg" id="cfg-url-g" style="display:none"><label class="fl" for="cfg-u">Base URL</label><input class="fi" type="text" id="cfg-u" placeholder="https://api.example.com/v1"></div>
           <div class="info-box" id="cfg-info">Config saved to PicoClaw and takes effect after restart.</div>
           <button class="btn-save" onclick="saveLLM()">Save &amp; Apply</button>
@@ -683,6 +684,7 @@ let streaming = false;
 
 // ═══ MODEL SUGGESTIONS ═══
 const MODELS = {
+  clawbot:    ['clawbot-smart','clawbot-mini'],
   openai:     ['gpt-4o','gpt-4o-mini','gpt-4-turbo','gpt-3.5-turbo'],
   anthropic:  ['claude-opus-4-6','claude-sonnet-4-6','claude-haiku-4-5-20251001'],
   openrouter: ['anthropic/claude-sonnet-4-6','openai/gpt-4o','google/gemini-flash-1.5'],
@@ -691,6 +693,7 @@ const MODELS = {
   custom:     []
 };
 const PROV_DEFAULTS = {
+  clawbot:    {model:'clawbot-smart', url:'https://api.clawbot.io/v1', placeholder:'clb-...'},
   anthropic:  {model:'claude-sonnet-4-6', url:'', placeholder:'sk-ant-api03-...'},
   openai:     {model:'gpt-4o',     url:'', placeholder:'sk-proj-...'},
   deepseek:   {model:'deepseek-chat', url:'', placeholder:'sk-...'},
@@ -788,12 +791,16 @@ function svcAct(svc, action) {
 // ═══ LLM CONFIG ═══
 function onProv() {
   const p = $id('cfg-p').value;
-  const showUrl = ['ollama','custom'].includes(p);
+  const showUrl = ['ollama','custom','clawbot'].includes(p);
   $id('cfg-url-g').style.display = showUrl ? '' : 'none';
   const def = PROV_DEFAULTS[p] || {};
   if (def.model) $id('cfg-m').value = def.model;
   if (def.url) $id('cfg-u').value = def.url;
   if (def.placeholder) $id('cfg-k').placeholder = def.placeholder;
+  const urlInput = $id('cfg-u');
+  urlInput.readOnly = p === 'clawbot';
+  urlInput.style.opacity = p === 'clawbot' ? '0.6' : '';
+  $id('cfg-k-lbl').textContent = p === 'clawbot' ? 'Subscription Key' : 'API Key';
   const chips = (MODELS[p] || []).map(m => `<button class="mc" onclick="setModel('${m}')">${m}</button>`).join('');
   $('m-chips').innerHTML = chips;
 }

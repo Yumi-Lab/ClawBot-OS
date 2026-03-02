@@ -85,9 +85,10 @@ configure_api_key() {
 
     # Ask for LLM provider
     provider=$("${DIALOG}" --backtitle "${BT}" --title "LLM Provider" \
-        --menu "Select your LLM provider:" ${WT} ${WW} 7 \
-        "openai"     "OpenAI (GPT-4o, etc.)" \
+        --menu "Select your LLM provider:" ${WT} ${WW} 8 \
+        "clawbot"    "Clawbot Cloud (subscription — no API key needed)" \
         "anthropic"  "Anthropic (Claude)" \
+        "openai"     "OpenAI (GPT-4o, etc.)" \
         "openrouter" "OpenRouter (multi-provider)" \
         "deepseek"   "DeepSeek" \
         "ollama"     "Ollama (running on another machine)" \
@@ -99,10 +100,16 @@ configure_api_key() {
         return
     fi
 
-    # Ask for API key
-    api_key=$("${DIALOG}" --backtitle "${BT}" --title "API Key" \
-        --insecure --passwordbox "Enter your ${provider} API key:" \
-        10 ${WW} 3>&1 1>&2 2>&3) || api_key=""
+    # Ask for key (label depends on provider)
+    if [[ "${provider}" == "clawbot" ]]; then
+        api_key=$("${DIALOG}" --backtitle "${BT}" --title "Clawbot Cloud — Subscription Key" \
+            --insecure --passwordbox "Enter your Clawbot Cloud subscription key:\n(Get yours at clawbot.io)" \
+            10 ${WW} 3>&1 1>&2 2>&3) || api_key=""
+    else
+        api_key=$("${DIALOG}" --backtitle "${BT}" --title "API Key" \
+            --insecure --passwordbox "Enter your ${provider} API key:" \
+            10 ${WW} 3>&1 1>&2 2>&3) || api_key=""
+    fi
 
     if [[ -z "${api_key}" ]]; then
         return
@@ -110,6 +117,10 @@ configure_api_key() {
 
     # Set defaults based on provider
     case "${provider}" in
+        clawbot)
+            model="clawbot-smart"
+            base_url="https://api.clawbot.io/v1"
+            ;;
         openai)
             model="gpt-4o"
             base_url="https://api.openai.com/v1"
