@@ -69,7 +69,7 @@ jobs:
           SMARTPI1_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
             --jq '.assets[] | select(.name | test("smartpi1-bookworm.*server.*\\.img\\.xz$")) | .name')
           SMARTPAD_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
-            --jq '.assets[] | select(.name | test("smartpad-bookworm.*server.*\\.img\\.xz$")) | .name')
+            --jq '.assets[] | select(.name | test("smartpad-trixie.*server.*\\.img\\.xz$")) | .name')
 
           echo "SmartPi-armbian release: ${TAG}"
           echo "Smart Pi One image: ${SMARTPI1_IMG}"
