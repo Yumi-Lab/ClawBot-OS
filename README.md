@@ -9,7 +9,7 @@ Built with the same architecture as [YumiOS](https://github.com/Yumi-Lab/YumiOS)
 | Component | Description | RAM Usage |
 |-----------|-------------|-----------|
 | **[PicoClaw](https://github.com/sipeed/picoclaw)** | Ultra-lightweight AI agent (Go, by Sipeed) | ~10MB |
-| **[ClawbotOS Dashboard](https://github.com/Yumi-Lab/clawbot-interface)** | Static web dashboard with chat, monitoring, config | ~0MB (nginx) |
+| **[ClawbotCore WebUI](https://github.com/Yumi-Lab/ClawbotCore-WebUI)** | Static web dashboard with chat, monitoring, config | ~0MB (nginx) |
 | **nginx** | Reverse proxy + static file server on port 80 | ~5MB |
 
 PicoClaw connects to external LLM APIs (OpenAI, Anthropic, OpenRouter, DeepSeek, Ollama, etc.).
@@ -107,7 +107,7 @@ base -> udev_fix -> armbian (
 
 ```bash
 # Requires ARM host or QEMU
-git clone https://github.com/Yumi-Lab/clawbot.git
+git clone https://github.com/Yumi-Lab/ClawBot-OS.git
 cd clawbot/src
 sudo bash -x ./build_dist
 ```
@@ -122,7 +122,7 @@ GitHub Actions builds images automatically on push to `develop`. See `.github/wo
 - [MainsailOS](https://github.com/mainsail-crew/MainsailOS) - Upstream project
 - [CustomPiOS](https://github.com/guysoft/CustomPiOS) - Build framework
 - [PicoClaw](https://github.com/sipeed/picoclaw) - Lightweight AI agent by Sipeed
-- [clawbot-interface](https://github.com/Yumi-Lab/clawbot-interface) - ClawbotOS web dashboard
+- [ClawbotCore-WebUI](https://github.com/Yumi-Lab/ClawbotCore-WebUI) - ClawbotOS web dashboard
 
 ## License
 

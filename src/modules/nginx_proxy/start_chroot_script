@@ -25,7 +25,7 @@ echo_green "Deploying nginx configuration ..."
 unpack /filesystem/root /
 
 ## Step 2b: Try to fetch latest dashboard from GitHub (fallback to bundled)
-DASHBOARD_REPO="Yumi-Lab/clawbot-interface"
+DASHBOARD_REPO="Yumi-Lab/ClawbotCore-WebUI"
 DASHBOARD_DIR="/home/pi/clawbot-dashboard"
 mkdir -p "${DASHBOARD_DIR}"
 echo_green "Fetching latest dashboard from GitHub ..."

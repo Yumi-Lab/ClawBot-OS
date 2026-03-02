@@ -5,7 +5,7 @@
 
 set -e
 
-REPO="Yumi-Lab/clawbot-interface"
+REPO="Yumi-Lab/ClawbotCore-WebUI"
 DASHBOARD_DIR="/home/pi/clawbot-dashboard"
 DASHBOARD_FILE="${DASHBOARD_DIR}/index.html"
 VERSION_FILE="${DASHBOARD_DIR}/VERSION"
