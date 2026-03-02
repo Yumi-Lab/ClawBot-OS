@@ -94,6 +94,40 @@ jobs:
           config: ${{ matrix.config }}
           custompios-ref: 1.5.0
 
+      - name: Fix boot UUID in image
+        shell: bash
+        run: |
+          IMG=$(ls repository/src/workspace/*.img)
+          echo "Fixing boot UUID in ${IMG}..."
+
+          # Attach image as loop device with partition scanning
+          LOOPDEV=$(sudo losetup -fP --show "$IMG")
+          echo "Loop device: ${LOOPDEV}"
+
+          # Read actual UUID of root partition (p2)
+          ROOT_UUID=$(sudo blkid -o value -s UUID "${LOOPDEV}p2")
+          echo "Actual root UUID: ${ROOT_UUID}"
+
+          # Mount boot partition (p1 = FAT /boot)
+          BOOTMNT=$(mktemp -d)
+          sudo mount "${LOOPDEV}p1" "$BOOTMNT"
+
+          # Update armbianEnv.txt if it exists
+          if [[ -f "${BOOTMNT}/armbianEnv.txt" ]]; then
+              echo "Before fix:"
+              grep -i rootdev "${BOOTMNT}/armbianEnv.txt" || true
+              sudo sed -i "s|^rootdev=.*|rootdev=UUID=${ROOT_UUID}|" "${BOOTMNT}/armbianEnv.txt"
+              echo "After fix:"
+              grep -i rootdev "${BOOTMNT}/armbianEnv.txt"
+          else
+              echo "WARNING: armbianEnv.txt not found in boot partition"
+              ls "$BOOTMNT" || true
+          fi
+
+          sudo umount "$BOOTMNT"
+          sudo losetup -d "$LOOPDEV"
+          echo "UUID fix complete."
+
       - name: Rename image file
         id: move-image
         if: always()
