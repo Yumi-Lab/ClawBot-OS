@@ -52,7 +52,7 @@ else
     sudo -u "${BASE_USER}" git clone --depth 1 -b "${PICOCLAW_REPO_BRANCH}" \
         "${PICOCLAW_REPO}" "/home/${BASE_USER}/picoclaw-src"
     pushd "/home/${BASE_USER}/picoclaw-src" &> /dev/null || exit 1
-    /usr/local/go/bin/go build -o /usr/local/bin/picoclaw .
+    /usr/local/go/bin/go build -o /usr/local/bin/picoclaw ./cmd/picoclaw
     popd &> /dev/null || exit 1
     rm -rf "/home/${BASE_USER}/picoclaw-src"
     # Remove Go toolchain to save disk space (~500MB)
