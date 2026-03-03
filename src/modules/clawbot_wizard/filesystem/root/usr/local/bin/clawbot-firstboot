@@ -104,6 +104,11 @@ configure_wifi() {
 }
 
 show_qr_and_wait() {
+    # Build short device code from MAC (no colons, uppercase, grouped by 4)
+    local mac_raw device_code
+    mac_raw="$(echo "${MAC}" | tr -d ':' | tr '[:lower:]' '[:upper:]')"
+    device_code="${mac_raw:0:4}-${mac_raw:4:4}-${mac_raw:8:4}"
+
     # Display QR code + status loop on the terminal (no dialog overlay)
     while [[ ! -f "${ACTIVATED_SIGNAL}" ]]; do
         local ip
@@ -112,18 +117,23 @@ show_qr_and_wait() {
         echo ""
         echo "  ┌─────────────────────────────────────────────────────────────┐"
         echo "  │          Clawbot Cloud — Link your device                   │"
-        echo "  │  Scan the QR code with the Yumi-Lab app to activate         │"
+        echo "  │  Scan the QR code or enter the device code to activate      │"
         echo "  └─────────────────────────────────────────────────────────────┘"
         echo ""
         if command -v qrencode &>/dev/null; then
             qrencode -t utf8 -m 2 "${ACTIVATE_URL}" 2>/dev/null || true
         fi
+        echo "  ┌─────────────────────────────────────────────────────────────┐"
+        echo "  │  No app? Activate manually:                                 │"
+        echo "  │                                                             │"
+        printf  "  │      Device code:  %-40s│\n" "${device_code}"
+        echo "  │                                                             │"
+        printf  "  │  URL: %-53s│\n" "${ACTIVATE_URL}"
+        echo "  │                                                             │"
+        printf  "  │  MAC: %-20s  IP: %-20s│\n" "${MAC}" "${ip:-no network}"
+        echo "  │  Status: waiting for activation...                          │"
+        echo "  └─────────────────────────────────────────────────────────────┘"
         echo ""
-        echo "  MAC : ${MAC}"
-        echo "  IP  : ${ip:-no network}"
-        echo "  URL : ${ACTIVATE_URL}"
-        echo ""
-        echo "  Status : waiting for cloud activation..."
         sleep 5
     done
 
