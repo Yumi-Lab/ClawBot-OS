@@ -342,6 +342,7 @@ def update_clawbot_core() -> dict:
         # Install core files
         src_core = os.path.join(tmp, "clawbot_core")
         src_store = os.path.join(tmp, "store")
+        src_version = os.path.join(tmp, "VERSION")
         if os.path.isdir(src_core):
             for f in os.listdir(src_core):
                 shutil.copy2(os.path.join(src_core, f), CLAWBOT_CORE_INSTALL_DIR)
@@ -350,6 +351,8 @@ def update_clawbot_core() -> dict:
             if os.path.isdir(dest_store):
                 shutil.rmtree(dest_store)
             shutil.copytree(src_store, dest_store)
+        if os.path.isfile(src_version):
+            shutil.copy2(src_version, os.path.join(CLAWBOT_CORE_INSTALL_DIR, "VERSION"))
         shutil.rmtree(tmp, ignore_errors=True)
 
         # Restart service
