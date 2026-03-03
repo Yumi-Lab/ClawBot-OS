@@ -236,7 +236,7 @@ def get_current_config() -> dict:
     mac = get_mac()
     mac_clean = mac.replace(":", "") if mac != "unknown" else ""
     device_code, id_long = _compute_ids(mac_clean)
-    activate_url = f"https://openjarvis.io/activate?mac={mac_clean}" if mac_clean else "https://openjarvis.io"
+    activate_url = f"https://clawbot-api.yumi-lab.com/activate?mac={mac_clean}" if mac_clean else "https://clawbot-api.yumi-lab.com/activate"
     try:
         with open(PICOCLAW_CONFIG) as f:
             cfg = json.load(f)

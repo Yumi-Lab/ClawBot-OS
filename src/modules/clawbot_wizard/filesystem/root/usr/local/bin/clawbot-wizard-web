@@ -24,7 +24,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 PORT = 8099
 ACTIVATED_SIGNAL = "/tmp/clawbot-activated"
-ACTIVATE_URL_BASE = "https://openjarvis.io/activate?mac="
+ACTIVATE_URL_BASE = "https://clawbot-api.yumi-lab.com/activate?mac="
 
 
 # ── Device identity (computed once at startup) ────────────────────────────────
@@ -67,7 +67,7 @@ else:
     ID_LONG = ""
 
 ACTIVATE_URL = (
-    f"{ACTIVATE_URL_BASE}{MAC_CLEAN}" if MAC_CLEAN else "https://openjarvis.io"
+    f"{ACTIVATE_URL_BASE}{MAC_CLEAN}" if MAC_CLEAN else "https://clawbot-api.yumi-lab.com/activate"
 )
 
 
@@ -300,7 +300,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tp);
     <!-- ── SCREEN 2: QR / ACTIVATION ── -->
     <div class="screen" id="qr-screen" style="align-items:center">
       <div style="font-size:.75rem;color:var(--ts);text-align:center;margin-bottom:10px">
-        Scan the QR code with your phone or enter the device code at openjarvis.io
+        Scan the QR code with your phone or enter the device code at clawbot-api.yumi-lab.com
       </div>
       <div class="qr-wrap">
         <img class="qr-img" id="qr-img" src="/api/qr.png" alt="QR Code"
@@ -319,7 +319,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tp);
           MAC: <span id="qr-mac" style="font-family:monospace;color:var(--ts)">--</span>
         </div>
 
-        <span class="lnk" onclick="openJarvis()">Open openjarvis.io →</span>
+        <span class="lnk" onclick="openJarvis()">Activate at clawbot-api.yumi-lab.com →</span>
 
         <div class="status-line">
           <div class="pulse" id="act-pulse"></div>
@@ -354,7 +354,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tp);
 let selectedSsid = '';
 let shiftOn = false;
 let pollTimer = null;
-let activateUrl = 'https://openjarvis.io';
+let activateUrl = 'https://clawbot-api.yumi-lab.com/activate';
 let deviceIp = '';
 
 // ── Virtual keyboard ──────────────────────────────────────────────────────────
@@ -590,7 +590,7 @@ async function loadStatus() {
   try {
     const r = await fetch('/api/status', {signal: AbortSignal.timeout(4000)});
     const d = await r.json();
-    activateUrl = d.activate_url || 'https://openjarvis.io';
+    activateUrl = d.activate_url || 'https://clawbot-api.yumi-lab.com/activate';
     deviceIp = d.ip || '';
     document.getElementById('dev-code').textContent = d.device_code || '----';
     document.getElementById('qr-mac').textContent = d.mac || '--';
