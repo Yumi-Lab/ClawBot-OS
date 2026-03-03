@@ -236,7 +236,13 @@ async def run():
 
                         if msg_type == "welcome":
                             status = msg.get("status", "pending")
-                            log.info("Cloud status: %s", status)
+                            # Persist IDs sent by cloud (authoritative source)
+                            id_long = msg.get("id_long", "")
+                            if id_long:
+                                os.makedirs("/etc/clawbot", exist_ok=True)
+                                with open("/etc/clawbot/id-long", "w") as f:
+                                    f.write(id_long)
+                            log.info("Cloud status: %s | id_long: %s…", status, id_long[:8] if id_long else "?")
 
                         elif msg_type == "config":
                             log.info("Received config push from cloud")

@@ -139,7 +139,19 @@ show_qr_and_wait() {
     mac_raw="$(echo "${MAC}" | tr -d ':' | tr '[:lower:]' '[:upper:]')"
     device_code="${mac_raw:0:4}-${mac_raw:4:4}-${mac_raw:8:4}"
 
-    # Display QR code + status loop on the terminal (no dialog overlay)
+    # On SmartPad (screen + fbi available): render QR as PNG on framebuffer
+    # → readable by phone cameras, unlike UTF-8 terminal art
+    local use_fbi=false FBI_PID=""
+    if command -v fbi &>/dev/null && command -v qrencode &>/dev/null && [[ -e /dev/fb0 ]]; then
+        local qr_png="/tmp/clawbot-qr.png"
+        if qrencode -t PNG -s 8 -m 4 -o "${qr_png}" "${ACTIVATE_URL}" 2>/dev/null; then
+            fbi -T 2 -d /dev/fb0 --noverbose "${qr_png}" 2>/dev/null &
+            FBI_PID=$!
+            use_fbi=true
+        fi
+    fi
+
+    # Status info loop on tty2
     while [[ ! -f "${ACTIVATED_SIGNAL}" ]]; do
         local ip
         ip="$(get_ip)"
@@ -150,7 +162,8 @@ show_qr_and_wait() {
         echo "  │  Scan the QR code or enter the device code to activate      │"
         echo "  └─────────────────────────────────────────────────────────────┘"
         echo ""
-        if command -v qrencode &>/dev/null; then
+        if ! ${use_fbi} && command -v qrencode &>/dev/null; then
+            # Fallback: UTF-8 terminal QR (headless devices without framebuffer)
             qrencode -t utf8 -m 2 "${ACTIVATE_URL}" 2>/dev/null || true
         fi
         echo "  ┌─────────────────────────────────────────────────────────────┐"
@@ -166,6 +179,9 @@ show_qr_and_wait() {
         echo ""
         sleep 5
     done
+
+    # Stop framebuffer QR display
+    [[ -n "${FBI_PID}" ]] && kill "${FBI_PID}" 2>/dev/null || true
 
     clear
     echo ""
@@ -208,8 +224,43 @@ headless_wait() {
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
-if ${HAS_SCREEN} && [[ -n "${DIALOG}" ]]; then
-    # ── SCREEN MODE ──
+if ${HAS_SCREEN} && command -v cage &>/dev/null && command -v chromium &>/dev/null; then
+    # ── WEB WIZARD MODE (SmartPad: cage + Chromium kiosk) ──
+    # Start the Python wizard server in background
+    /usr/local/bin/clawbot-wizard-web &
+    WIZARD_PID=$!
+
+    # Wait up to 10 s for server to be ready
+    for i in $(seq 1 10); do
+        curl -sf http://127.0.0.1:8099/ >/dev/null 2>&1 && break
+        sleep 1
+    done
+
+    # Launch Chromium in full-screen kiosk via cage (Wayland compositor)
+    # cage drives the display directly via DRM/KMS — no X11 needed
+    cage -- chromium \
+        --kiosk \
+        --ozone-platform=wayland \
+        --no-sandbox \
+        --disable-infobars \
+        --disable-session-crashed-bubble \
+        --disable-features=TranslateUI \
+        --check-for-update-interval=31536000 \
+        http://127.0.0.1:8099/ &
+    CAGE_PID=$!
+
+    # Wait for cloud activation (written by clawbot-cloud.service)
+    while [[ ! -f "${ACTIVATED_SIGNAL}" ]]; do
+        sleep 3
+    done
+
+    # Give Chromium time to navigate to the dashboard before killing cage
+    sleep 8
+    kill "${CAGE_PID}" 2>/dev/null || true
+    kill "${WIZARD_PID}" 2>/dev/null || true
+
+elif ${HAS_SCREEN} && [[ -n "${DIALOG}" ]]; then
+    # ── DIALOG FALLBACK (screen but no cage/chromium) ──
     chvt 2 2>/dev/null || true
     welcome_msg
     configure_wifi

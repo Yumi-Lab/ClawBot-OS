@@ -7,4 +7,4 @@
 
 # shellcheck disable=all
 
-[[ -n "$CLAWBOT_WIZARD_DEPS" ]] || CLAWBOT_WIZARD_DEPS="dialog"
+[[ -n "$CLAWBOT_WIZARD_DEPS" ]] || CLAWBOT_WIZARD_DEPS="dialog qrencode fbi"

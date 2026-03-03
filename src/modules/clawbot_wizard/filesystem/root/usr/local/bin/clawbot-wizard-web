@@ -1,0 +1,745 @@
+#!/usr/bin/env python3
+"""
+ClawbotOS First-Boot Web Wizard — HTTP server (port 8099)
+Serves the touchscreen setup wizard for SmartPad (cage + Chromium kiosk).
+
+Endpoints:
+  GET  /           → wizard HTML
+  GET  /api/status → {ip, mac, device_code, activate_url, activated}
+  GET  /api/networks → {networks: [{ssid, signal}]}
+  POST /api/wifi   → {ssid, password} → {ok, message}
+  GET  /api/qr.png → QR code PNG (via qrencode)
+
+Written by Yumi Lab — BUSL-1.1
+"""
+
+import hashlib
+import hmac as _hmac
+import json
+import os
+import socket
+import subprocess
+import sys
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+PORT = 8099
+ACTIVATED_SIGNAL = "/tmp/clawbot-activated"
+ACTIVATE_URL_BASE = "https://openjarvis.io/activate?mac="
+
+
+# ── Device identity (computed once at startup) ────────────────────────────────
+
+def _get_mac() -> str:
+    for iface in ["eth0", "end0"]:
+        try:
+            with open(f"/sys/class/net/{iface}/address") as f:
+                mac = f.read().strip()
+            if mac and mac != "00:00:00:00:00:00":
+                return mac.upper()
+        except Exception:
+            pass
+    return "unknown"
+
+
+def _get_ip() -> str:
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return ""
+
+
+MAC = _get_mac()
+MAC_CLEAN = MAC.replace(":", "") if MAC != "unknown" else ""
+
+# HMAC-SHA256("YUMI", MAC) → 64-char hex uppercase
+# - First 12 chars → device_code XXXX-XXXX-XXXX  (281T space, safe to ~16M devices)
+# - Full 64 chars  → id_long (secure device identity for API auth)
+if MAC_CLEAN:
+    _h = _hmac.new(b"YUMI", MAC_CLEAN.encode(), hashlib.sha256).hexdigest().upper()
+    DEVICE_CODE = f"{_h[:4]}-{_h[4:8]}-{_h[8:12]}"
+    ID_LONG = _h
+else:
+    DEVICE_CODE = "UNKN-UNKN-UNKN"
+    ID_LONG = ""
+
+ACTIVATE_URL = (
+    f"{ACTIVATE_URL_BASE}{MAC_CLEAN}" if MAC_CLEAN else "https://openjarvis.io"
+)
+
+
+# ── WiFi helpers ──────────────────────────────────────────────────────────────
+
+def scan_networks() -> list:
+    try:
+        subprocess.run(
+            ["nmcli", "device", "wifi", "rescan"],
+            capture_output=True, timeout=8
+        )
+        r = subprocess.run(
+            ["nmcli", "-t", "-f", "SSID,SIGNAL", "device", "wifi", "list"],
+            capture_output=True, text=True, timeout=8
+        )
+        nets, seen = [], set()
+        for line in r.stdout.splitlines():
+            parts = line.split(":")
+            if len(parts) >= 2:
+                ssid = parts[0].strip()
+                sig = parts[1].strip()
+                if ssid and ssid != "--" and ssid not in seen:
+                    seen.add(ssid)
+                    nets.append({
+                        "ssid": ssid,
+                        "signal": int(sig) if sig.isdigit() else 0
+                    })
+        nets.sort(key=lambda x: -x["signal"])
+        return nets[:14]
+    except Exception:
+        return []
+
+
+def connect_wifi(ssid: str, password: str) -> tuple:
+    try:
+        cmd = ["nmcli", "device", "wifi", "connect", ssid]
+        if password:
+            cmd += ["password", password]
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        ok = r.returncode == 0
+        msg = (r.stdout.strip() or r.stderr.strip())[:200]
+        return ok, msg
+    except Exception as e:
+        return False, str(e)
+
+
+def make_qr_png(url: str) -> bytes | None:
+    try:
+        r = subprocess.run(
+            ["qrencode", "-t", "PNG", "-s", "10", "-m", "3", "-o", "-", url],
+            capture_output=True, timeout=5
+        )
+        return r.stdout if r.returncode == 0 else None
+    except Exception:
+        return None
+
+
+# ── Embedded wizard HTML ──────────────────────────────────────────────────────
+
+WIZARD_HTML = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ClawbotOS Setup</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#050a0e;--bg-c:#0d1a24;--bg-i:#081018;
+  --br:#1a3040;--ac:#00ffe0;--ac-d:#00ffe022;--ac-m:#00ffe055;
+  --tp:#e0f0f8;--ts:#6a8fa8;--td:#3a5a70;
+  --ok:#00ff88;--wn:#ffaa00;--er:#ff3860;--r:10px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tp);
+  font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;
+  touch-action:manipulation}
+.app{display:flex;flex-direction:column;height:100vh}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;height:50px;background:var(--bg-c);border-bottom:1px solid var(--br);
+  flex-shrink:0}
+.hdr-logo{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--ac),#00b8ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr-step{font-size:.6rem;color:var(--td);font-family:monospace;letter-spacing:1px;text-transform:uppercase}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;transition:padding-bottom .25s ease}
+.content.kb-open{padding-bottom:224px}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;min-height:100%;padding:14px 18px 18px}
+.screen.active{display:flex}
+
+/* WIFI LIST */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-title{font-size:.65rem;font-weight:700;color:var(--td);text-transform:uppercase;letter-spacing:2px}
+.net-list{display:flex;flex-direction:column;gap:5px}
+.net-item{display:flex;align-items:center;gap:12px;padding:13px 15px;background:var(--bg-c);
+  border:1px solid var(--br);border-radius:var(--r);cursor:pointer;transition:all .15s;user-select:none}
+.net-item:active,.net-item.pressed{background:var(--ac-d);border-color:var(--ac-m)}
+.net-ssid{flex:1;font-size:.92rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.net-sig{display:flex;gap:2px;align-items:flex-end;flex-shrink:0}
+.net-sig-bar{width:4px;border-radius:2px;background:var(--br)}
+.net-sig-bar.on{background:var(--ac)}
+.net-sig-bar:nth-child(1){height:5px}.net-sig-bar:nth-child(2){height:9px}
+.net-sig-bar:nth-child(3){height:13px}.net-sig-bar:nth-child(4){height:17px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:0 20px;height:50px;border-radius:var(--r);border:none;font-size:.88rem;
+  font-weight:600;cursor:pointer;transition:all .15s;user-select:none;min-width:80px}
+.btn-primary{background:var(--ac);color:#050a0e}
+.btn-primary:active{opacity:.75}
+.btn-ghost{background:transparent;color:var(--ts);border:1px solid var(--br)}
+.btn-ghost:active{background:var(--bg-i)}
+.btn-sm{height:38px;padding:0 14px;font-size:.72rem}
+
+/* PASSWORD PANEL */
+.pw-panel{display:none;flex-direction:column;gap:10px;margin-top:10px}
+.pw-panel.open{display:flex}
+.pw-label{font-size:.7rem;color:var(--ts);letter-spacing:1px;text-transform:uppercase}
+.pw-row{display:flex;gap:8px}
+.pw-inp{flex:1;background:var(--bg-i);border:1px solid var(--br);border-radius:var(--r);
+  padding:0 15px;height:52px;color:var(--tp);font-size:1rem;outline:none}
+.pw-inp:focus{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac-d)}
+.pw-tog{padding:0 14px;height:52px;background:var(--bg-c);border:1px solid var(--br);
+  border-radius:var(--r);color:var(--ts);cursor:pointer;font-size:.72rem;white-space:nowrap}
+.pw-actions{display:flex;gap:8px}
+.pw-actions .btn{flex:1}
+
+/* MSG */
+.msg{font-size:.78rem;padding:9px 13px;border-radius:8px;display:none}
+.msg.ok{background:#00ff8815;border:1px solid #00ff8840;color:var(--ok);display:block}
+.msg.err{background:#ff386015;border:1px solid #ff386040;color:var(--er);display:block}
+
+/* SPIN */
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--bg-i);
+  border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* QR SCREEN */
+.qr-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 0}
+.qr-img{width:200px;height:200px;background:white;border-radius:8px;display:block;object-fit:contain}
+.qr-ph{width:200px;height:200px;background:var(--bg-c);border:2px dashed var(--br);
+  border-radius:8px;display:none;align-items:center;justify-content:center;
+  color:var(--td);font-size:.75rem;text-align:center;padding:16px}
+.dev-code{font-family:monospace;font-size:1.5rem;font-weight:700;color:var(--ac);
+  letter-spacing:4px;background:var(--bg-c);border:1px solid var(--br);border-radius:var(--r);
+  padding:12px 18px;text-align:center;width:100%}
+.dev-row{display:flex;gap:8px;align-items:center;width:100%}
+.dev-row .btn{padding:0 16px;height:46px;font-size:.72rem;flex-shrink:0}
+.status-line{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--ts)}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--wn);animation:pd 1.5s infinite}
+@keyframes pd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.pulse.ok{background:var(--ok);animation:none}
+.lnk{font-size:.72rem;color:var(--ac);text-decoration:underline;cursor:pointer}
+
+/* DONE */
+.done-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;gap:16px;text-align:center}
+.done-ico{font-size:3.5rem}
+.done-title{font-size:1.3rem;font-weight:700;color:var(--ok)}
+.done-sub{font-size:.85rem;color:var(--ts)}
+
+/* VIRTUAL KEYBOARD */
+.kb{position:fixed;bottom:0;left:0;right:0;background:var(--bg-c);border-top:1px solid var(--br);
+  padding:6px 4px 8px;transform:translateY(100%);transition:transform .25s ease;z-index:100}
+.kb.open{transform:translateY(0)}
+.kb-row{display:flex;gap:3px;justify-content:center;margin-bottom:3px}
+.kb-key{height:44px;background:var(--bg-i);border:1px solid var(--br);border-radius:6px;
+  color:var(--tp);font-size:.85rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;user-select:none;flex:1;min-width:0;max-width:72px;
+  transition:background .1s,border-color .1s}
+.kb-key:active,.kb-key.pressed{background:var(--ac-d);border-color:var(--ac-m);color:var(--ac)}
+.kb-key.kb-wide{max-width:100px}
+.kb-key.kb-space{max-width:none;flex:5}
+.kb-key.kb-enter{background:var(--ac-d);border-color:var(--ac-m);color:var(--ac);max-width:100px}
+.kb-key.kb-enter:active{background:var(--ac);color:#050a0e}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-logo">ClawbotOS</div>
+    <div class="hdr-step" id="hdr-step">Step 1 · WiFi</div>
+  </div>
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="content" id="content">
+
+    <!-- ── SCREEN 1: WIFI ── -->
+    <div class="screen active" id="wifi-screen">
+      <div class="sec-hdr">
+        <div class="sec-title">WiFi Networks</div>
+        <button class="btn btn-ghost btn-sm" onclick="scanNetworks()">↻ Rescan</button>
+      </div>
+      <div class="net-list" id="net-list">
+        <div style="color:var(--td);font-size:.85rem;text-align:center;padding:20px;display:flex;align-items:center;justify-content:center;gap:8px">
+          <div class="spin"></div> Scanning…
+        </div>
+      </div>
+
+      <!-- Password sub-panel -->
+      <div class="pw-panel" id="pw-panel">
+        <div class="pw-label">Password for <span id="pw-ssid" style="color:var(--ac)"></span></div>
+        <div class="pw-row">
+          <input class="pw-inp" type="password" id="pw-inp"
+            placeholder="Password (leave empty for open network)"
+            onfocus="openKeyboard()"
+            autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+          <button class="pw-tog" onclick="togglePw()" id="pw-tog">Show</button>
+        </div>
+        <div id="wifi-msg"></div>
+        <div class="pw-actions">
+          <button class="btn btn-ghost" onclick="closePwPanel()">← Back</button>
+          <button class="btn btn-primary" id="btn-connect" onclick="connectWifi()">Connect →</button>
+        </div>
+      </div>
+
+      <div style="margin-top:auto;padding-top:14px">
+        <button class="btn btn-ghost" style="width:100%" onclick="skipWifi()">
+          Skip — use Ethernet only
+        </button>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 2: QR / ACTIVATION ── -->
+    <div class="screen" id="qr-screen" style="align-items:center">
+      <div style="font-size:.75rem;color:var(--ts);text-align:center;margin-bottom:10px">
+        Scan the QR code with your phone or enter the device code at openjarvis.io
+      </div>
+      <div class="qr-wrap">
+        <img class="qr-img" id="qr-img" src="/api/qr.png" alt="QR Code"
+          onerror="this.style.display='none';document.getElementById('qr-ph').style.display='flex'">
+        <div class="qr-ph" id="qr-ph">QR generation failed — use the device code below</div>
+
+        <div style="width:100%">
+          <div style="font-size:.6rem;color:var(--td);margin-bottom:5px;text-transform:uppercase;letter-spacing:1.5px">Device code</div>
+          <div class="dev-row">
+            <div class="dev-code" id="dev-code">----</div>
+            <button class="btn btn-ghost" id="btn-copy" onclick="copyCode()">Copy</button>
+          </div>
+        </div>
+
+        <div style="font-size:.68rem;color:var(--td)">
+          MAC: <span id="qr-mac" style="font-family:monospace;color:var(--ts)">--</span>
+        </div>
+
+        <span class="lnk" onclick="openJarvis()">Open openjarvis.io →</span>
+
+        <div class="status-line">
+          <div class="pulse" id="act-pulse"></div>
+          <span id="act-status">Waiting for activation…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 3: DONE ── -->
+    <div class="screen" id="done-screen">
+      <div class="done-wrap">
+        <div class="done-ico">✅</div>
+        <div class="done-title">Device activated!</div>
+        <div class="done-sub" id="done-ip">Opening dashboard…</div>
+        <div class="spin"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<!-- VIRTUAL KEYBOARD -->
+<div class="kb" id="kb">
+  <div class="kb-row" id="kb-r0"></div>
+  <div class="kb-row" id="kb-r1"></div>
+  <div class="kb-row" id="kb-r2"></div>
+  <div class="kb-row" id="kb-r3"></div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+let selectedSsid = '';
+let shiftOn = false;
+let pollTimer = null;
+let activateUrl = 'https://openjarvis.io';
+let deviceIp = '';
+
+// ── Virtual keyboard ──────────────────────────────────────────────────────────
+const KB_ROWS = [
+  ['1','2','3','4','5','6','7','8','9','0','-'],
+  ['q','w','e','r','t','y','u','i','o','p'],
+  ['a','s','d','f','g','h','j','k','l'],
+  ['⇧','z','x','c','v','b','n','m','⌫'],
+];
+
+function buildKeyboard() {
+  KB_ROWS.forEach((row, ri) => {
+    const rowEl = document.getElementById('kb-r' + ri);
+    row.forEach(k => {
+      const btn = document.createElement('button');
+      btn.className = 'kb-key';
+      if (k === '⇧') btn.className += ' kb-wide';
+      else if (k === '⌫') btn.className += ' kb-wide';
+      btn.textContent = k;
+      btn.dataset.k = k;
+      const handler = e => { e.preventDefault(); pressKey(btn); };
+      btn.addEventListener('touchstart', handler, {passive: false});
+      btn.addEventListener('mousedown', handler);
+      rowEl.appendChild(btn);
+    });
+    if (ri === 3) {
+      // Space
+      const sp = document.createElement('button');
+      sp.className = 'kb-key kb-space';
+      sp.textContent = 'space';
+      sp.dataset.k = ' ';
+      const hs = e => { e.preventDefault(); pressKey(sp); };
+      sp.addEventListener('touchstart', hs, {passive: false});
+      sp.addEventListener('mousedown', hs);
+      rowEl.appendChild(sp);
+      // Enter
+      const en = document.createElement('button');
+      en.className = 'kb-key kb-enter kb-wide';
+      en.textContent = 'Enter';
+      en.dataset.k = 'enter';
+      const he = e => { e.preventDefault(); pressKey(en); };
+      en.addEventListener('touchstart', he, {passive: false});
+      en.addEventListener('mousedown', he);
+      rowEl.appendChild(en);
+    }
+  });
+}
+
+function pressKey(btn) {
+  btn.classList.add('pressed');
+  setTimeout(() => btn.classList.remove('pressed'), 130);
+  const k = btn.dataset.k;
+  const inp = document.getElementById('pw-inp');
+  if (!inp) return;
+  if (k === '⇧') {
+    shiftOn = !shiftOn;
+    updateShift();
+  } else if (k === '⌫') {
+    inp.value = inp.value.slice(0, -1);
+  } else if (k === 'enter') {
+    connectWifi();
+  } else {
+    inp.value += shiftOn ? k.toUpperCase() : k;
+    if (shiftOn) { shiftOn = false; updateShift(); }
+  }
+}
+
+function updateShift() {
+  document.querySelectorAll('.kb-key').forEach(b => {
+    const k = b.dataset.k;
+    if (k && k.length === 1 && k >= 'a' && k <= 'z') {
+      b.textContent = shiftOn ? k.toUpperCase() : k;
+    }
+  });
+}
+
+function openKeyboard() {
+  document.getElementById('kb').classList.add('open');
+  document.getElementById('content').classList.add('kb-open');
+  setTimeout(() => {
+    document.getElementById('pw-inp').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }, 60);
+}
+
+function closeKeyboard() {
+  document.getElementById('kb').classList.remove('open');
+  document.getElementById('content').classList.remove('kb-open');
+}
+
+document.addEventListener('touchstart', e => {
+  const kb = document.getElementById('kb');
+  const inp = document.getElementById('pw-inp');
+  if (kb.classList.contains('open') && !kb.contains(e.target) && e.target !== inp) {
+    closeKeyboard();
+  }
+}, {passive: true});
+
+// ── Screens ───────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const labels = {
+    'wifi-screen': 'Step 1 · WiFi',
+    'qr-screen': 'Step 2 · Activate',
+    'done-screen': 'Done!'
+  };
+  document.getElementById('hdr-step').textContent = labels[id] || '';
+}
+
+// ── WiFi ──────────────────────────────────────────────────────────────────────
+function sigBars(signal) {
+  const bars = signal > 75 ? 4 : signal > 50 ? 3 : signal > 25 ? 2 : 1;
+  let h = '';
+  for (let i = 1; i <= 4; i++) h += `<div class="net-sig-bar${i <= bars ? ' on' : ''}"></div>`;
+  return h;
+}
+
+function escHtml(s) {
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+async function scanNetworks() {
+  const list = document.getElementById('net-list');
+  list.innerHTML = '<div style="color:var(--td);font-size:.85rem;text-align:center;padding:20px;display:flex;align-items:center;justify-content:center;gap:8px"><div class="spin"></div> Scanning…</div>';
+  try {
+    const r = await fetch('/api/networks', {signal: AbortSignal.timeout(18000)});
+    const d = await r.json();
+    renderNetworks(d.networks || []);
+  } catch {
+    list.innerHTML = '<div style="color:var(--er);font-size:.85rem;text-align:center;padding:20px">Scan failed</div>';
+  }
+}
+
+function renderNetworks(nets) {
+  const list = document.getElementById('net-list');
+  list.innerHTML = '';
+  if (!nets.length) {
+    list.innerHTML = '<div style="color:var(--td);font-size:.85rem;text-align:center;padding:20px">No networks found — try rescanning.</div>';
+  }
+  nets.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'net-item';
+    el.innerHTML = `<div class="net-sig">${sigBars(n.signal)}</div><div class="net-ssid">${escHtml(n.ssid)}</div>`;
+    const tap = () => selectNetwork(n.ssid);
+    el.addEventListener('click', tap);
+    el.addEventListener('touchend', e => { e.preventDefault(); tap(); });
+    list.appendChild(el);
+  });
+  // Manual entry
+  const manual = document.createElement('div');
+  manual.className = 'net-item';
+  manual.innerHTML = `<div class="net-sig"><div class="net-sig-bar"></div><div class="net-sig-bar"></div><div class="net-sig-bar"></div><div class="net-sig-bar"></div></div><div class="net-ssid" style="color:var(--ts)">✏ Enter SSID manually…</div>`;
+  manual.addEventListener('click', () => selectNetwork('__manual__'));
+  manual.addEventListener('touchend', e => { e.preventDefault(); selectNetwork('__manual__'); });
+  list.appendChild(manual);
+}
+
+function selectNetwork(ssid) {
+  selectedSsid = ssid === '__manual__' ? '' : ssid;
+  document.getElementById('pw-ssid').textContent = ssid === '__manual__' ? '(type manually)' : ssid;
+  document.getElementById('pw-inp').value = '';
+  document.getElementById('pw-panel').classList.add('open');
+  setMsg('wifi-msg', '', '');
+  document.getElementById('btn-connect').disabled = false;
+  document.getElementById('btn-connect').innerHTML = 'Connect →';
+  // Scroll down to show the panel
+  setTimeout(() => {
+    document.getElementById('pw-panel').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }, 50);
+}
+
+function closePwPanel() {
+  document.getElementById('pw-panel').classList.remove('open');
+  closeKeyboard();
+}
+
+function togglePw() {
+  const inp = document.getElementById('pw-inp');
+  const tog = document.getElementById('pw-tog');
+  if (inp.type === 'password') { inp.type = 'text'; tog.textContent = 'Hide'; }
+  else { inp.type = 'password'; tog.textContent = 'Show'; }
+}
+
+async function connectWifi() {
+  let ssid = selectedSsid;
+  if (!ssid) {
+    // manual entry: SSID is in a separate input (not implemented — use pw-inp for now)
+    // Actually we should show a separate SSID input for manual entry
+    // For simplicity, if selectedSsid is empty we ask via prompt (works in Chromium)
+    ssid = (window.prompt && window.prompt('Enter WiFi SSID:')) || '';
+    if (!ssid) return;
+  }
+  const pw = document.getElementById('pw-inp').value;
+  const btn = document.getElementById('btn-connect');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div>';
+  setMsg('wifi-msg', '', '');
+  closeKeyboard();
+  try {
+    const r = await fetch('/api/wifi', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ssid, password: pw}),
+      signal: AbortSignal.timeout(35000)
+    });
+    const d = await r.json();
+    if (d.ok) {
+      setMsg('wifi-msg', '✓ Connected!', 'ok');
+      setTimeout(goToQr, 1000);
+    } else {
+      setMsg('wifi-msg', d.message || 'Connection failed — check password', 'err');
+      btn.disabled = false;
+      btn.textContent = 'Retry →';
+    }
+  } catch {
+    setMsg('wifi-msg', 'Timeout — check password and try again', 'err');
+    btn.disabled = false;
+    btn.textContent = 'Retry →';
+  }
+}
+
+function skipWifi() { goToQr(); }
+
+// ── QR / Activation ───────────────────────────────────────────────────────────
+function goToQr() {
+  closeKeyboard();
+  showScreen('qr-screen');
+  loadStatus();
+  pollTimer = setInterval(pollActivation, 3000);
+}
+
+async function loadStatus() {
+  try {
+    const r = await fetch('/api/status', {signal: AbortSignal.timeout(4000)});
+    const d = await r.json();
+    activateUrl = d.activate_url || 'https://openjarvis.io';
+    deviceIp = d.ip || '';
+    document.getElementById('dev-code').textContent = d.device_code || '----';
+    document.getElementById('qr-mac').textContent = d.mac || '--';
+    if (d.activated) onActivated(d);
+  } catch {}
+}
+
+async function pollActivation() {
+  try {
+    const r = await fetch('/api/status', {signal: AbortSignal.timeout(4000)});
+    const d = await r.json();
+    deviceIp = d.ip || deviceIp;
+    if (d.activated) { clearInterval(pollTimer); onActivated(d); }
+  } catch {}
+}
+
+function onActivated(d) {
+  clearInterval(pollTimer);
+  document.getElementById('act-pulse').classList.add('ok');
+  document.getElementById('act-status').textContent = 'Activated!';
+  setTimeout(() => {
+    showScreen('done-screen');
+    document.getElementById('done-ip').textContent =
+      (d.ip ? `IP: ${d.ip} — ` : '') + 'Opening dashboard…';
+    setTimeout(() => { window.location.href = 'http://localhost'; }, 2500);
+  }, 800);
+}
+
+function copyCode() {
+  const code = document.getElementById('dev-code').textContent;
+  if (navigator.clipboard && code && code !== '----') {
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('btn-copy');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+    });
+  }
+}
+
+function openJarvis() {
+  window.open(activateUrl, '_blank');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function setMsg(id, text, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'msg' + (type ? ' ' + type : '');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildKeyboard();
+scanNetworks();
+// Pre-load QR image (will be refreshed later by qr-screen init)
+</script>
+</body>
+</html>
+"""
+
+# ── HTTP server ───────────────────────────────────────────────────────────────
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, fmt, *args):
+        pass  # silence access logs
+
+    def send_json(self, code, data):
+        body = json.dumps(data).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
+    def do_GET(self):
+        path = self.path.split("?")[0]
+
+        if path in ("/", ""):
+            body = WIZARD_HTML.encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        elif path == "/api/status":
+            self.send_json(200, {
+                "ip": _get_ip(),
+                "mac": MAC,
+                "device_code": DEVICE_CODE,
+                "id_long": ID_LONG,
+                "activate_url": ACTIVATE_URL,
+                "activated": os.path.exists(ACTIVATED_SIGNAL),
+            })
+
+        elif path == "/api/networks":
+            nets = scan_networks()
+            self.send_json(200, {"networks": nets})
+
+        elif path == "/api/qr.png":
+            png = make_qr_png(ACTIVATE_URL)
+            if png:
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Content-Length", str(len(png)))
+                self.end_headers()
+                self.wfile.write(png)
+            else:
+                self.send_response(503)
+                self.end_headers()
+
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_POST(self):
+        length = int(self.headers.get("Content-Length", 0))
+        try:
+            data = json.loads(self.rfile.read(length) or b"{}")
+        except Exception:
+            self.send_json(400, {"error": "invalid JSON"})
+            return
+
+        path = self.path.split("?")[0]
+
+        if path == "/api/wifi":
+            ssid = data.get("ssid", "").strip()
+            password = data.get("password", "")
+            if not ssid:
+                self.send_json(400, {"ok": False, "message": "Missing SSID"})
+                return
+            ok, msg = connect_wifi(ssid, password)
+            self.send_json(200 if ok else 400, {"ok": ok, "message": msg})
+
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+
+if __name__ == "__main__":
+    server = HTTPServer(("127.0.0.1", PORT), Handler)
+    print(f"ClawbotOS wizard server on http://127.0.0.1:{PORT}", flush=True)
+    server.serve_forever()
