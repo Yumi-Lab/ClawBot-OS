@@ -253,8 +253,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <span></span><span></span><span></span>
     </button>
     <div class="sb-brand">
-      <span class="sb-title">ClawbotOS</span>
-      <span class="sb-sub">AI Assistant Hub</span>
+      <img src="https://wiki.yumi-lab.com/img/YUMI_LOGO.svg" alt="Yumi Lab" style="height:22px;filter:brightness(0) invert(1);opacity:.9;margin-bottom:2px">
+      <span class="sb-sub">ClawbotOS · AI Hub</span>
     </div>
   </div>
 
@@ -638,6 +638,20 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <span>3. Services panel → Start clawbot-telegram</span>
             <span>4. Message your bot — it replies via Claude!</span>
           </div>
+        </div>
+
+        <!-- ClawbotCore update -->
+        <div class="setup-card" id="sc-core-update">
+          <div class="setup-h">
+            <div class="setup-ico">🔧</div>
+            <div class="setup-badge opt" id="sb-core-update">v—</div>
+          </div>
+          <div class="setup-title">ClawbotCore Update</div>
+          <div class="setup-desc">Update the AI middleware engine without reflashing. Pulls the latest code from <strong>Yumi-Lab/clawbot-core</strong> on GitHub and restarts the service.</div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="setup-go" onclick="updateCore()" id="btn-update-core">Update ClawbotCore</button>
+          </div>
+          <div class="setup-desc" id="core-update-msg" style="color:var(--td);margin-top:2px"></div>
         </div>
 
         <!-- Dashboard update -->
@@ -1049,6 +1063,47 @@ async function doUpdate() {
     $id('btn-do-update').disabled = false;
   }
 }
+
+// ═══ CLAWBOTCORE UPDATE ═══
+async function updateCore() {
+  const btn = $id('btn-update-core');
+  const msg = $id('core-update-msg');
+  btn.disabled = true;
+  msg.textContent = 'Pulling from GitHub... this may take 30–60s.';
+  msg.style.color = 'var(--td)';
+  try {
+    const r = await fetch('/api/system/update-core', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:'{}',
+      signal: AbortSignal.timeout(90000)
+    });
+    const d = await r.json();
+    if (d.updated) {
+      $id('sb-core-update').className = 'setup-badge ok';
+      $id('sb-core-update').textContent = 'Updated!';
+      msg.textContent = `v${d.from} → v${d.to} — Service restarted.`;
+      msg.style.color = 'var(--ok)';
+    } else {
+      msg.textContent = d.error || 'No update applied.';
+      msg.style.color = 'var(--er)';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    msg.textContent = 'Update failed: ' + e.message;
+    msg.style.color = 'var(--er)';
+    btn.disabled = false;
+  }
+}
+
+// Load core version on startup
+(async () => {
+  try {
+    const r = await fetch('/api/system/core-version', {signal: AbortSignal.timeout(5000)});
+    if (r.ok) {
+      const d = await r.json();
+      $id('sb-core-update').textContent = d.version || '—';
+    }
+  } catch(e) {}
+})();
 
 // ═══ FILE EDITOR ═══
 const FILE_SVC_MAP = {

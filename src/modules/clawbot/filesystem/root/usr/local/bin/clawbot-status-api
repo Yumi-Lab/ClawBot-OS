@@ -217,6 +217,7 @@ def update_picoclaw_config(provider, model, api_key, base_url):
         "gateway": {"host": "0.0.0.0", "port": 8080},
         "agents": {
             "defaults": {
+                "model": "default",
                 "workspace": "~/.picoclaw/workspace",
                 "max_tokens": 4096,
                 "temperature": 0.7
@@ -231,6 +232,16 @@ def update_picoclaw_config(provider, model, api_key, base_url):
                 "request_timeout": 120
             }
         ],
+        # maixcam satisfies picoclaw v0.2.0 requirement of ≥1 enabled channel
+        "channels": {
+            "maixcam": {
+                "enabled": True,
+                "host": "127.0.0.1",
+                "port": 18790,
+                "allow_from": [],
+                "reasoning_channel_id": ""
+            }
+        },
         "tools": {"web": {"duckduckgo": {"enabled": True, "max_results": 5}}},
         "log_level": "info"
     }
@@ -298,6 +309,59 @@ def write_file(path, content):
         return True, None
     except Exception as e:
         return False, str(e)
+
+
+CLAWBOT_CORE_REPO = "https://github.com/Yumi-Lab/clawbot-core"
+CLAWBOT_CORE_BRANCH = "main"
+CLAWBOT_CORE_INSTALL_DIR = "/usr/local/lib/clawbot-core"
+CLAWBOT_CORE_VERSION_FILE = "/usr/local/lib/clawbot-core/VERSION"
+
+
+def get_clawbot_core_version() -> str:
+    """Read local ClawbotCore version from VERSION file or git."""
+    try:
+        with open(CLAWBOT_CORE_VERSION_FILE) as f:
+            return f.read().strip()
+    except Exception:
+        return "unknown"
+
+
+def update_clawbot_core() -> dict:
+    """Pull latest ClawbotCore from GitHub, install, restart service."""
+    import tempfile
+    import shutil
+
+    local_ver = get_clawbot_core_version()
+    try:
+        tmp = tempfile.mkdtemp(prefix="clawbot-core-update-")
+        subprocess.run(
+            ["git", "clone", "--depth=1", "--branch", CLAWBOT_CORE_BRANCH,
+             CLAWBOT_CORE_REPO, tmp],
+            check=True, capture_output=True, timeout=60
+        )
+        # Install core files
+        src_core = os.path.join(tmp, "clawbot_core")
+        src_store = os.path.join(tmp, "store")
+        if os.path.isdir(src_core):
+            for f in os.listdir(src_core):
+                shutil.copy2(os.path.join(src_core, f), CLAWBOT_CORE_INSTALL_DIR)
+        if os.path.isdir(src_store):
+            dest_store = os.path.join(CLAWBOT_CORE_INSTALL_DIR, "store")
+            if os.path.isdir(dest_store):
+                shutil.rmtree(dest_store)
+            shutil.copytree(src_store, dest_store)
+        shutil.rmtree(tmp, ignore_errors=True)
+
+        # Restart service
+        subprocess.run(["systemctl", "restart", "clawbot-core.service"],
+                       timeout=10, capture_output=True)
+
+        new_ver = get_clawbot_core_version()
+        return {"updated": True, "from": local_ver, "to": new_ver}
+    except subprocess.CalledProcessError as e:
+        return {"updated": False, "error": e.stderr.decode(errors="replace")[:300]}
+    except Exception as e:
+        return {"updated": False, "error": str(e)}
 
 
 def update_dashboard(check_only=False):
@@ -379,6 +443,9 @@ class Handler(BaseHTTPRequestHandler):
             result = update_dashboard(check_only=True)
             self.send_json(200, result)
 
+        elif parsed.path == "/core-version":
+            self.send_json(200, {"version": get_clawbot_core_version()})
+
         elif parsed.path == "/logs":
             service = qs.get("service", [""])[0]
             lines = qs.get("lines", ["100"])[0]
@@ -436,6 +503,11 @@ class Handler(BaseHTTPRequestHandler):
 
         elif path == "/update-dashboard":
             result = update_dashboard(check_only=False)
+            self.send_json(200, result)
+            return
+
+        elif path == "/update-core":
+            result = update_clawbot_core()
             self.send_json(200, result)
             return
 
