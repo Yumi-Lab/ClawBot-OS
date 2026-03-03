@@ -202,8 +202,25 @@ def get_stats():
     }
 
 
+def get_mac() -> str:
+    """Read Ethernet MAC address (eth0 or end0 for predictable naming)."""
+    for iface in ["eth0", "end0"]:
+        try:
+            with open(f"/sys/class/net/{iface}/address") as f:
+                mac = f.read().strip()
+            if mac and mac != "00:00:00:00:00:00":
+                return mac.upper()
+        except Exception:
+            pass
+    return "unknown"
+
+
 def get_current_config() -> dict:
     """Read current LLM config from picoclaw config.json."""
+    mac = get_mac()
+    mac_clean = mac.replace(":", "") if mac != "unknown" else ""
+    device_code = f"{mac_clean[:4]}-{mac_clean[4:8]}-{mac_clean[8:]}" if len(mac_clean) == 12 else mac
+    activate_url = f"https://openjarvis.io/activate?mac={mac_clean}" if mac_clean else "https://openjarvis.io"
     try:
         with open(PICOCLAW_CONFIG) as f:
             cfg = json.load(f)
@@ -224,9 +241,11 @@ def get_current_config() -> dict:
             provider = "openrouter"
         else:
             provider = "custom"
-        return {"provider": provider, "model": model, "apikey": api_key, "baseurl": base_url}
+        return {"provider": provider, "model": model, "apikey": api_key, "baseurl": base_url,
+                "mac": mac, "device_code": device_code, "activate_url": activate_url}
     except Exception:
-        return {"provider": "", "model": "", "apikey": "", "baseurl": ""}
+        return {"provider": "", "model": "", "apikey": "", "baseurl": "",
+                "mac": mac, "device_code": device_code, "activate_url": activate_url}
 
 
 def update_picoclaw_config(provider, model, api_key, base_url):
