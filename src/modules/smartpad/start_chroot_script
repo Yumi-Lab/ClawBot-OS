@@ -106,7 +106,14 @@ apt-get install -y --no-install-recommends \
     cage \
     chromium \
     || echo_red "Warning: cage/chromium install failed — wizard will fall back to dialog"
+
+# wvkbd: Wayland virtual keyboard (shows automatically on input focus)
+apt-get install -y --no-install-recommends wvkbd \
+    || echo_yellow "wvkbd not available — on-screen keyboard disabled"
+
 echo_green "Kiosk packages installed."
+
+chmod +x /usr/local/bin/clawbot-kiosk-launcher
 
 ### Enable persistent dashboard kiosk service (starts after firstboot wizard)
 systemctl enable clawbot-kiosk.service

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#### ClawbotOS — Kiosk launcher (runs inside cage Wayland session)
+####
+#### Starts wvkbd virtual keyboard (if available) then launches Chromium
+#### in full-screen kiosk mode pointing to the local dashboard.
+####
+#### This script is the sole argument to cage:
+####   cage -- /usr/local/bin/clawbot-kiosk-launcher
+####
+#### wvkbd MUST run inside the same Wayland session (cage) to receive
+#### text-input focus events and show/hide automatically.
+####
+#### Written by Yumi Lab — BUSL-1.1
+
+# Start virtual keyboard in background (hidden by default, shows on input focus)
+if command -v wvkbd-mobintl &>/dev/null; then
+    wvkbd-mobintl --hidden -L 240 &
+    WVKBD_PID=$!
+fi
+
+# Launch Chromium kiosk — exec so cage exits when Chromium exits
+exec chromium \
+    --kiosk \
+    --ozone-platform=wayland \
+    --no-sandbox \
+    --disable-infobars \
+    --disable-session-crashed-bubble \
+    --disable-features=TranslateUI \
+    --check-for-update-interval=31536000 \
+    --disable-restore-session-state \
+    http://localhost/

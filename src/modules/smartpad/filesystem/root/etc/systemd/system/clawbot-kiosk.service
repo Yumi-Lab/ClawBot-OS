@@ -10,16 +10,7 @@ ConditionPathNotExists=/.firstboot_clawbot
 
 [Service]
 Type=simple
-ExecStart=cage -- chromium \
-    --kiosk \
-    --ozone-platform=wayland \
-    --no-sandbox \
-    --disable-infobars \
-    --disable-session-crashed-bubble \
-    --disable-features=TranslateUI \
-    --check-for-update-interval=31536000 \
-    --disable-restore-session-state \
-    http://localhost/
+ExecStart=cage -- /usr/local/bin/clawbot-kiosk-launcher
 Restart=on-failure
 RestartSec=5
 TimeoutStartSec=30
