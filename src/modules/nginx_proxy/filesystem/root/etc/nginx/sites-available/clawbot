@@ -42,14 +42,26 @@ server {
         add_header Access-Control-Allow-Origin *;
     }
 
-    # ClawbotCore — module registry, tool loop orchestrator
-    location /api/core/ {
-        proxy_pass http://127.0.0.1:8090/;
+    # ClawbotCore — chat completions API (longest prefix match wins)
+    location /api/core/v1/ {
+        proxy_pass http://127.0.0.1:8090/v1/;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
 
-        # Support long-running tool loops
+        # Support long-running tool loops + SSE streaming
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_buffering off;
+    }
+
+    # ClawbotCore — module registry, health (shorter prefix)
+    location /api/core/ {
+        proxy_pass http://127.0.0.1:8090/core/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+
         proxy_read_timeout 300s;
         proxy_send_timeout 300s;
         proxy_buffering off;
