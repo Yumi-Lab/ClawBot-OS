@@ -139,7 +139,19 @@ show_qr_and_wait() {
     mac_raw="$(echo "${MAC}" | tr -d ':' | tr '[:lower:]' '[:upper:]')"
     device_code="${mac_raw:0:4}-${mac_raw:4:4}-${mac_raw:8:4}"
 
-    # Display QR code + status loop on the terminal (no dialog overlay)
+    # On SmartPad (screen + fbi available): render QR as PNG on framebuffer
+    # → readable by phone cameras, unlike UTF-8 terminal art
+    local use_fbi=false FBI_PID=""
+    if command -v fbi &>/dev/null && command -v qrencode &>/dev/null && [[ -e /dev/fb0 ]]; then
+        local qr_png="/tmp/clawbot-qr.png"
+        if qrencode -t PNG -s 8 -m 4 -o "${qr_png}" "${ACTIVATE_URL}" 2>/dev/null; then
+            fbi -T 2 -d /dev/fb0 --noverbose "${qr_png}" 2>/dev/null &
+            FBI_PID=$!
+            use_fbi=true
+        fi
+    fi
+
+    # Status info loop on tty2
     while [[ ! -f "${ACTIVATED_SIGNAL}" ]]; do
         local ip
         ip="$(get_ip)"
@@ -150,7 +162,8 @@ show_qr_and_wait() {
         echo "  │  Scan the QR code or enter the device code to activate      │"
         echo "  └─────────────────────────────────────────────────────────────┘"
         echo ""
-        if command -v qrencode &>/dev/null; then
+        if ! ${use_fbi} && command -v qrencode &>/dev/null; then
+            # Fallback: UTF-8 terminal QR (headless devices without framebuffer)
             qrencode -t utf8 -m 2 "${ACTIVATE_URL}" 2>/dev/null || true
         fi
         echo "  ┌─────────────────────────────────────────────────────────────┐"
@@ -166,6 +179,9 @@ show_qr_and_wait() {
         echo ""
         sleep 5
     done
+
+    # Stop framebuffer QR display
+    [[ -n "${FBI_PID}" ]] && kill "${FBI_PID}" 2>/dev/null || true
 
     clear
     echo ""
