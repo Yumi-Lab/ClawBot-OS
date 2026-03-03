@@ -1,47 +1,67 @@
 #!/usr/bin/env bash
 #### ClawbotOS First-Boot Setup Wizard
 ####
-#### Written by Yumi Lab
-#### This File is distributed under GPLv3
+#### Unified wizard: detects screen presence.
+####   - With screen: interactive WiFi setup + QR code display
+####   - Headless: console message with MAC, waits for cloud activation
 ####
+#### Cloud provisioning is handled by clawbot-cloud.service (WebSocket).
+#### This wizard only provides the local UX (dialog or console output).
+####
+#### Written by Yumi Lab — BUSL-1.1
 
 set -e
 
-DIALOG="$(command -v dialog)"
+DIALOG="$(command -v dialog 2>/dev/null || true)"
 BT="ClawbotOS Setup Wizard"
 WT=20
 WW=70
+ACTIVATED_SIGNAL="/tmp/clawbot-activated"
 
-# Switch to TTY2
-chvt 2 2>/dev/null || true
+# ── Detect environment ────────────────────────────────────────────────────────
+
+get_mac() {
+    cat /sys/class/net/eth0/address 2>/dev/null || \
+    cat /sys/class/net/wlan0/address 2>/dev/null || \
+    echo "unknown"
+}
+
+get_ip() {
+    hostname -I 2>/dev/null | awk '{print $1}'
+}
+
+MAC="$(get_mac | tr '[:lower:]' '[:upper:]')"
+MAC_CLEAN="$(echo "${MAC}" | tr -d ':')"
+ACTIVATE_URL="https://clawbot-api.yumi-lab.com/activate?mac=${MAC_CLEAN}"
+HAS_SCREEN=false
+[[ -e /dev/fb0 ]] && HAS_SCREEN=true
+
+# ── Screen mode: interactive dialog ──────────────────────────────────────────
 
 welcome_msg() {
     "${DIALOG}" --backtitle "${BT}" --title "Welcome to ClawbotOS" \
         --no-cancel --msgbox "\
 Welcome to ClawbotOS for your Yumi Lab board!
 
-This wizard will help you configure your AI assistant.
+This wizard will help you set up your device.
 
 The setup will:
   1. Configure WiFi (optional)
-  2. Configure your AI provider API key
-  3. Start all services
+  2. Display a QR code to link your device
+  3. Wait for cloud activation
 
 Press OK to continue..." ${WT} ${WW}
 }
 
 configure_wifi() {
-    # Check if nmcli is available
     if ! command -v nmcli &>/dev/null; then
         return
     fi
 
-    # Ask user if they want to configure WiFi
     "${DIALOG}" --backtitle "${BT}" --title "WiFi Configuration" \
         --yesno "Do you want to connect to a WiFi network?\n\n(Select No to use Ethernet only)" \
         10 ${WW} || return
 
-    # Get SSID
     local ssid
     ssid=$("${DIALOG}" --backtitle "${BT}" --title "WiFi - Network Name" \
         --inputbox "Enter WiFi network name (SSID):" \
@@ -51,13 +71,11 @@ configure_wifi() {
         return
     fi
 
-    # Get password
     local password
     password=$("${DIALOG}" --backtitle "${BT}" --title "WiFi - Password" \
         --insecure --passwordbox "Enter WiFi password for '${ssid}':\n(Leave empty for open network)" \
         10 ${WW} 3>&1 1>&2 2>&3) || return
 
-    # Connect using nmcli
     "${DIALOG}" --backtitle "${BT}" --title "WiFi - Connecting..." \
         --infobox "Connecting to '${ssid}'..." 5 ${WW}
 
@@ -69,7 +87,6 @@ configure_wifi() {
 
     sleep 3
 
-    # Check if connected
     if nmcli -t -f STATE general 2>/dev/null | grep -q "connected"; then
         "${DIALOG}" --backtitle "${BT}" --title "WiFi" \
             --msgbox "Connected to '${ssid}' successfully!" 8 ${WW}
@@ -80,170 +97,48 @@ configure_wifi() {
     fi
 }
 
-configure_clawbot_cloud() {
-    # Generate (or retrieve) device ID
-    local device_id
-    device_id=$(/usr/local/bin/clawbot-provision --device-id 2>/dev/null || \
-                cat /etc/clawbot/device-id 2>/dev/null || echo "unknown")
-
-    local activate_url="https://clawbot-api.yumi-lab.com/activate?device_id=${device_id}"
-
-    # Show QR code full-screen on TTY, then dialog on top
+show_qr_on_screen() {
     clear
     echo ""
     echo "  ┌─────────────────────────────────────────────────────────────┐"
     echo "  │          Clawbot Cloud — Link your device                   │"
     echo "  │                                                             │"
-    echo "  │  Scan the QR code below with the Yumi-Lab app:             │"
+    echo "  │  Scan the QR code below with the Yumi-Lab app              │"
+    echo "  │  or visit the URL to activate your device.                  │"
     echo "  └─────────────────────────────────────────────────────────────┘"
     echo ""
     if command -v qrencode &>/dev/null; then
-        qrencode -t utf8 -m 2 "${activate_url}" 2>/dev/null || true
+        qrencode -t utf8 -m 2 "${ACTIVATE_URL}" 2>/dev/null || true
     fi
     echo ""
-    echo "  URL : ${activate_url}"
-    echo "  ID  : ${device_id}"
+    echo "  MAC : ${MAC}"
+    echo "  URL : ${ACTIVATE_URL}"
     echo ""
-
-    # Ask user: wait for scan or enter key manually
-    if "${DIALOG}" --backtitle "${BT}" --title "Clawbot Cloud — Activate" \
-        --yesno \
-"Scan the QR code above with the Yumi-Lab app to link this device.\n
-After linking, press YES to auto-configure.\n
-Not linked yet? Press NO to enter a subscription key manually." \
-        12 ${WW}; then
-        # Try cloud provisioning
-        if /usr/local/bin/clawbot-provision 2>/dev/null; then
-            return 0
-        fi
-        "${DIALOG}" --backtitle "${BT}" --title "Clawbot Cloud" \
-            --msgbox "Device not linked yet. Please scan the QR code first,\nthen run 'clawbot-provision' or reboot." \
-            8 ${WW}
-        return 0
-    fi
-
-    # Fallback: manual subscription key
-    local sub_key
-    sub_key=$("${DIALOG}" --backtitle "${BT}" --title "Clawbot Cloud — Subscription Key" \
-        --insecure --passwordbox \
-"Enter your Clawbot Cloud subscription key:\n(Get yours at clawbot-api.yumi-lab.com/subscribe)" \
-        10 ${WW} 3>&1 1>&2 2>&3) || sub_key=""
-
-    if [[ -n "${sub_key}" ]]; then
-        /usr/local/bin/clawbot-provision --key "${sub_key}" 2>/dev/null || true
-    fi
 }
 
-configure_api_key() {
-    local provider api_key model base_url
+wait_for_activation() {
+    local ip
+    # Show waiting dialog that auto-refreshes
+    while [[ ! -f "${ACTIVATED_SIGNAL}" ]]; do
+        ip="$(get_ip)"
+        "${DIALOG}" --backtitle "${BT}" --title "Waiting for activation..." \
+            --infobox "\
+Scan the QR code displayed above to activate your device.
 
-    # Ask for LLM provider
-    provider=$("${DIALOG}" --backtitle "${BT}" --title "LLM Provider" \
-        --menu "Select your LLM provider:" ${WT} ${WW} 8 \
-        "clawbot"    "Clawbot Cloud (subscription — no API key needed)" \
-        "anthropic"  "Anthropic (Claude)" \
-        "openai"     "OpenAI (GPT-4o, etc.)" \
-        "openrouter" "OpenRouter (multi-provider)" \
-        "deepseek"   "DeepSeek" \
-        "ollama"     "Ollama (running on another machine)" \
-        "custom"     "Custom OpenAI-compatible endpoint" \
-        "skip"       "Skip for now (configure later)" \
-        3>&1 1>&2 2>&3) || provider="skip"
+MAC : ${MAC}
+IP  : ${ip:-no network}
+Web : http://${ip:-clawbot.local}
 
-    if [[ "${provider}" == "skip" ]]; then
-        return
-    fi
+Cloud status: waiting...
 
-    # Clawbot Cloud: QR code activation flow
-    if [[ "${provider}" == "clawbot" ]]; then
-        configure_clawbot_cloud
-        return
-    fi
+The wizard will continue automatically once activated." \
+            14 ${WW}
+        sleep 5
+    done
 
-    # Other providers: ask for API key
-    api_key=$("${DIALOG}" --backtitle "${BT}" --title "API Key" \
-        --insecure --passwordbox "Enter your ${provider} API key:" \
-        10 ${WW} 3>&1 1>&2 2>&3) || api_key=""
-
-    if [[ -z "${api_key}" ]]; then
-        return
-    fi
-
-    # Set defaults based on provider
-    case "${provider}" in
-        openai)
-            model="gpt-4o"
-            base_url="https://api.openai.com/v1"
-            ;;
-        anthropic)
-            model="claude-sonnet-4-20250514"
-            base_url="https://api.anthropic.com/v1"
-            ;;
-        openrouter)
-            model="anthropic/claude-sonnet-4-20250514"
-            base_url="https://openrouter.ai/api/v1"
-            ;;
-        deepseek)
-            model="deepseek-chat"
-            base_url="https://api.deepseek.com/v1"
-            ;;
-        ollama)
-            base_url=$("${DIALOG}" --backtitle "${BT}" --title "Ollama URL" \
-                --inputbox "Enter Ollama server URL:" 10 ${WW} \
-                "http://192.168.1.100:11434" 3>&1 1>&2 2>&3) || base_url=""
-            model="llama3"
-            ;;
-        custom)
-            base_url=$("${DIALOG}" --backtitle "${BT}" --title "Custom API URL" \
-                --inputbox "Enter API base URL:" 10 ${WW} 3>&1 1>&2 2>&3) || base_url=""
-            model=$("${DIALOG}" --backtitle "${BT}" --title "Model Name" \
-                --inputbox "Enter model name:" 10 ${WW} 3>&1 1>&2 2>&3) || model=""
-            ;;
-    esac
-
-    # Write PicoClaw config
-    cat > /home/pi/.picoclaw/config.json << PICOEOF
-{
-  "gateway": {
-    "host": "0.0.0.0",
-    "port": 8080
-  },
-  "agents": {
-    "defaults": {
-      "workspace": "~/.picoclaw/workspace",
-      "max_tokens": 4096,
-      "temperature": 0.7
-    }
-  },
-  "model_list": [
-    {
-      "model_name": "default",
-      "model": "${model}",
-      "api_key": "${api_key}",
-      "base_url": "${base_url}",
-      "request_timeout": 120
-    }
-  ],
-  "tools": {
-    "web": {
-      "duckduckgo": {
-        "enabled": true,
-        "max_results": 5
-      }
-    }
-  },
-  "log_level": "info"
-}
-PICOEOF
-    chown pi:pi /home/pi/.picoclaw/config.json
-    chmod 600 /home/pi/.picoclaw/config.json
-
-}
-
-finish_setup() {
-    "${DIALOG}" --backtitle "${BT}" --title "Setup Complete!" \
-        --no-cancel --msgbox "\
-ClawbotOS setup is complete!
+    "${DIALOG}" --backtitle "${BT}" --title "Activated!" \
+        --msgbox "\
+Your device has been activated!
 
 Access your AI dashboard at:
     http://clawbot.local
@@ -252,23 +147,56 @@ SSH access:
     User: pi
     Password: yumi
 
-The device will now reboot to apply changes.
-
-Thank you for choosing ClawbotOS!" ${WT} ${WW}
+Press OK to continue." ${WT} ${WW}
 }
 
-# --- MAIN ---
+# ── Headless mode: console output ────────────────────────────────────────────
 
-welcome_msg
-configure_wifi
-configure_api_key
-finish_setup
+headless_wait() {
+    local ip fw
+    fw="$(grep 'VERSION=' /etc/clawbot-release 2>/dev/null | cut -d= -f2 | tr -d '"' || echo '?')"
+    ip="$(get_ip)"
 
-# Cleanup: disable firstboot
+    clear
+    echo ""
+    echo "  ┌────────────────────────────────────────────────┐"
+    echo "  │  ClawbotOS v${fw}                               │"
+    echo "  │                                                │"
+    echo "  │  MAC : ${MAC}                     │"
+    echo "  │  IP  : ${ip:-no network yet}                          │"
+    echo "  │                                                │"
+    echo "  │  Cloud : waiting for activation...             │"
+    echo "  │  Scan the QR code on the device case           │"
+    echo "  │  or visit:                                     │"
+    echo "  │  ${ACTIVATE_URL}  │"
+    echo "  └────────────────────────────────────────────────┘"
+    echo ""
+
+    while [[ ! -f "${ACTIVATED_SIGNAL}" ]]; do
+        sleep 5
+    done
+
+    echo ""
+    echo "  Device activated! Services are being configured..."
+    echo ""
+}
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+
+if ${HAS_SCREEN} && [[ -n "${DIALOG}" ]]; then
+    # ── SCREEN MODE ──
+    chvt 2 2>/dev/null || true
+    welcome_msg
+    configure_wifi
+    show_qr_on_screen
+    wait_for_activation
+else
+    # ── HEADLESS MODE ──
+    headless_wait
+fi
+
+# Cleanup: disable firstboot (one-shot)
 systemctl --quiet disable clawbot-firstboot.service 2>/dev/null || true
 rm -f /.firstboot_clawbot
-
-# Reboot
-reboot
 
 exit 0

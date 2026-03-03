@@ -32,14 +32,19 @@ mkdir -p /home/pi/.clawbot/modules
 chown -R pi:pi /home/pi/.clawbot
 ## END Step 4
 
-## Step 5: Install systemd services and scripts
+## Step 5: Install Python websockets for cloud WebSocket client
+echo_green "Installing Python websockets package ..."
+pip3 install --no-cache-dir websockets
+## END Step 5
+
+## Step 6: Install systemd services and scripts
 echo_green "Installing systemd units and scripts ..."
 unpack /filesystem/root /
 chmod +x /usr/local/bin/clawbot-provision
-chmod +x /usr/local/bin/clawbot-heartbeat
+chmod +x /usr/local/bin/clawbot-cloud
 mkdir -p /etc/clawbot
 systemctl_if_exists enable clawbot-core.service
-systemctl_if_exists enable clawbot-heartbeat.timer
-## END Step 5
+systemctl_if_exists enable clawbot-cloud.service
+## END Step 6
 
 echo_green "Installing ClawbotCore ... DONE!"

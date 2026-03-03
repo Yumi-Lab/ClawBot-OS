@@ -1,0 +1,276 @@
+#!/usr/bin/env python3
+"""
+clawbot-cloud — ClawbotOS Cloud WebSocket Client
+
+Maintains a persistent WebSocket tunnel to Clawbot Cloud.
+Receives config pushes and sends periodic heartbeats.
+Replaces the old HTTP-based clawbot-heartbeat.
+
+Written by Yumi Lab — BUSL-1.1
+"""
+import asyncio
+import json
+import logging
+import os
+import re
+import subprocess
+import sys
+import time
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[clawbot-cloud] %(levelname)s %(message)s",
+)
+log = logging.getLogger("clawbot-cloud")
+
+CLOUD_WS_URL = "wss://clawbot-api.yumi-lab.com/v1/ws"
+PICOCLAW_CONFIG = "/home/pi/.picoclaw/config.json"
+ACTIVATED_SIGNAL = "/tmp/clawbot-activated"
+HEARTBEAT_INTERVAL = 300  # 5 minutes
+BACKOFF_STEPS = [5, 10, 30, 60]  # seconds
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def get_mac() -> str:
+    """Read MAC address of eth0."""
+    try:
+        with open("/sys/class/net/eth0/address") as f:
+            return f.read().strip().upper()
+    except FileNotFoundError:
+        pass
+    # Fallback: try wlan0
+    try:
+        with open("/sys/class/net/wlan0/address") as f:
+            return f.read().strip().upper()
+    except FileNotFoundError:
+        pass
+    # Last resort: ip link
+    try:
+        out = subprocess.check_output(
+            ["ip", "link", "show", "eth0"], text=True, stderr=subprocess.DEVNULL
+        )
+        m = re.search(r"ether ([\da-f:]+)", out, re.I)
+        if m:
+            return m.group(1).upper()
+    except Exception:
+        pass
+    return "UNKNOWN"
+
+
+def get_ip() -> str:
+    try:
+        out = subprocess.check_output(
+            ["ip", "route", "get", "1.1.1.1"], text=True, stderr=subprocess.DEVNULL
+        )
+        m = re.search(r"src (\S+)", out)
+        return m.group(1) if m else "unknown"
+    except Exception:
+        return "unknown"
+
+
+def get_board() -> str:
+    for path in ["/etc/clawbot/board", "/etc/armbian-release"]:
+        try:
+            with open(path) as f:
+                content = f.read()
+            if "BOARD=" in content:
+                for line in content.splitlines():
+                    if line.startswith("BOARD="):
+                        return line.split("=", 1)[1].strip().strip('"')
+            else:
+                return content.strip()
+        except FileNotFoundError:
+            continue
+    return "unknown"
+
+
+def get_firmware() -> str:
+    try:
+        with open("/etc/clawbot-release") as f:
+            for line in f:
+                if line.startswith("VERSION="):
+                    return line.split("=", 1)[1].strip().strip('"')
+    except FileNotFoundError:
+        pass
+    return "0.0.0"
+
+
+def service_active(name: str) -> str:
+    try:
+        subprocess.check_call(
+            ["systemctl", "is-active", "--quiet", name],
+            stderr=subprocess.DEVNULL,
+        )
+        return "active"
+    except subprocess.CalledProcessError:
+        return "inactive"
+
+
+def apply_config(config: dict):
+    """Write PicoClaw config and restart the service."""
+    sub_key = config.get("subscription_key", "")
+    model = config.get("model", "clawbot-smart")
+    base_url = config.get("base_url", "https://clawbot-api.yumi-lab.com/v1")
+
+    if not sub_key:
+        log.warning("Config received but no subscription_key — skipping")
+        return
+
+    os.makedirs(os.path.dirname(PICOCLAW_CONFIG), exist_ok=True)
+    picoclaw_cfg = {
+        "gateway": {"host": "0.0.0.0", "port": 8080},
+        "agents": {
+            "defaults": {
+                "workspace": "~/.picoclaw/workspace",
+                "max_tokens": 4096,
+                "temperature": 0.7,
+            }
+        },
+        "model_list": [
+            {
+                "model_name": "default",
+                "model": model,
+                "api_key": sub_key,
+                "base_url": base_url,
+                "request_timeout": 120,
+            }
+        ],
+        "tools": {"web": {"duckduckgo": {"enabled": True, "max_results": 5}}},
+        "log_level": "info",
+    }
+
+    with open(PICOCLAW_CONFIG, "w") as f:
+        json.dump(picoclaw_cfg, f, indent=2)
+    os.chmod(PICOCLAW_CONFIG, 0o600)
+    # chown pi:pi
+    try:
+        import pwd
+        pw = pwd.getpwnam("pi")
+        os.chown(PICOCLAW_CONFIG, pw.pw_uid, pw.pw_gid)
+    except Exception:
+        pass
+
+    log.info("PicoClaw config updated (model: %s)", model)
+
+    # Restart picoclaw
+    subprocess.run(
+        ["systemctl", "restart", "picoclaw.service"],
+        stderr=subprocess.DEVNULL,
+    )
+
+    # Signal firstboot wizard that activation is done
+    with open(ACTIVATED_SIGNAL, "w") as f:
+        f.write("1")
+
+    log.info("Device activated and configured")
+
+
+def build_heartbeat() -> dict:
+    return {
+        "type": "heartbeat",
+        "board": get_board(),
+        "firmware": get_firmware(),
+        "ip": get_ip(),
+        "services": {
+            "picoclaw": service_active("picoclaw.service"),
+            "clawbot_core": service_active("clawbot-core.service"),
+        },
+    }
+
+
+# ── Main loop ─────────────────────────────────────────────────────────────────
+
+async def run():
+    try:
+        import websockets
+    except ImportError:
+        log.error("websockets package not installed — pip3 install websockets")
+        sys.exit(1)
+
+    mac = get_mac()
+    if mac == "UNKNOWN":
+        log.error("Cannot determine MAC address — exiting")
+        sys.exit(1)
+
+    mac_clean = mac.replace(":", "").upper()
+    url = f"{CLOUD_WS_URL}?mac={mac_clean}"
+    backoff_idx = 0
+
+    log.info("MAC: %s — connecting to %s", mac, CLOUD_WS_URL)
+
+    while True:
+        try:
+            async with websockets.connect(
+                url,
+                ping_interval=30,
+                ping_timeout=10,
+                close_timeout=5,
+            ) as ws:
+                backoff_idx = 0  # Reset backoff on successful connect
+                log.info("Connected to cloud")
+
+                # Schedule periodic heartbeats
+                async def heartbeat_sender():
+                    while True:
+                        await asyncio.sleep(HEARTBEAT_INTERVAL)
+                        try:
+                            await ws.send(json.dumps(build_heartbeat()))
+                        except Exception:
+                            break
+
+                heartbeat_task = asyncio.create_task(heartbeat_sender())
+
+                try:
+                    async for raw in ws:
+                        try:
+                            msg = json.loads(raw)
+                        except json.JSONDecodeError:
+                            continue
+
+                        msg_type = msg.get("type", "")
+
+                        if msg_type == "welcome":
+                            status = msg.get("status", "pending")
+                            log.info("Cloud status: %s", status)
+
+                        elif msg_type == "config":
+                            log.info("Received config push from cloud")
+                            apply_config(msg)
+
+                        elif msg_type == "command":
+                            action = msg.get("action", "")
+                            log.info("Received command: %s", action)
+                            if action == "restart_picoclaw":
+                                subprocess.run(
+                                    ["systemctl", "restart", "picoclaw.service"],
+                                    stderr=subprocess.DEVNULL,
+                                )
+                            elif action == "restart_core":
+                                subprocess.run(
+                                    ["systemctl", "restart", "clawbot-core.service"],
+                                    stderr=subprocess.DEVNULL,
+                                )
+
+                        elif msg_type == "heartbeat_ack":
+                            pass  # Normal acknowledgement
+
+                        elif msg_type == "pong":
+                            pass
+
+                finally:
+                    heartbeat_task.cancel()
+                    try:
+                        await heartbeat_task
+                    except asyncio.CancelledError:
+                        pass
+
+        except Exception as e:
+            delay = BACKOFF_STEPS[min(backoff_idx, len(BACKOFF_STEPS) - 1)]
+            log.warning("Connection lost (%s) — reconnecting in %ds", e, delay)
+            await asyncio.sleep(delay)
+            backoff_idx += 1
+
+
+if __name__ == "__main__":
+    asyncio.run(run())
