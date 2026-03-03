@@ -85,17 +85,14 @@ if [[ -f "${SMARTPAD_CONFIG_TXT_FILE}" ]]; then
 fi
 
 echo_green "Install Yumi Lab Plymouth theme on SmartPad... [DONE]"
-### Fix SSH on Trixie: disable ssh.socket (socket-activation) to prevent
-### conflict with ssh.service on second boot (Debian 13 default changed to
-### socket activation but Armbian still enables ssh.service — both conflict)
+### Fix SSH on Trixie: mask ssh.socket completely (prevents socket-activation
+### which conflicts with ssh.service on Debian 13 / Armbian Trixie)
 echo_green "Fixing SSH service activation on Trixie..."
-systemctl_if_exists disable ssh.socket || true
-systemctl_if_exists enable ssh.service || true
-# Regenerate host keys at build time so they exist in the image
-if [[ ! -f /etc/ssh/ssh_host_ed25519_key ]]; then
-    dpkg-reconfigure -f noninteractive openssh-server 2>/dev/null || \
-    ssh-keygen -A 2>/dev/null || true
-fi
+# mask is stronger than disable — prevents socket-activation entirely
+systemctl mask ssh.socket 2>/dev/null || ln -sf /dev/null /etc/systemd/system/ssh.socket
+systemctl enable ssh.service 2>/dev/null || true
+# Force-generate host keys at build time (avoids first-boot generation failure)
+ssh-keygen -A 2>/dev/null || true
 echo_green "SSH fix applied."
 
 ### Install kiosk browser stack for the firstboot web wizard
