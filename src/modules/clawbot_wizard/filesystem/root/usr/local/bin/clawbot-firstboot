@@ -21,8 +21,14 @@ ACTIVATED_SIGNAL="/tmp/clawbot-activated"
 # ── Detect environment ────────────────────────────────────────────────────────
 
 get_mac() {
-    cat /sys/class/net/eth0/address 2>/dev/null || \
-    cat /sys/class/net/wlan0/address 2>/dev/null || \
+    # Ethernet only — WiFi excluded (dongle MAC can change if swapped)
+    # eth0 = legacy naming, end0 = predictable naming (Armbian Trixie)
+    for iface in eth0 end0; do
+        mac=$(cat "/sys/class/net/${iface}/address" 2>/dev/null || true)
+        if [[ -n "${mac}" && "${mac}" != "00:00:00:00:00:00" ]]; then
+            echo "${mac}"; return
+        fi
+    done
     echo "unknown"
 }
 
@@ -97,57 +103,36 @@ configure_wifi() {
     fi
 }
 
-show_qr_on_screen() {
-    clear
-    echo ""
-    echo "  ┌─────────────────────────────────────────────────────────────┐"
-    echo "  │          Clawbot Cloud — Link your device                   │"
-    echo "  │                                                             │"
-    echo "  │  Scan the QR code below with the Yumi-Lab app              │"
-    echo "  │  or visit the URL to activate your device.                  │"
-    echo "  └─────────────────────────────────────────────────────────────┘"
-    echo ""
-    if command -v qrencode &>/dev/null; then
-        qrencode -t utf8 -m 2 "${ACTIVATE_URL}" 2>/dev/null || true
-    fi
-    echo ""
-    echo "  MAC : ${MAC}"
-    echo "  URL : ${ACTIVATE_URL}"
-    echo ""
-}
-
-wait_for_activation() {
-    local ip
-    # Show waiting dialog that auto-refreshes
+show_qr_and_wait() {
+    # Display QR code + status loop on the terminal (no dialog overlay)
     while [[ ! -f "${ACTIVATED_SIGNAL}" ]]; do
+        local ip
         ip="$(get_ip)"
-        "${DIALOG}" --backtitle "${BT}" --title "Waiting for activation..." \
-            --infobox "\
-Scan the QR code displayed above to activate your device.
-
-MAC : ${MAC}
-IP  : ${ip:-no network}
-Web : http://${ip:-clawbot.local}
-
-Cloud status: waiting...
-
-The wizard will continue automatically once activated." \
-            14 ${WW}
+        clear
+        echo ""
+        echo "  ┌─────────────────────────────────────────────────────────────┐"
+        echo "  │          Clawbot Cloud — Link your device                   │"
+        echo "  │  Scan the QR code with the Yumi-Lab app to activate         │"
+        echo "  └─────────────────────────────────────────────────────────────┘"
+        echo ""
+        if command -v qrencode &>/dev/null; then
+            qrencode -t utf8 -m 2 "${ACTIVATE_URL}" 2>/dev/null || true
+        fi
+        echo ""
+        echo "  MAC : ${MAC}"
+        echo "  IP  : ${ip:-no network}"
+        echo "  URL : ${ACTIVATE_URL}"
+        echo ""
+        echo "  Status : waiting for cloud activation..."
         sleep 5
     done
 
-    "${DIALOG}" --backtitle "${BT}" --title "Activated!" \
-        --msgbox "\
-Your device has been activated!
-
-Access your AI dashboard at:
-    http://clawbot.local
-
-SSH access:
-    User: pi
-    Password: yumi
-
-Press OK to continue." ${WT} ${WW}
+    clear
+    echo ""
+    echo "  ✅ Device activated!"
+    echo "  Access your dashboard at: http://$(get_ip)"
+    echo ""
+    sleep 3
 }
 
 # ── Headless mode: console output ────────────────────────────────────────────
@@ -188,8 +173,7 @@ if ${HAS_SCREEN} && [[ -n "${DIALOG}" ]]; then
     chvt 2 2>/dev/null || true
     welcome_msg
     configure_wifi
-    show_qr_on_screen
-    wait_for_activation
+    show_qr_and_wait
 else
     # ── HEADLESS MODE ──
     headless_wait

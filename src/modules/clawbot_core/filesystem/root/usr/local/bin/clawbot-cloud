@@ -33,28 +33,21 @@ BACKOFF_STEPS = [5, 10, 30, 60]  # seconds
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def get_mac() -> str:
-    """Read MAC address of eth0."""
-    try:
-        with open("/sys/class/net/eth0/address") as f:
-            return f.read().strip().upper()
-    except FileNotFoundError:
-        pass
-    # Fallback: try wlan0
-    try:
-        with open("/sys/class/net/wlan0/address") as f:
-            return f.read().strip().upper()
-    except FileNotFoundError:
-        pass
-    # Last resort: ip link
-    try:
-        out = subprocess.check_output(
-            ["ip", "link", "show", "eth0"], text=True, stderr=subprocess.DEVNULL
-        )
-        m = re.search(r"ether ([\da-f:]+)", out, re.I)
-        if m:
-            return m.group(1).upper()
-    except Exception:
-        pass
+    """Read Ethernet MAC address (eth0 or end0).
+
+    WiFi interfaces are intentionally excluded — their MAC can change
+    if the dongle is swapped. Only the onboard Ethernet MAC is stable.
+    """
+    from pathlib import Path
+
+    for iface in ["eth0", "end0"]:
+        try:
+            mac = Path(f"/sys/class/net/{iface}/address").read_text().strip().upper()
+            if mac and mac != "00:00:00:00:00:00":
+                return mac
+        except (FileNotFoundError, PermissionError):
+            continue
+
     return "UNKNOWN"
 
 
