@@ -215,11 +215,27 @@ def get_mac() -> str:
     return "unknown"
 
 
+def _compute_ids(mac_clean: str) -> tuple:
+    """Return (device_code, id_long) from MAC.
+    device_code = HMAC-SHA256('YUMI', mac_clean)[:12] hex → XXXX-XXXX-XXXX
+    id_long     = full 64-char HMAC hex (uppercase)
+    Using HMAC instead of raw MAC avoids exposing hardware info and
+    provides 281-trillion-value space (collision safe to ~16M devices).
+    """
+    import hashlib
+    import hmac as _hmac
+    if not mac_clean:
+        return "UNKN-UNKN-UNKN", ""
+    h = _hmac.new(b"YUMI", mac_clean.encode(), hashlib.sha256).hexdigest().upper()
+    code = f"{h[:4]}-{h[4:8]}-{h[8:12]}"
+    return code, h
+
+
 def get_current_config() -> dict:
     """Read current LLM config from picoclaw config.json."""
     mac = get_mac()
     mac_clean = mac.replace(":", "") if mac != "unknown" else ""
-    device_code = f"{mac_clean[:4]}-{mac_clean[4:8]}-{mac_clean[8:]}" if len(mac_clean) == 12 else mac
+    device_code, id_long = _compute_ids(mac_clean)
     activate_url = f"https://openjarvis.io/activate?mac={mac_clean}" if mac_clean else "https://openjarvis.io"
     try:
         with open(PICOCLAW_CONFIG) as f:
@@ -242,10 +258,10 @@ def get_current_config() -> dict:
         else:
             provider = "custom"
         return {"provider": provider, "model": model, "apikey": api_key, "baseurl": base_url,
-                "mac": mac, "device_code": device_code, "activate_url": activate_url}
+                "mac": mac, "device_code": device_code, "id_long": id_long, "activate_url": activate_url}
     except Exception:
         return {"provider": "", "model": "", "apikey": "", "baseurl": "",
-                "mac": mac, "device_code": device_code, "activate_url": activate_url}
+                "mac": mac, "device_code": device_code, "id_long": id_long, "activate_url": activate_url}
 
 
 def update_picoclaw_config(provider, model, api_key, base_url):

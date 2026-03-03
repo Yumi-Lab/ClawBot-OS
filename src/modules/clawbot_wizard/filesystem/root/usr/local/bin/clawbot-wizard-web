@@ -13,6 +13,8 @@ Endpoints:
 Written by Yumi Lab — BUSL-1.1
 """
 
+import hashlib
+import hmac as _hmac
 import json
 import os
 import socket
@@ -52,10 +54,18 @@ def _get_ip() -> str:
 
 MAC = _get_mac()
 MAC_CLEAN = MAC.replace(":", "") if MAC != "unknown" else ""
-DEVICE_CODE = (
-    f"{MAC_CLEAN[:4]}-{MAC_CLEAN[4:8]}-{MAC_CLEAN[8:]}"
-    if len(MAC_CLEAN) == 12 else MAC
-)
+
+# HMAC-SHA256("YUMI", MAC) → 64-char hex uppercase
+# - First 12 chars → device_code XXXX-XXXX-XXXX  (281T space, safe to ~16M devices)
+# - Full 64 chars  → id_long (secure device identity for API auth)
+if MAC_CLEAN:
+    _h = _hmac.new(b"YUMI", MAC_CLEAN.encode(), hashlib.sha256).hexdigest().upper()
+    DEVICE_CODE = f"{_h[:4]}-{_h[4:8]}-{_h[8:12]}"
+    ID_LONG = _h
+else:
+    DEVICE_CODE = "UNKN-UNKN-UNKN"
+    ID_LONG = ""
+
 ACTIVATE_URL = (
     f"{ACTIVATE_URL_BASE}{MAC_CLEAN}" if MAC_CLEAN else "https://openjarvis.io"
 )
@@ -679,6 +689,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ip": _get_ip(),
                 "mac": MAC,
                 "device_code": DEVICE_CODE,
+                "id_long": ID_LONG,
                 "activate_url": ACTIVATE_URL,
                 "activated": os.path.exists(ACTIVATED_SIGNAL),
             })
