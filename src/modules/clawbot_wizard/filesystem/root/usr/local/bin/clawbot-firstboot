@@ -42,6 +42,10 @@ ACTIVATE_URL="https://clawbot-api.yumi-lab.com/activate?mac=${MAC_CLEAN}"
 HAS_SCREEN=false
 [[ -e /dev/fb0 ]] && HAS_SCREEN=true
 
+# Always start fresh: remove stale activation signal so the wizard waits
+# for a real cloud push even if device was previously activated
+rm -f "${ACTIVATED_SIGNAL}"
+
 # ── Screen mode: interactive dialog ──────────────────────────────────────────
 
 welcome_msg() {
@@ -68,18 +72,44 @@ configure_wifi() {
         --yesno "Do you want to connect to a WiFi network?\n\n(Select No to use Ethernet only)" \
         10 ${WW} || return
 
-    local ssid
-    ssid=$("${DIALOG}" --backtitle "${BT}" --title "WiFi - Network Name" \
-        --inputbox "Enter WiFi network name (SSID):" \
-        10 ${WW} 3>&1 1>&2 2>&3) || return
+    # Scan for available networks and show a selectable list
+    "${DIALOG}" --backtitle "${BT}" --title "WiFi - Scanning..." \
+        --infobox "Scanning for WiFi networks, please wait..." 5 ${WW}
+    nmcli device wifi rescan 2>/dev/null || true
+    sleep 3
 
-    if [[ -z "${ssid}" ]]; then
-        return
+    # Build menu from scan results: SSID + signal strength
+    local menu_items=()
+    while IFS=: read -r ssid signal; do
+        [[ -z "${ssid}" || "${ssid}" == "--" ]] && continue
+        menu_items+=("${ssid}" "${signal}%  signal")
+    done < <(nmcli -t -f SSID,SIGNAL device wifi list 2>/dev/null \
+             | sort -t: -k2 -rn \
+             | awk -F: '!seen[$1]++ && NF>=2 && $1!=""' \
+             | head -15)
+
+    local ssid
+    if [[ ${#menu_items[@]} -gt 0 ]]; then
+        ssid=$("${DIALOG}" --backtitle "${BT}" --title "WiFi - Select Network" \
+            --menu "Select a WiFi network to connect:" \
+            18 ${WW} 10 "${menu_items[@]}" \
+            "-- manual --" "Type SSID manually" \
+            3>&1 1>&2 2>&3) || return
+    else
+        ssid="-- manual --"
     fi
 
+    if [[ "${ssid}" == "-- manual --" ]]; then
+        ssid=$("${DIALOG}" --backtitle "${BT}" --title "WiFi - Network Name" \
+            --inputbox "Enter WiFi network name (SSID):" \
+            10 ${WW} 3>&1 1>&2 2>&3) || return
+    fi
+
+    [[ -z "${ssid}" ]] && return
+
     local password
-    password=$("${DIALOG}" --backtitle "${BT}" --title "WiFi - Password" \
-        --insecure --passwordbox "Enter WiFi password for '${ssid}':\n(Leave empty for open network)" \
+    password=$("${DIALOG}" --backtitle "${BT}" --title "WiFi - Password for '${ssid}'" \
+        --insecure --passwordbox "Enter WiFi password:\n(Leave empty for open network)" \
         10 ${WW} 3>&1 1>&2 2>&3) || return
 
     "${DIALOG}" --backtitle "${BT}" --title "WiFi - Connecting..." \
@@ -94,11 +124,11 @@ configure_wifi() {
     sleep 3
 
     if nmcli -t -f STATE general 2>/dev/null | grep -q "connected"; then
-        "${DIALOG}" --backtitle "${BT}" --title "WiFi" \
-            --msgbox "Connected to '${ssid}' successfully!" 8 ${WW}
+        "${DIALOG}" --backtitle "${BT}" --title "WiFi ✓" \
+            --msgbox "Connected to '${ssid}' successfully!\n\nIP: $(get_ip)" 8 ${WW}
     else
-        "${DIALOG}" --backtitle "${BT}" --title "WiFi" \
-            --msgbox "Could not connect to '${ssid}'.\nCheck the password and try again via:\n  nmcli device wifi connect \"${ssid}\"" \
+        "${DIALOG}" --backtitle "${BT}" --title "WiFi - Failed" \
+            --msgbox "Could not connect to '${ssid}'.\nCheck the password and try again.\n\nRetry later via:\n  nmcli device wifi connect \"${ssid}\"" \
             10 ${WW}
     fi
 }

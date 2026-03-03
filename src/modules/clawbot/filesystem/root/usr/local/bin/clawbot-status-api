@@ -29,6 +29,7 @@ ALLOWED_FILES = {
 ALLOWED_LOG_SERVICES = {
     "picoclaw", "nginx", "clawbot-telegram",
     "clawbot-status-api", "clawbot-swap",
+    "clawbot-core", "clawbot-cloud", "clawbot-firstboot",
 }
 
 
@@ -199,6 +200,52 @@ def get_stats():
         "swap_mb": swap_mb,
         "services": services,
     }
+
+
+def get_mac() -> str:
+    """Read Ethernet MAC address (eth0 or end0 for predictable naming)."""
+    for iface in ["eth0", "end0"]:
+        try:
+            with open(f"/sys/class/net/{iface}/address") as f:
+                mac = f.read().strip()
+            if mac and mac != "00:00:00:00:00:00":
+                return mac.upper()
+        except Exception:
+            pass
+    return "unknown"
+
+
+def get_current_config() -> dict:
+    """Read current LLM config from picoclaw config.json."""
+    mac = get_mac()
+    mac_clean = mac.replace(":", "") if mac != "unknown" else ""
+    device_code = f"{mac_clean[:4]}-{mac_clean[4:8]}-{mac_clean[8:]}" if len(mac_clean) == 12 else mac
+    activate_url = f"https://openjarvis.io/activate?mac={mac_clean}" if mac_clean else "https://openjarvis.io"
+    try:
+        with open(PICOCLAW_CONFIG) as f:
+            cfg = json.load(f)
+        entry = cfg.get("model_list", [{}])[0]
+        api_key = entry.get("api_key", "")
+        model = entry.get("model", "")
+        base_url = entry.get("base_url", "")
+        # Detect provider from base_url or api_key prefix
+        if "clawbot-api" in base_url or api_key.startswith("clb-"):
+            provider = "clawbot"
+        elif "anthropic.com" in base_url or api_key.startswith("sk-ant-"):
+            provider = "anthropic"
+        elif "openai.com" in base_url or api_key.startswith("sk-proj-") or api_key.startswith("sk-"):
+            provider = "openai"
+        elif "deepseek.com" in base_url:
+            provider = "deepseek"
+        elif "openrouter.ai" in base_url:
+            provider = "openrouter"
+        else:
+            provider = "custom"
+        return {"provider": provider, "model": model, "apikey": api_key, "baseurl": base_url,
+                "mac": mac, "device_code": device_code, "activate_url": activate_url}
+    except Exception:
+        return {"provider": "", "model": "", "apikey": "", "baseurl": "",
+                "mac": mac, "device_code": device_code, "activate_url": activate_url}
 
 
 def update_picoclaw_config(provider, model, api_key, base_url):
@@ -448,6 +495,9 @@ class Handler(BaseHTTPRequestHandler):
 
         elif parsed.path == "/core-version":
             self.send_json(200, {"version": get_clawbot_core_version()})
+
+        elif parsed.path == "/config":
+            self.send_json(200, get_current_config())
 
         elif parsed.path == "/logs":
             service = qs.get("service", [""])[0]
