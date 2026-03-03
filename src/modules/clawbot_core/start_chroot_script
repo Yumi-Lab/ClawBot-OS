@@ -34,7 +34,7 @@ chown -R pi:pi /home/pi/.clawbot
 
 ## Step 5: Install Python websockets for cloud WebSocket client
 echo_green "Installing Python websockets package ..."
-pip3 install --no-cache-dir websockets
+pip3 install --no-cache-dir --break-system-packages websockets
 ## END Step 5
 
 ## Step 6: Install systemd services and scripts
