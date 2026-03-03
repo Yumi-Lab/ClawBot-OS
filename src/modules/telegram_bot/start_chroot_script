@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#### ClawbotOS Telegram Bot module
+####
+#### Written by Yumi Lab
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+if [[ "${DEBIAN_FRONTEND}" != "noninteractive" ]]; then
+    export DEBIAN_FRONTEND=noninteractive
+fi
+
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+## Step 1: Install Python dependencies
+echo_green "Installing Telegram bot dependencies ..."
+apt-get update --allow-releaseinfo-change
+# shellcheck disable=SC2086
+check_install_pkgs ${TELEGRAM_DEPS}
+## END Step 1
+
+## Step 2: Install bot script and service
+echo_green "Installing clawbot-telegram bot ..."
+unpack /filesystem/root /
+chmod +x /usr/local/bin/clawbot-telegram
+
+## Step 3: Create default env file (disabled until configured)
+# The service will not start without TELEGRAM_TOKEN set.
+# Users configure this via the dashboard Settings > Telegram panel.
+if [[ ! -f /home/pi/.clawbot-telegram.env ]]; then
+    cat > /home/pi/.clawbot-telegram.env << 'ENVEOF'
+# ClawbotOS Telegram Bot configuration
+# Configure via http://clawbot.local (Settings > Telegram Bot)
+# or edit this file directly and restart: sudo systemctl restart clawbot-telegram
+
+TELEGRAM_TOKEN=
+ALLOWED_USERS=
+AGENT=picoclaw
+ENVEOF
+    chown pi:pi /home/pi/.clawbot-telegram.env
+    chmod 600 /home/pi/.clawbot-telegram.env
+fi
+
+## Step 4: Install service but do NOT enable it (requires token)
+# Users enable via: sudo systemctl enable --now clawbot-telegram
+# Or via the dashboard Services panel.
+systemctl_if_exists daemon-reload
+## END Step 4
+
+echo_green "Telegram bot module installed (disabled until TELEGRAM_TOKEN is configured)."

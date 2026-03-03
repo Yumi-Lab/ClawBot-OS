@@ -7,13 +7,21 @@
 
 # shellcheck disable=all
 
-[[ -n "$PICOCLAW_REPO" ]] || PICOCLAW_REPO="https://github.com/sipeed/picoclaw.git"
+# Source repo (Yumi-Lab fork for custom patches, used for source-build fallback)
+[[ -n "$PICOCLAW_REPO" ]] || PICOCLAW_REPO="https://github.com/Yumi-Lab/picoclaw.git"
 [[ -n "$PICOCLAW_REPO_BRANCH" ]] || PICOCLAW_REPO_BRANCH="main"
 
-# Architecture for precompiled binary download
-[[ -n "$PICOCLAW_ARCH" ]] || PICOCLAW_ARCH="arm"
-# Download URL pattern for releases
-[[ -n "$PICOCLAW_RELEASE_URL" ]] || PICOCLAW_RELEASE_URL="https://github.com/sipeed/picoclaw/releases/latest/download"
+# PicoClaw version — must match a tag with Linux_armv6 binary on sipeed/picoclaw
+[[ -n "$PICOCLAW_VERSION" ]] || PICOCLAW_VERSION="v0.2.0"
+# Architecture for precompiled binary download (armv6 is compatible with ARMv7/H3)
+[[ -n "$PICOCLAW_ARCH" ]] || PICOCLAW_ARCH="Linux_armv6"
+# Binary releases come from upstream sipeed repo (Yumi-Lab fork has no releases yet)
+[[ -n "$PICOCLAW_RELEASE_URL" ]] || PICOCLAW_RELEASE_URL="https://github.com/sipeed/picoclaw/releases/download/${PICOCLAW_VERSION}"
+# Tarball filename
+[[ -n "$PICOCLAW_TARBALL" ]] || PICOCLAW_TARBALL="picoclaw_${PICOCLAW_ARCH}.tar.gz"
+
+# Go version for building from source — must match go.mod minimum (currently 1.25.7)
+[[ -n "$PICOCLAW_GO_VERSION" ]] || PICOCLAW_GO_VERSION="1.25.7"
 
 # Gateway port
 [[ -n "$PICOCLAW_PORT" ]] || PICOCLAW_PORT="8080"

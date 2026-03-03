@@ -1,0 +1,14 @@
+[Unit]
+Description=ClawbotOS Cloud WebSocket Connection
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/local/bin/clawbot-cloud
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

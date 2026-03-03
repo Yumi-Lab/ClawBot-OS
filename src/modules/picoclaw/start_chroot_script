@@ -25,26 +25,38 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 mkdir -p "/home/${BASE_USER}/.picoclaw"
 ## END Step 2
 
-## Step 3: Download precompiled ARM binary
-echo_green "Downloading PicoClaw precompiled binary ..."
-PICOCLAW_BIN_URL="${PICOCLAW_RELEASE_URL}/picoclaw-linux-${PICOCLAW_ARCH}"
+## Step 3: Download precompiled ARM binary (tar.gz)
+echo_green "Downloading PicoClaw ${PICOCLAW_VERSION} precompiled binary ..."
+PICOCLAW_DL_URL="${PICOCLAW_RELEASE_URL}/${PICOCLAW_TARBALL}"
 
-if curl -fsSL -o /usr/local/bin/picoclaw "${PICOCLAW_BIN_URL}"; then
+if curl -fsSL -o "/tmp/${PICOCLAW_TARBALL}" "${PICOCLAW_DL_URL}"; then
+    echo_green "Extracting PicoClaw binary ..."
+    tar -xzf "/tmp/${PICOCLAW_TARBALL}" -C /tmp/
+    # Find and install the binary
+    find /tmp/ -name "picoclaw" -type f -executable -exec cp {} /usr/local/bin/picoclaw \; 2>/dev/null \
+        || cp /tmp/picoclaw /usr/local/bin/picoclaw 2>/dev/null \
+        || { echo_green "Extracting from tar root ..."; tar -xzf "/tmp/${PICOCLAW_TARBALL}" -C /usr/local/bin/ picoclaw 2>/dev/null || true; }
     chmod +x /usr/local/bin/picoclaw
-    echo_green "PicoClaw binary downloaded successfully."
+    rm -f "/tmp/${PICOCLAW_TARBALL}"
+    echo_green "PicoClaw binary installed successfully."
 else
-    ## Step 3b: Fallback -- build from source
+    ## Step 3b: Fallback -- build from source with recent Go
     echo_green "Binary download failed, building from source ..."
-    check_install_pkgs golang
+    echo_green "Installing Go ${PICOCLAW_GO_VERSION} from golang.org ..."
+    GO_TARBALL="go${PICOCLAW_GO_VERSION}.linux-armv6l.tar.gz"
+    curl -fsSL -o "/tmp/${GO_TARBALL}" "https://go.dev/dl/${GO_TARBALL}"
+    tar -C /usr/local -xzf "/tmp/${GO_TARBALL}"
+    rm -f "/tmp/${GO_TARBALL}"
+    export PATH="/usr/local/go/bin:${PATH}"
+
     sudo -u "${BASE_USER}" git clone --depth 1 -b "${PICOCLAW_REPO_BRANCH}" \
         "${PICOCLAW_REPO}" "/home/${BASE_USER}/picoclaw-src"
     pushd "/home/${BASE_USER}/picoclaw-src" &> /dev/null || exit 1
-    go build -o /usr/local/bin/picoclaw .
+    /usr/local/go/bin/go build -o /usr/local/bin/picoclaw ./cmd/picoclaw
     popd &> /dev/null || exit 1
     rm -rf "/home/${BASE_USER}/picoclaw-src"
-    # Remove golang after build to save space
-    apt-get remove --purge --yes golang || true
-    apt-get autoremove --yes || true
+    # Remove Go toolchain to save disk space (~500MB)
+    rm -rf /usr/local/go
 fi
 ## END Step 3
 

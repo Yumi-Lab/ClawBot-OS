@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+#### ClawbotOS Dashboard Updater
+#### Downloads the latest dashboard from GitHub Releases
+#### Usage: clawbot-update-dashboard [--check]
+
+set -e
+
+REPO="Yumi-Lab/ClawbotCore-WebUI"
+DASHBOARD_DIR="/home/pi/clawbot-dashboard"
+DASHBOARD_FILE="${DASHBOARD_DIR}/index.html"
+VERSION_FILE="${DASHBOARD_DIR}/VERSION"
+RELEASE_BASE="https://github.com/${REPO}/releases/latest/download"
+
+check_only=false
+[[ "${1}" == "--check" ]] && check_only=true
+
+# Get remote version
+remote_version=$(curl -fsSL --max-time 10 "${RELEASE_BASE}/VERSION" 2>/dev/null | tr -d '[:space:]') || {
+    echo '{"error":"Could not reach GitHub. Check internet connection."}' >&2
+    exit 1
+}
+
+# Get local version
+local_version="0.0.0"
+if [[ -f "${VERSION_FILE}" ]]; then
+    local_version=$(cat "${VERSION_FILE}" | tr -d '[:space:]')
+fi
+
+if [[ "${check_only}" == "true" ]]; then
+    echo "{\"local\":\"${local_version}\",\"remote\":\"${remote_version}\",\"update_available\":$([ \"${local_version}\" != \"${remote_version}\" ] && echo true || echo false)}"
+    exit 0
+fi
+
+if [[ "${local_version}" == "${remote_version}" ]]; then
+    echo "{\"updated\":false,\"version\":\"${local_version}\",\"message\":\"Already up to date\"}"
+    exit 0
+fi
+
+# Download new dashboard
+mkdir -p "${DASHBOARD_DIR}"
+tmp=$(mktemp)
+if curl -fsSL --max-time 30 "${RELEASE_BASE}/index.html" -o "${tmp}"; then
+    mv "${tmp}" "${DASHBOARD_FILE}"
+    echo "${remote_version}" > "${VERSION_FILE}"
+    chown -R pi:pi "${DASHBOARD_DIR}"
+    echo "{\"updated\":true,\"from\":\"${local_version}\",\"to\":\"${remote_version}\"}"
+else
+    rm -f "${tmp}"
+    echo '{"error":"Download failed"}' >&2
+    exit 1
+fi

@@ -62,13 +62,27 @@ sudo -u "${BASE_USER}" git clone "${SMARTPAD_PLYMOUTH_REPO}" || true
 smartpad_install_theme
 popd &>/dev/null || exit 1
 
-echo_green "Install Yumi Lab Plymouth theme on SmartPad... [DONE]"
+### Run initramfs update at build time (was deferred to dead firstboot.service)
+echo_green "Updating initramfs for Plymouth theme..."
+update-initramfs -u 2>/dev/null || true
+echo_green "Updating initramfs ... [DONE]"
 
-### Enable firstboot service for SmartPad
-echo_green "Enable SmartPad first boot service..."
-if [[ -f /usr/local/bin/firstboot ]]; then
-    chmod +x /usr/local/bin/firstboot
+### Enable bootlogo at build time
+if [[ -f "${SMARTPAD_CONFIG_TXT_FILE}" ]]; then
+    echo_green "Enable boot logo in ${SMARTPAD_CONFIG_TXT_FILE}..."
+    sed -i 's/bootlogo=false/bootlogo=true/' "${SMARTPAD_CONFIG_TXT_FILE}" 2>/dev/null || true
 fi
-systemctl_if_exists enable firstboot.service || true
 
+### Framebuffer rotation (180°) + touchscreen calibration already in udev rule
+echo_green "Setting framebuffer rotation 180° for SmartPad display..."
+if [[ -f "${SMARTPAD_CONFIG_TXT_FILE}" ]]; then
+    # Add fbcon rotation if not already set
+    if ! grep -q "extraargs=" "${SMARTPAD_CONFIG_TXT_FILE}"; then
+        echo "extraargs=fbcon=rotate:2" >> "${SMARTPAD_CONFIG_TXT_FILE}"
+    else
+        sed -i '/extraargs=/s/$/ fbcon=rotate:2/' "${SMARTPAD_CONFIG_TXT_FILE}"
+    fi
+fi
+
+echo_green "Install Yumi Lab Plymouth theme on SmartPad... [DONE]"
 echo_green "SmartPad module ... DONE!"

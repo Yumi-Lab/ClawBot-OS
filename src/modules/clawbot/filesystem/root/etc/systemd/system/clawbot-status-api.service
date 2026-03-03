@@ -1,0 +1,17 @@
+[Unit]
+Description=ClawbotOS System Status API
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/clawbot-status-api
+Restart=always
+RestartSec=5
+# Run as root to allow systemctl actions and reading /proc
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

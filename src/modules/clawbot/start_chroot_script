@@ -40,6 +40,14 @@ apt-get update --allow-releaseinfo-change
 check_install_pkgs ${CLAWBOT_DEPS}
 ## END Step 3
 
+## Step 3b: Install clawbot-status-api, updater and enable service
+echo_green "Installing ClawbotOS status API and dashboard updater ..."
+unpack /filesystem/root /
+chmod +x /usr/local/bin/clawbot-status-api
+chmod +x /usr/local/bin/clawbot-update-dashboard
+systemctl_if_exists enable clawbot-status-api.service
+## END Step 3b
+
 ## Step 4: Set hostname to clawbot
 echo_green "Setting hostname to 'clawbot' ..."
 echo "clawbot" > /etc/hostname
@@ -53,54 +61,17 @@ if [[ -f /etc/avahi/avahi-daemon.conf ]]; then
 fi
 ## END Step 5
 
-## Step 6: Install agent switching script
-echo_green "Installing clawbot-switch-agent utility ..."
-cat > /usr/local/bin/clawbot-switch-agent << 'SWITCH_EOF'
+## Step 6: Install service status helper
+echo_green "Installing clawbot-status utility ..."
+cat > /usr/local/bin/clawbot-status << 'STATUS_EOF'
 #!/usr/bin/env bash
-# ClawbotOS - Switch between PicoClaw and OpenClaw agents
-set -e
-
-case "$1" in
-    picoclaw)
-        systemctl stop openclaw.service 2>/dev/null || true
-        systemctl disable openclaw.service 2>/dev/null || true
-        systemctl enable picoclaw.service
-        systemctl start picoclaw.service
-        sed -i 's|OPENAI_API_BASE_URL=http://127.0.0.1:8081|OPENAI_API_BASE_URL=http://127.0.0.1:8080|' \
-            /etc/systemd/system/open-webui.service
-        systemctl daemon-reload
-        systemctl restart open-webui.service
-        echo "Switched to PicoClaw (port 8080)"
-        ;;
-    openclaw)
-        systemctl stop picoclaw.service 2>/dev/null || true
-        systemctl disable picoclaw.service 2>/dev/null || true
-        systemctl enable openclaw.service
-        systemctl start openclaw.service
-        sed -i 's|OPENAI_API_BASE_URL=http://127.0.0.1:8080|OPENAI_API_BASE_URL=http://127.0.0.1:8081|' \
-            /etc/systemd/system/open-webui.service
-        systemctl daemon-reload
-        systemctl restart open-webui.service
-        echo "Switched to OpenClaw (port 8081)"
-        ;;
-    status)
-        echo "=== ClawbotOS Service Status ==="
-        echo "PicoClaw:  $(systemctl is-active picoclaw.service 2>/dev/null || echo 'not installed')"
-        echo "OpenClaw:  $(systemctl is-active openclaw.service 2>/dev/null || echo 'not installed')"
-        echo "Open WebUI: $(systemctl is-active open-webui.service 2>/dev/null || echo 'not installed')"
-        echo "nginx:     $(systemctl is-active nginx.service 2>/dev/null || echo 'not installed')"
-        ;;
-    *)
-        echo "Usage: clawbot-switch-agent {picoclaw|openclaw|status}"
-        echo ""
-        echo "  picoclaw  - Switch to PicoClaw (lightweight, <10MB RAM)"
-        echo "  openclaw  - Switch to OpenClaw (full-featured, ~500MB RAM)"
-        echo "  status    - Show status of all ClawbotOS services"
-        exit 1
-        ;;
-esac
-SWITCH_EOF
-chmod +x /usr/local/bin/clawbot-switch-agent
+# ClawbotOS - Show service status
+echo "=== ClawbotOS Service Status ==="
+echo "PicoClaw:  $(systemctl is-active picoclaw.service 2>/dev/null || echo 'not installed')"
+echo "nginx:     $(systemctl is-active nginx.service 2>/dev/null || echo 'not installed')"
+echo "Telegram:  $(systemctl is-active clawbot-telegram.service 2>/dev/null || echo 'not installed')"
+STATUS_EOF
+chmod +x /usr/local/bin/clawbot-status
 ## END Step 6
 
 echo_green "ClawbotOS branding applied."

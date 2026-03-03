@@ -9,4 +9,4 @@
 
 # System utilities for AI assistant management and debugging
 [[ -n "$CLAWBOT_DEPS" ]] || CLAWBOT_DEPS="wavemon htop nano usbutils ncdu \
-lsof curl wget jq toilet dialog whiptail"
+lsof curl wget jq toilet dialog whiptail network-manager wireless-tools python3"

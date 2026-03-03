@@ -3,17 +3,44 @@
 # shellcheck enable=require-variable-braces
 # shellcheck disable=SC2034
 
-# Image source for SmartPad
-DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/20240302-2147/Yumi-smartpad-bookworm-server.img.xz.sha256"
-DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/20240302-2147/Yumi-smartpad-bookworm-server.img.xz"
+# SmartPad — Armbian Trixie (Debian 13) server image
+# These URLs are automatically overridden by the CI workflow (resolve-base-image step)
+# to always use the latest SmartPi-armbian release.
+DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.6.0/Yumi-smartpad-trixie-debian13-server-2026-03-01-2139.img.xz"
+DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.6.0/Yumi-smartpad-trixie-debian13-server-2026-03-01-2139.img.xz.sha256"
 
-# SmartPad needs more disk space (touchscreen UI + Plymouth)
+# Base User
+BASE_ADD_USER="yes"
+BASE_USER="pi"
+BASE_USER_PASSWORD="yumi"
+
+# Needed while building for non rpi sbc
+BASE_DISTRO="armbian"
+BASE_IMAGE_RASPBIAN="no"
+
+# partition resizing
+BASE_ROOT_PARTITION="2"
 BASE_IMAGE_ENLARGEROOT=6000
+BASE_IMAGE_RESIZEROOT=600
+# Set boot partition mountpoint
+BASE_BOOT_MOUNT_PATH="/boot/"
+# Compress not needed due compression done in workflow
+BASE_RELEASE_COMPRESS=no
 
 # Module chain for SmartPad (with touchscreen)
-MODULES="base(udev_fix,armbian(armbian_net,clawbot,swap_setup,picoclaw,openclaw,openwebui,nginx_proxy,smartpad,clawbot_wizard))"
+MODULES="base(udev_fix,armbian(armbian_net,clawbot,swap_setup,picoclaw,nginx_proxy,smartpad,clawbot_core,telegram_bot,clawbot_wizard))"
 
 # export Variables
-export BASE_ARCH
-export DOWNLOAD_URL_CHECKSUM
 export DOWNLOAD_URL_IMAGE
+export DOWNLOAD_URL_CHECKSUM
+export BASE_ADD_USER
+export BASE_USER
+export BASE_USER_PASSWORD
+export BASE_DISTRO
+export BASE_IMAGE_RASPBIAN
+export BASE_ROOT_PARTITION
+export BASE_IMAGE_ENLARGEROOT
+export BASE_IMAGE_RESIZEROOT
+export BASE_BOOT_MOUNT_PATH
+export BASE_RELEASE_COMPRESS
+export MODULES

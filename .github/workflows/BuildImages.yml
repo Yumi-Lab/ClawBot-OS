@@ -59,12 +59,74 @@ jobs:
           path: repository
           submodules: true
 
+      - name: Resolve latest SmartPi-armbian base image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest --jq '.tag_name')
+          BASE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/${TAG}"
+
+          SMARTPI1_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
+            --jq '.assets[] | select(.name | test("smartpi1-bookworm.*server.*\\.img\\.xz$")) | .name')
+          SMARTPAD_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
+            --jq '.assets[] | select(.name | test("smartpad-trixie.*server.*\\.img\\.xz$")) | .name')
+
+          echo "SmartPi-armbian release: ${TAG}"
+          echo "Smart Pi One image: ${SMARTPI1_IMG}"
+          echo "SmartPad image:     ${SMARTPAD_IMG}"
+
+          # Patch Smart Pi One config
+          sed -i "s|DOWNLOAD_URL_IMAGE=.*smartpi1.*|DOWNLOAD_URL_IMAGE=\"${BASE}/${SMARTPI1_IMG}\"|" \
+            repository/config/armbian/default
+          sed -i "s|DOWNLOAD_URL_CHECKSUM=.*smartpi1.*|DOWNLOAD_URL_CHECKSUM=\"${BASE}/${SMARTPI1_IMG}.sha256\"|" \
+            repository/config/armbian/default
+
+          # Patch SmartPad config
+          sed -i "s|DOWNLOAD_URL_IMAGE=.*smartpad.*|DOWNLOAD_URL_IMAGE=\"${BASE}/${SMARTPAD_IMG}\"|" \
+            repository/config/armbian/smartpad
+          sed -i "s|DOWNLOAD_URL_CHECKSUM=.*smartpad.*|DOWNLOAD_URL_CHECKSUM=\"${BASE}/${SMARTPAD_IMG}.sha256\"|" \
+            repository/config/armbian/smartpad
+
       - name: Build image
         id: build
         uses: ./repository/.github/actions/build
         with:
           config: ${{ matrix.config }}
           custompios-ref: 1.5.0
+
+      - name: Fix boot UUID in image
+        shell: bash
+        run: |
+          IMG=$(ls repository/src/workspace/*.img)
+          echo "Fixing boot UUID in ${IMG}..."
+
+          # Attach image as loop device with partition scanning
+          LOOPDEV=$(sudo losetup -fP --show "$IMG")
+          echo "Loop device: ${LOOPDEV}"
+
+          # Read actual UUID of root partition (p2)
+          ROOT_UUID=$(sudo blkid -o value -s UUID "${LOOPDEV}p2")
+          echo "Actual root UUID: ${ROOT_UUID}"
+
+          # Mount boot partition (p1 = FAT /boot)
+          BOOTMNT=$(mktemp -d)
+          sudo mount "${LOOPDEV}p1" "$BOOTMNT"
+
+          # Update armbianEnv.txt if it exists
+          if [[ -f "${BOOTMNT}/armbianEnv.txt" ]]; then
+              echo "Before fix:"
+              grep -i rootdev "${BOOTMNT}/armbianEnv.txt" || true
+              sudo sed -i "s|^rootdev=.*|rootdev=UUID=${ROOT_UUID}|" "${BOOTMNT}/armbianEnv.txt"
+              echo "After fix:"
+              grep -i rootdev "${BOOTMNT}/armbianEnv.txt"
+          else
+              echo "WARNING: armbianEnv.txt not found in boot partition"
+              ls "$BOOTMNT" || true
+          fi
+
+          sudo umount "$BOOTMNT"
+          sudo losetup -d "$LOOPDEV"
+          echo "UUID fix complete."
 
       - name: Rename image file
         id: move-image

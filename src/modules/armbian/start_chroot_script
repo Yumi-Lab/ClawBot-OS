@@ -16,6 +16,13 @@ set -Ee
 source /common.sh
 install_cleanup_trap
 
+### Fix DNS in chroot (Trixie uses systemd-resolved symlink that breaks under QEMU)
+if [[ -L /etc/resolv.conf ]] || ! grep -q "nameserver" /etc/resolv.conf 2>/dev/null; then
+    rm -f /etc/resolv.conf
+    printf "nameserver 8.8.8.8\nnameserver 1.1.1.1\n" > /etc/resolv.conf
+    echo_green "Fixed /etc/resolv.conf for chroot DNS resolution."
+fi
+
 ### Helper func
 is_board_type() {
     local board releasefile

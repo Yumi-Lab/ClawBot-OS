@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+#### clawbot-provision — ClawbotOS Cloud Provisioning
+####
+#### Fetches device config from Clawbot Cloud and applies it locally.
+#### Called by clawbot-heartbeat and clawbot-firstboot.
+####
+#### Usage:
+####   clawbot-provision               — provision from cloud (uses stored device_id)
+####   clawbot-provision --device-id   — print device_id and exit
+####   clawbot-provision --key <key>   — provision with explicit subscription key
+####
+#### Written by Yumi Lab — BUSL-1.1
+
+set -euo pipefail
+
+CLOUD_API="https://clawbot-api.yumi-lab.com/v1"
+DEVICE_ID_FILE="/etc/clawbot/device-id"
+BOARD_FILE="/etc/clawbot/board"
+PICOCLAW_CONFIG="/home/pi/.picoclaw/config.json"
+CLAWBOT_CORE_API="http://127.0.0.1:8090"
+LOG_TAG="clawbot-provision"
+
+log()  { logger -t "${LOG_TAG}" -- "$*"; }
+info() { log "INFO  $*"; echo "[provision] $*" >&2; }
+err()  { log "ERROR $*"; echo "[provision] ERROR: $*" >&2; }
+
+# ── Device ID ─────────────────────────────────────────────────────────────────
+
+get_or_create_device_id() {
+    if [[ -f "${DEVICE_ID_FILE}" ]]; then
+        cat "${DEVICE_ID_FILE}"
+        return
+    fi
+    # Generate from hardware serial if available, otherwise random UUID
+    local serial hw_id
+    serial=$(grep -m1 "^Serial" /proc/cpuinfo 2>/dev/null | awk '{print $NF}' || true)
+    if [[ -n "${serial}" && "${serial}" != "0000000000000000" ]]; then
+        hw_id=$(echo "clawbot-${serial}" | sha256sum | cut -c1-32)
+        hw_id="${hw_id:0:8}-${hw_id:8:4}-${hw_id:12:4}-${hw_id:16:4}-${hw_id:20:12}"
+    else
+        hw_id=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || uuidgen 2>/dev/null || \
+                python3 -c "import uuid; print(uuid.uuid4())")
+    fi
+    mkdir -p "$(dirname "${DEVICE_ID_FILE}")"
+    echo "${hw_id}" > "${DEVICE_ID_FILE}"
+    chmod 600 "${DEVICE_ID_FILE}"
+    echo "${hw_id}"
+}
+
+get_board_type() {
+    if [[ -f "${BOARD_FILE}" ]]; then
+        cat "${BOARD_FILE}"
+        return
+    fi
+    # Try armbian board info
+    local board
+    board=$(grep -m1 "BOARD=" /etc/armbian-release 2>/dev/null | cut -d= -f2 | tr -d '"' || true)
+    [[ -z "${board}" ]] && board="unknown"
+    echo "${board}"
+}
+
+get_firmware_version() {
+    grep -m1 "VERSION=" /etc/clawbot-release 2>/dev/null | cut -d= -f2 | tr -d '"' || echo "0.0.0"
+}
+
+# ── Provision from cloud ───────────────────────────────────────────────────────
+
+fetch_provision_config() {
+    local device_id="$1"
+    local url="${CLOUD_API}/provision?device_id=${device_id}"
+
+    local resp http_code body
+    resp=$(curl -sf --max-time 15 -w "\n%{http_code}" "${url}" 2>/dev/null) || { err "Cloud unreachable"; return 1; }
+    http_code=$(echo "${resp}" | tail -1)
+    body=$(echo "${resp}" | head -n -1)
+
+    if [[ "${http_code}" != "200" ]]; then
+        err "Cloud returned HTTP ${http_code}"
+        return 1
+    fi
+
+    echo "${body}"
+}
+
+apply_picoclaw_config() {
+    local subscription_key="$1"
+    local model="${2:-clawbot-smart}"
+    local base_url="${3:-https://clawbot-api.yumi-lab.com/v1}"
+
+    mkdir -p "$(dirname "${PICOCLAW_CONFIG}")"
+    cat > "${PICOCLAW_CONFIG}" << PICOEOF
+{
+  "gateway": {
+    "host": "0.0.0.0",
+    "port": 8080
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "~/.picoclaw/workspace",
+      "max_tokens": 4096,
+      "temperature": 0.7
+    }
+  },
+  "model_list": [
+    {
+      "model_name": "default",
+      "model": "${model}",
+      "api_key": "${subscription_key}",
+      "base_url": "${base_url}",
+      "request_timeout": 120
+    }
+  ],
+  "tools": {
+    "web": {
+      "duckduckgo": {
+        "enabled": true,
+        "max_results": 5
+      }
+    }
+  },
+  "log_level": "info"
+}
+PICOEOF
+    chown pi:pi "${PICOCLAW_CONFIG}"
+    chmod 600 "${PICOCLAW_CONFIG}"
+    info "PicoClaw config updated (model: ${model})"
+
+    # Restart picoclaw to pick up new config
+    systemctl --quiet restart picoclaw.service 2>/dev/null || true
+}
+
+apply_modules() {
+    local modules_json="$1"
+    local count
+    count=$(echo "${modules_json}" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
+
+    if [[ "${count}" -eq 0 ]]; then
+        return
+    fi
+
+    info "Applying ${count} module action(s) from cloud..."
+
+    echo "${modules_json}" | python3 - << 'PYEOF'
+import sys, json, urllib.request, urllib.error
+
+CORE_API = "http://127.0.0.1:8090"
+
+def call_core(path, payload):
+    data = json.dumps(payload).encode()
+    req = urllib.request.Request(f"{CORE_API}{path}", data=data,
+                                  headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        return {"ok": False, "message": str(e)}
+
+modules = json.load(sys.stdin)
+for m in modules:
+    mid = m.get("id", "")
+    action = m.get("action", "")
+    repo = m.get("repo", "")
+    if not mid or not action:
+        continue
+    if action == "install" and repo:
+        res = call_core(f"/core/modules/{mid}/install", {"repo": repo})
+        print(f"[provision] module {mid} install: {res.get('ok')} — {res.get('message','')}", flush=True)
+    elif action == "enable":
+        res = call_core(f"/core/modules/{mid}/enable", {})
+        print(f"[provision] module {mid} enable: {res.get('ok')} — {res.get('message','')}", flush=True)
+    elif action == "disable":
+        res = call_core(f"/core/modules/{mid}/disable", {})
+        print(f"[provision] module {mid} disable: {res.get('ok')} — {res.get('message','')}", flush=True)
+PYEOF
+}
+
+provision_from_cloud() {
+    local device_id="$1"
+
+    info "Fetching provision config for device ${device_id} ..."
+    local config
+    config=$(fetch_provision_config "${device_id}") || return 1
+
+    local provisioned
+    provisioned=$(echo "${config}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('provisioned','false'))" 2>/dev/null || echo "false")
+
+    if [[ "${provisioned}" != "True" && "${provisioned}" != "true" ]]; then
+        info "Device not yet provisioned in cloud (scan QR code or visit clawbot-api.yumi-lab.com/activate)"
+        return 1
+    fi
+
+    info "Cloud provisioning response received."
+
+    # Apply LLM config if present
+    local sub_key model base_url
+    sub_key=$(echo "${config}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('subscription_key',''))" 2>/dev/null || true)
+    model=$(echo "${config}"   | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('model','clawbot-smart'))" 2>/dev/null || echo "clawbot-smart")
+    base_url=$(echo "${config}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('base_url','https://clawbot-api.yumi-lab.com/v1'))" 2>/dev/null || echo "https://clawbot-api.yumi-lab.com/v1")
+
+    if [[ -n "${sub_key}" ]]; then
+        apply_picoclaw_config "${sub_key}" "${model}" "${base_url}"
+    fi
+
+    # Apply modules if present
+    local modules_json
+    modules_json=$(echo "${config}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d.get('modules',[])))" 2>/dev/null || echo "[]")
+    apply_modules "${modules_json}"
+
+    info "Provisioning complete."
+    return 0
+}
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+main() {
+    local device_id
+    device_id=$(get_or_create_device_id)
+
+    case "${1:-}" in
+        --device-id)
+            echo "${device_id}"
+            exit 0
+            ;;
+        --key)
+            # Direct key provisioning (firstboot fallback)
+            local key="${2:-}"
+            if [[ -z "${key}" ]]; then
+                err "Usage: clawbot-provision --key <subscription-key>"
+                exit 1
+            fi
+            apply_picoclaw_config "${key}" "clawbot-smart" "https://clawbot-api.yumi-lab.com/v1"
+            info "Provisioned with explicit subscription key."
+            exit 0
+            ;;
+        "")
+            provision_from_cloud "${device_id}"
+            ;;
+        *)
+            err "Unknown argument: $1"
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
