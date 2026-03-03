@@ -29,6 +29,7 @@ ALLOWED_FILES = {
 ALLOWED_LOG_SERVICES = {
     "picoclaw", "nginx", "clawbot-telegram",
     "clawbot-status-api", "clawbot-swap",
+    "clawbot-core", "clawbot-cloud", "clawbot-firstboot",
 }
 
 
@@ -199,6 +200,33 @@ def get_stats():
         "swap_mb": swap_mb,
         "services": services,
     }
+
+
+def get_current_config() -> dict:
+    """Read current LLM config from picoclaw config.json."""
+    try:
+        with open(PICOCLAW_CONFIG) as f:
+            cfg = json.load(f)
+        entry = cfg.get("model_list", [{}])[0]
+        api_key = entry.get("api_key", "")
+        model = entry.get("model", "")
+        base_url = entry.get("base_url", "")
+        # Detect provider from base_url or api_key prefix
+        if "clawbot-api" in base_url or api_key.startswith("clb-"):
+            provider = "clawbot"
+        elif "anthropic.com" in base_url or api_key.startswith("sk-ant-"):
+            provider = "anthropic"
+        elif "openai.com" in base_url or api_key.startswith("sk-proj-") or api_key.startswith("sk-"):
+            provider = "openai"
+        elif "deepseek.com" in base_url:
+            provider = "deepseek"
+        elif "openrouter.ai" in base_url:
+            provider = "openrouter"
+        else:
+            provider = "custom"
+        return {"provider": provider, "model": model, "apikey": api_key, "baseurl": base_url}
+    except Exception:
+        return {"provider": "", "model": "", "apikey": "", "baseurl": ""}
 
 
 def update_picoclaw_config(provider, model, api_key, base_url):
@@ -448,6 +476,9 @@ class Handler(BaseHTTPRequestHandler):
 
         elif parsed.path == "/core-version":
             self.send_json(200, {"version": get_clawbot_core_version()})
+
+        elif parsed.path == "/config":
+            self.send_json(200, get_current_config())
 
         elif parsed.path == "/logs":
             service = qs.get("service", [""])[0]
