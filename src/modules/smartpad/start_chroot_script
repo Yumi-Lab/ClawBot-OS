@@ -98,4 +98,14 @@ if [[ ! -f /etc/ssh/ssh_host_ed25519_key ]]; then
 fi
 echo_green "SSH fix applied."
 
+### Install kiosk browser stack for the firstboot web wizard
+### cage = minimal Wayland compositor (DRM/KMS, no X11 needed)
+### chromium = full-screen kiosk browser with touch + virtual keyboard support
+echo_green "Installing cage + chromium for firstboot web wizard..."
+apt-get install -y --no-install-recommends \
+    cage \
+    chromium \
+    || echo_red "Warning: cage/chromium install failed — wizard will fall back to dialog"
+echo_green "Kiosk packages installed."
+
 echo_green "SmartPad module ... DONE!"
