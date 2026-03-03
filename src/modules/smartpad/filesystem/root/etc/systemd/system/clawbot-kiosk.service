@@ -1,0 +1,28 @@
+[Unit]
+Description=ClawbotOS Kiosk Browser (SmartPad Dashboard)
+Documentation=https://github.com/Yumi-Lab/ClawBot-OS
+After=network-online.target nginx.service picoclaw.service clawbot-core.service
+Wants=network-online.target nginx.service
+# Only run on devices with a screen (SmartPad)
+ConditionPathExists=/dev/fb0
+# Only run after firstboot wizard has completed (sentinel file removed)
+ConditionPathNotExists=/.firstboot_clawbot
+
+[Service]
+Type=simple
+ExecStart=cage -- chromium \
+    --kiosk \
+    --ozone-platform=wayland \
+    --no-sandbox \
+    --disable-infobars \
+    --disable-session-crashed-bubble \
+    --disable-features=TranslateUI \
+    --check-for-update-interval=31536000 \
+    --disable-restore-session-state \
+    http://localhost/
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=30
+
+[Install]
+WantedBy=multi-user.target

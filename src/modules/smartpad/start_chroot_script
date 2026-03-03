@@ -108,4 +108,8 @@ apt-get install -y --no-install-recommends \
     || echo_red "Warning: cage/chromium install failed — wizard will fall back to dialog"
 echo_green "Kiosk packages installed."
 
+### Enable persistent dashboard kiosk service (starts after firstboot wizard)
+systemctl enable clawbot-kiosk.service
+echo_green "clawbot-kiosk.service enabled."
+
 echo_green "SmartPad module ... DONE!"

@@ -38,7 +38,7 @@ get_ip() {
 
 MAC="$(get_mac | tr '[:lower:]' '[:upper:]')"
 MAC_CLEAN="$(echo "${MAC}" | tr -d ':')"
-ACTIVATE_URL="https://clawbot-api.yumi-lab.com/activate?mac=${MAC_CLEAN}"
+ACTIVATE_URL="https://openjarvis.io/activate?mac=${MAC_CLEAN}"
 HAS_SCREEN=false
 [[ -e /dev/fb0 ]] && HAS_SCREEN=true
 
@@ -254,10 +254,20 @@ if ${HAS_SCREEN} && command -v cage &>/dev/null && command -v chromium &>/dev/nu
         sleep 3
     done
 
-    # Give Chromium time to navigate to the dashboard before killing cage
-    sleep 8
-    kill "${CAGE_PID}" 2>/dev/null || true
+    # Activation received — wizard's JS will navigate Chromium to http://localhost
+    # Shut down wizard server (no longer needed)
     kill "${WIZARD_PID}" 2>/dev/null || true
+
+    # Kill wizard's cage session so the kiosk service can own the display
+    sleep 2
+    kill "${CAGE_PID}" 2>/dev/null || true
+    wait "${CAGE_PID}" 2>/dev/null || true
+
+    # Remove sentinel now so clawbot-kiosk.service condition is satisfied
+    rm -f /.firstboot_clawbot
+
+    # Launch persistent kiosk (dashboard) — runs cage + Chromium → http://localhost
+    systemctl start clawbot-kiosk.service 2>/dev/null || true
 
 elif ${HAS_SCREEN} && [[ -n "${DIALOG}" ]]; then
     # ── DIALOG FALLBACK (screen but no cage/chromium) ──
