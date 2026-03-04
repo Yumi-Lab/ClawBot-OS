@@ -4,7 +4,7 @@ Documentation=https://github.com/Yumi-Lab/ClawBot-OS
 After=network-online.target nginx.service picoclaw.service clawbot-core.service
 Wants=network-online.target nginx.service
 # Only run on devices with a screen (SmartPad)
-ConditionPathExists=/dev/fb0
+ConditionPathExists=/dev/dri/card0
 # Only run after firstboot wizard has completed (sentinel file removed)
 ConditionPathNotExists=/.firstboot_clawbot
 

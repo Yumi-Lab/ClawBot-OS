@@ -40,7 +40,8 @@ MAC="$(get_mac | tr '[:lower:]' '[:upper:]')"
 MAC_CLEAN="$(echo "${MAC}" | tr -d ':')"
 ACTIVATE_URL="https://openjarvis.io/activate?mac=${MAC_CLEAN}"
 HAS_SCREEN=false
-[[ -e /dev/fb0 ]] && HAS_SCREEN=true
+# Detect screen via DRM/KMS device (works even without fbdev emulation, e.g. Trixie)
+[[ -e /dev/dri/card0 ]] && HAS_SCREEN=true
 
 # Always start fresh: remove stale activation signal so the wizard waits
 # for a real cloud push even if device was previously activated

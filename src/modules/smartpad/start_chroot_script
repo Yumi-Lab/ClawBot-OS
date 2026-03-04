@@ -87,13 +87,10 @@ if [[ -f "${SMARTPAD_CONFIG_TXT_FILE}" ]]; then
 fi
 
 echo_green "Install Yumi Lab Plymouth theme on SmartPad... [DONE]"
-### Fix SSH on Trixie: mask ssh.socket completely (prevents socket-activation
-### which conflicts with ssh.service on Debian 13 / Armbian Trixie)
+### Fix SSH on Trixie: ssh.socket is masked via filesystem overlay (symlink→/dev/null)
+### so socket-activation never starts. Just enable ssh.service + generate host keys.
 echo_green "Fixing SSH service activation on Trixie..."
-# mask is stronger than disable — prevents socket-activation entirely
-systemctl mask ssh.socket 2>/dev/null || ln -sf /dev/null /etc/systemd/system/ssh.socket
 systemctl enable ssh.service 2>/dev/null || true
-# Force-generate host keys at build time (avoids first-boot generation failure)
 ssh-keygen -A 2>/dev/null || true
 echo_green "SSH fix applied."
 
