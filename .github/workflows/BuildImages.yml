@@ -68,12 +68,15 @@ jobs:
 
           SMARTPI1_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
             --jq '.assets[] | select(.name | test("smartpi1-bookworm.*server.*\\.img\\.xz$")) | .name')
-          SMARTPAD_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
+          SMARTPAD_TRIXIE_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
             --jq '.assets[] | select(.name | test("smartpad-trixie.*server.*\\.img\\.xz$")) | .name')
+          SMARTPAD_BOOKWORM_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
+            --jq '.assets[] | select(.name | test("smartpad-bookworm.*server.*\\.img\\.xz$")) | .name')
 
-          echo "SmartPi-armbian release: ${TAG}"
-          echo "Smart Pi One image: ${SMARTPI1_IMG}"
-          echo "SmartPad image:     ${SMARTPAD_IMG}"
+          echo "SmartPi-armbian release:       ${TAG}"
+          echo "Smart Pi One image:            ${SMARTPI1_IMG}"
+          echo "SmartPad Trixie image:         ${SMARTPAD_TRIXIE_IMG}"
+          echo "SmartPad Bookworm image:       ${SMARTPAD_BOOKWORM_IMG}"
 
           # Patch Smart Pi One config
           sed -i "s|DOWNLOAD_URL_IMAGE=.*smartpi1.*|DOWNLOAD_URL_IMAGE=\"${BASE}/${SMARTPI1_IMG}\"|" \
@@ -81,11 +84,17 @@ jobs:
           sed -i "s|DOWNLOAD_URL_CHECKSUM=.*smartpi1.*|DOWNLOAD_URL_CHECKSUM=\"${BASE}/${SMARTPI1_IMG}.sha256\"|" \
             repository/config/armbian/default
 
-          # Patch SmartPad config
-          sed -i "s|DOWNLOAD_URL_IMAGE=.*smartpad.*|DOWNLOAD_URL_IMAGE=\"${BASE}/${SMARTPAD_IMG}\"|" \
+          # Patch SmartPad Trixie config
+          sed -i "s|DOWNLOAD_URL_IMAGE=.*trixie.*|DOWNLOAD_URL_IMAGE=\"${BASE}/${SMARTPAD_TRIXIE_IMG}\"|" \
             repository/config/armbian/smartpad
-          sed -i "s|DOWNLOAD_URL_CHECKSUM=.*smartpad.*|DOWNLOAD_URL_CHECKSUM=\"${BASE}/${SMARTPAD_IMG}.sha256\"|" \
+          sed -i "s|DOWNLOAD_URL_CHECKSUM=.*trixie.*|DOWNLOAD_URL_CHECKSUM=\"${BASE}/${SMARTPAD_TRIXIE_IMG}.sha256\"|" \
             repository/config/armbian/smartpad
+
+          # Patch SmartPad Bookworm config
+          sed -i "s|DOWNLOAD_URL_IMAGE=.*bookworm.*|DOWNLOAD_URL_IMAGE=\"${BASE}/${SMARTPAD_BOOKWORM_IMG}\"|" \
+            repository/config/armbian/smartpad-bookworm
+          sed -i "s|DOWNLOAD_URL_CHECKSUM=.*bookworm.*|DOWNLOAD_URL_CHECKSUM=\"${BASE}/${SMARTPAD_BOOKWORM_IMG}.sha256\"|" \
+            repository/config/armbian/smartpad-bookworm
 
       - name: Build image
         id: build

@@ -12,9 +12,11 @@
 # Build test matrix (pushes/PRs to develop)
 buildtest:
   - armbian/smartpad
+  - armbian/smartpad-bookworm
   - armbian/smartpi
 
 # Release build matrix
 release:
   - armbian/smartpad
+  - armbian/smartpad-bookworm
   - armbian/smartpi
