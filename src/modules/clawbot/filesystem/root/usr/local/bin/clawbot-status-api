@@ -240,7 +240,14 @@ def get_current_config() -> dict:
     try:
         with open(PICOCLAW_CONFIG) as f:
             cfg = json.load(f)
-        entry = cfg.get("model_list", [{}])[0]
+        # Find the 'default' model_list entry (picoclaw v0.2.0 may have multiple entries)
+        entry = {}
+        for item in cfg.get("model_list", []):
+            if item.get("model_name") == "default":
+                entry = item
+                break
+        if not entry:
+            entry = cfg.get("model_list", [{}])[0]
         api_key = entry.get("api_key", "")
         model = entry.get("model", "")
         base_url = entry.get("base_url", "")
@@ -265,7 +272,12 @@ def get_current_config() -> dict:
 
 
 def update_picoclaw_config(provider, model, api_key, base_url):
-    """Update PicoClaw config.json and restart the service."""
+    """Update PicoClaw config.json (merge into existing) and restart the service.
+
+    Reads the current config and updates only the 'default' model_list entry so
+    that picoclaw auth entries and channel config created by 'picoclaw auth login'
+    are preserved.
+    """
     PROVIDER_BASE_URLS = {
         "openai":     "https://api.openai.com/v1",
         "anthropic":  "https://api.anthropic.com/v1",
@@ -276,41 +288,39 @@ def update_picoclaw_config(provider, model, api_key, base_url):
     if not base_url and provider in PROVIDER_BASE_URLS:
         base_url = PROVIDER_BASE_URLS[provider]
 
-    config = {
-        "gateway": {"host": "0.0.0.0", "port": 8080},
-        "agents": {
-            "defaults": {
-                "model": "default",
-                "workspace": "~/.picoclaw/workspace",
-                "max_tokens": 4096,
-                "temperature": 0.7
-            }
-        },
-        "model_list": [
-            {
-                "model_name": "default",
-                "model": model,
-                "api_key": api_key,
-                "base_url": base_url,
-                "request_timeout": 120
-            }
-        ],
-        # maixcam satisfies picoclaw v0.2.0 requirement of ≥1 enabled channel
-        "channels": {
-            "maixcam": {
-                "enabled": True,
-                "host": "127.0.0.1",
-                "port": 18790,
-                "allow_from": [],
-                "reasoning_channel_id": ""
-            }
-        },
-        "tools": {"web": {"duckduckgo": {"enabled": True, "max_results": 5}}},
-        "log_level": "info"
-    }
-
+    # Load existing config to preserve picoclaw auth entries and channel settings
     config_dir = os.path.dirname(PICOCLAW_CONFIG)
     os.makedirs(config_dir, exist_ok=True)
+    try:
+        with open(PICOCLAW_CONFIG) as f:
+            config = json.load(f)
+    except Exception:
+        # Bootstrap minimal config if none exists
+        config = {
+            "gateway": {"host": "0.0.0.0", "port": 8080},
+            "agents": {"defaults": {"model": "default", "workspace": "~/.picoclaw/workspace",
+                                    "max_tokens": 4096, "temperature": 0.7}},
+            "model_list": [],
+            "channels": {"maixcam": {"enabled": True, "host": "127.0.0.1", "port": 18790,
+                                      "allow_from": [], "reasoning_channel_id": ""}},
+            "tools": {"web": {"duckduckgo": {"enabled": True, "max_results": 5}}},
+        }
+
+    # Update or insert the 'default' entry in model_list
+    model_list = config.get("model_list", [])
+    default_entry = None
+    for entry in model_list:
+        if entry.get("model_name") == "default":
+            default_entry = entry
+            break
+    if default_entry is None:
+        default_entry = {"model_name": "default", "request_timeout": 120}
+        model_list.insert(0, default_entry)
+    default_entry["model"] = model
+    default_entry["api_key"] = api_key
+    default_entry["base_url"] = base_url
+    default_entry["request_timeout"] = default_entry.get("request_timeout", 120)
+    config["model_list"] = model_list
 
     with open(PICOCLAW_CONFIG, "w") as f:
         json.dump(config, f, indent=2)
