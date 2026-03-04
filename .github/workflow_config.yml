@@ -14,9 +14,11 @@ buildtest:
   - armbian/smartpad
   - armbian/smartpad-bookworm
   - armbian/smartpi
+  - armbian/smartpi-trixie
 
 # Release build matrix
 release:
   - armbian/smartpad
   - armbian/smartpad-bookworm
   - armbian/smartpi
+  - armbian/smartpi-trixie
