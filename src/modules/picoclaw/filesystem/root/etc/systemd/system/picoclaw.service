@@ -1,7 +1,6 @@
 [Unit]
 Description=PicoClaw AI Gateway
-After=network-online.target clawbot-swap.service
-Wants=network-online.target
+After=network.target clawbot-swap.service
 
 [Service]
 Type=simple

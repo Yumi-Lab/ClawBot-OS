@@ -1,6 +1,6 @@
 [Unit]
 Description=ClawbotOS Core — Module Registry & Middleware
-After=network.target picoclaw.service
+After=network.target
 Wants=picoclaw.service
 
 [Service]
