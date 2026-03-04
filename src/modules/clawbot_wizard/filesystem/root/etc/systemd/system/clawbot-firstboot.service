@@ -4,11 +4,11 @@ After=network-online.target clawbot-cloud.service
 ConditionPathExists=/.firstboot_clawbot
 
 [Service]
+# cage manages its own VT allocation via LIBSEAT_BACKEND=direct
+# DO NOT set StandardInput=tty here — it causes SIGHUP to kill the process
+# when cage takes over the display (TTY session leader conflict)
 ExecStart=/usr/local/bin/clawbot-firstboot
-StandardInput=tty
-TTYPath=/dev/tty2
-TTYReset=yes
-TTYVHangup=yes
+Restart=no
 
 [Install]
 WantedBy=multi-user.target

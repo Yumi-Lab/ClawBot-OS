@@ -104,7 +104,8 @@ def apply_config(config: dict):
     """Write PicoClaw config and restart the service."""
     sub_key = config.get("subscription_key", "")
     model = config.get("model", "clawbot-smart")
-    base_url = config.get("base_url", "https://clawbot-api.yumi-lab.com/v1")
+    # Always route through Yumi proxy — subscription_key is NOT an Anthropic key
+    base_url = "https://clawbot-api.yumi-lab.com/v1"
 
     if not sub_key:
         log.warning("Config received but no subscription_key — skipping")
