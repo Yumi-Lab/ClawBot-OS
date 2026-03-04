@@ -227,6 +227,13 @@ headless_wait() {
 
 if ${HAS_SCREEN} && command -v cage &>/dev/null && command -v chromium &>/dev/null; then
     # ── WEB WIZARD MODE (SmartPad: cage + Chromium kiosk) ──
+    # cage needs XDG_RUNTIME_DIR for Wayland socket; LIBSEAT_BACKEND=direct
+    # avoids libseat/logind (system service has no user session)
+    export XDG_RUNTIME_DIR=/run/clawbot-wizard
+    export LIBSEAT_BACKEND=direct
+    mkdir -p "${XDG_RUNTIME_DIR}"
+    chmod 700 "${XDG_RUNTIME_DIR}"
+
     # Start the Python wizard server in background
     /usr/local/bin/clawbot-wizard-web &
     WIZARD_PID=$!

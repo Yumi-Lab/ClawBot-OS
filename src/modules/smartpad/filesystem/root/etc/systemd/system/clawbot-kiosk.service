@@ -10,10 +10,21 @@ ConditionPathNotExists=/.firstboot_clawbot
 
 [Service]
 Type=simple
+# cage needs XDG_RUNTIME_DIR for Wayland socket; LIBSEAT_BACKEND=direct
+# avoids libseat/logind dependency (system service, no user session)
+Environment=XDG_RUNTIME_DIR=/run/clawbot-kiosk
+Environment=LIBSEAT_BACKEND=direct
+RuntimeDirectory=clawbot-kiosk
+RuntimeDirectoryMode=0700
+# Allocate a virtual terminal so cage can perform VT switching
+StandardInput=tty
+TTYPath=/dev/tty2
+TTYReset=yes
+TTYVHangup=yes
 ExecStart=cage -- /usr/local/bin/clawbot-kiosk-launcher
 Restart=on-failure
 RestartSec=5
-TimeoutStartSec=30
+TimeoutStartSec=60
 
 [Install]
 WantedBy=multi-user.target
