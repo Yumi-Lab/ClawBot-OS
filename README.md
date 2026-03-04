@@ -101,6 +101,88 @@ curl -X POST http://clawbot.local/api/core/core/modules/my-module/install \
 
 Modules expose **OpenAI function-calling tools** that PicoClaw can invoke autonomously during conversations.
 
+## LLM Configuration
+
+### Option 1 — Clawbot Cloud Subscription (recommended)
+
+Link your device on [openjarvis.io](https://openjarvis.io) — the subscription key is pushed automatically.
+No manual configuration needed.
+
+### Option 2 — Anthropic API key (direct)
+
+Go to **Settings** in the dashboard:
+
+1. Select **Anthropic (Claude) — Recommended**
+2. Enter your `sk-ant-api03-...` key
+3. Choose a model (default: `claude-sonnet-4-6`)
+4. Click **Save & Apply** — PicoClaw restarts automatically
+
+Or via SSH terminal:
+
+```bash
+ssh pi@clawbot.local   # password: yumi
+
+# Write config directly
+sudo python3 - <<'EOF'
+import json, os
+cfg = {
+  "gateway": {"host": "0.0.0.0", "port": 8080},
+  "agents": {"defaults": {"model": "default", "workspace": "~/.picoclaw/workspace",
+                           "max_tokens": 4096, "temperature": 0.7}},
+  "model_list": [{
+    "model_name": "default",
+    "model": "claude-sonnet-4-6",
+    "api_key": "sk-ant-api03-YOUR_KEY_HERE",
+    "base_url": "https://api.anthropic.com/v1",
+    "request_timeout": 120
+  }],
+  "channels": {"maixcam": {"enabled": True, "host": "127.0.0.1", "port": 18790,
+                             "allow_from": [], "reasoning_channel_id": ""}},
+  "tools": {"web": {"duckduckgo": {"enabled": True, "max_results": 5}}},
+  "log_level": "info"
+}
+os.makedirs('/home/pi/.picoclaw', exist_ok=True)
+with open('/home/pi/.picoclaw/config.json', 'w') as f:
+    json.dump(cfg, f, indent=2)
+print('Config written.')
+EOF
+
+sudo systemctl restart picoclaw clawbot-core
+```
+
+### Option 3 — OpenAI, DeepSeek, OpenRouter, Ollama
+
+Same procedure — select the provider in Settings, enter the key, save.
+
+### Test the AI (curl)
+
+```bash
+# From your computer (replace with the Pi IP)
+curl http://clawbot.local/api/core/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"default","messages":[{"role":"user","content":"Hello, what can you do?"}]}'
+
+# From the Pi itself (SSH)
+curl http://127.0.0.1:8090/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Hello"}]}'
+```
+
+### How ClawbotCore uses the LLM
+
+```
+Chat request → ClawbotCore (:8090)
+    → injects available module tools (function calling)
+    → calls LLM API directly (for OpenAI-compatible providers)
+    → OR routes through PicoClaw (:8080) for Anthropic format translation
+    → executes tool_calls returned by the LLM
+    → loops until final answer
+    → returns OpenAI-compatible response
+```
+
+ClawbotCore reads the LLM config from `/home/pi/.picoclaw/config.json` — the same file
+used by PicoClaw. Changing it in Settings updates both services.
+
 ## WiFi Configuration
 
 Edit `/boot/network_config.txt.template`:
