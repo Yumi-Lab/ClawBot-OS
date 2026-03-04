@@ -326,8 +326,32 @@ def update_picoclaw_config(provider, model, api_key, base_url):
         json.dump(config, f, indent=2)
 
     os.chmod(PICOCLAW_CONFIG, 0o600)
+
+    # For native picoclaw providers (anthropic/openai), also update auth.json so
+    # picoclaw's own agent loop can authenticate (it reads auth.json, not config.json).
+    AUTH_FILE = os.path.join(os.path.dirname(PICOCLAW_CONFIG), "auth.json")
+    NATIVE_PROVIDERS = {"anthropic", "openai"}
+    if provider in NATIVE_PROVIDERS and api_key:
+        try:
+            try:
+                with open(AUTH_FILE) as f:
+                    auth = json.load(f)
+            except Exception:
+                auth = {"credentials": {}}
+            auth.setdefault("credentials", {})[provider] = {
+                "access_token": api_key,
+                "expires_at": "0001-01-01T00:00:00Z",
+                "provider": provider,
+                "auth_method": "token",
+            }
+            with open(AUTH_FILE, "w") as f:
+                json.dump(auth, f, indent=2)
+            os.chmod(AUTH_FILE, 0o600)
+        except Exception:
+            pass
+
     try:
-        subprocess.run(["chown", "pi:pi", PICOCLAW_CONFIG], timeout=3)
+        subprocess.run(["chown", "-R", "pi:pi", os.path.dirname(PICOCLAW_CONFIG)], timeout=3)
         subprocess.run(
             ["systemctl", "restart", "picoclaw.service"],
             timeout=10
