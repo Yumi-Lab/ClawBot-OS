@@ -76,11 +76,13 @@ fi
 ### Framebuffer rotation (180°) + touchscreen calibration already in udev rule
 echo_green "Setting framebuffer rotation 180° for SmartPad display..."
 if [[ -f "${SMARTPAD_CONFIG_TXT_FILE}" ]]; then
-    # Add fbcon rotation if not already set
+    # Add fbcon + DRM rotation if not already set
+    # fbcon=rotate:2   → framebuffer console (text mode) 180°
+    # video=DSI-1:rotate=180 → DRM connector rotation (Plymouth splash + kiosk) 180°
     if ! grep -q "extraargs=" "${SMARTPAD_CONFIG_TXT_FILE}"; then
-        echo "extraargs=fbcon=rotate:2" >> "${SMARTPAD_CONFIG_TXT_FILE}"
+        echo "extraargs=fbcon=rotate:2 video=DSI-1:rotate=180" >> "${SMARTPAD_CONFIG_TXT_FILE}"
     else
-        sed -i '/extraargs=/s/$/ fbcon=rotate:2/' "${SMARTPAD_CONFIG_TXT_FILE}"
+        sed -i '/extraargs=/s/$/ fbcon=rotate:2 video=DSI-1:rotate=180/' "${SMARTPAD_CONFIG_TXT_FILE}"
     fi
 fi
 
