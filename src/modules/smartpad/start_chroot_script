@@ -44,9 +44,10 @@ fi
 
 ### Install Plymouth theme from Yumi Lab repo
 echo_green "Install Yumi Lab Plymouth theme on SmartPad..."
+apt-get install -y --no-install-recommends imagemagick 2>/dev/null || true
 
 smartpad_install_theme() {
-    local src dest
+    local src dest theme_dest
     dest="/usr/share/plymouth/themes/"
     src="/home/${BASE_USER}/$(basename "${SMARTPAD_PLYMOUTH_REPO/.git/}")"
     src="${src}/pack_2/hexagon_alt"
@@ -55,6 +56,14 @@ smartpad_install_theme() {
     fi
     echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ..."
     sudo plymouth-set-default-theme "${SMARTPAD_PLYMOUTH_THEME}" || true
+
+    # Rotate all PNG assets 180° so Plymouth splash matches screen orientation
+    # Plymouth uses its own DRM renderer — kernel video= param doesn't affect it
+    theme_dest="${dest}${SMARTPAD_PLYMOUTH_THEME}"
+    if command -v mogrify &>/dev/null && [[ -d "${theme_dest}" ]]; then
+        echo_green "Rotating Plymouth theme PNGs 180°..."
+        find "${theme_dest}" -name "*.png" -exec mogrify -rotate 180 {} \;
+    fi
 }
 
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
