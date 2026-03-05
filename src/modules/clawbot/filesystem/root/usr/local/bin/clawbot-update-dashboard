@@ -41,6 +41,7 @@ mkdir -p "${DASHBOARD_DIR}"
 tmp=$(mktemp)
 if curl -fsSL --max-time 30 "${RELEASE_BASE}/index.html" -o "${tmp}"; then
     mv "${tmp}" "${DASHBOARD_FILE}"
+    chmod 644 "${DASHBOARD_FILE}"
     echo "${remote_version}" > "${VERSION_FILE}"
     chown -R pi:pi "${DASHBOARD_DIR}"
     echo "{\"updated\":true,\"from\":\"${local_version}\",\"to\":\"${remote_version}\"}"
