@@ -16,7 +16,7 @@
       "model_name": "default",
       "model": "",
       "api_key": "",
-      "base_url": "",
+      "api_base": "",
       "request_timeout": 120
     }
   ],

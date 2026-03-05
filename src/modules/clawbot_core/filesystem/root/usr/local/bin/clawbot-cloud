@@ -127,7 +127,7 @@ def apply_config(config: dict):
                 "model_name": "default",
                 "model": model,
                 "api_key": sub_key,
-                "base_url": base_url,
+                "api_base": base_url,
                 "request_timeout": 120,
             }
         ],
