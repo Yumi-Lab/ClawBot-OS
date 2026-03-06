@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# wifi-watchdog — reconnect WiFi if connectivity is lost
+# Runs via systemd timer every 60 seconds (see wifi-watchdog.timer)
+
+PING_TARGET="8.8.8.8"
+PING_COUNT=3
+PING_TIMEOUT=5
+
+# Find the WiFi interface (wlan* or wlx*)
+IFACE=$(nmcli -t -f DEVICE,TYPE device status 2>/dev/null \
+    | grep ':wifi$' | head -1 | cut -d: -f1)
+
+if [[ -z "${IFACE}" ]]; then
+    # No WiFi device managed by NetworkManager — nothing to do
+    exit 0
+fi
+
+# Check if the interface is connected
+IFACE_STATE=$(nmcli -t -f DEVICE,STATE device status 2>/dev/null \
+    | grep "^${IFACE}:" | cut -d: -f2)
+
+if [[ "${IFACE_STATE}" == "connected" ]]; then
+    # Verify actual connectivity with a ping
+    if ping -c "${PING_COUNT}" -W "${PING_TIMEOUT}" -I "${IFACE}" "${PING_TARGET}" &>/dev/null; then
+        exit 0
+    fi
+fi
+
+# Connection lost — try to reconnect
+logger -t wifi-watchdog "WiFi down on ${IFACE} (state: ${IFACE_STATE}) — attempting reconnect"
+nmcli device disconnect "${IFACE}" 2>/dev/null || true
+sleep 2
+nmcli device connect "${IFACE}" 2>/dev/null \
+    || nmcli connection up ifname "${IFACE}" 2>/dev/null \
+    || logger -t wifi-watchdog "Reconnect failed on ${IFACE}"
