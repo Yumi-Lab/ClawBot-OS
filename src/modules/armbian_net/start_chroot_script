@@ -60,3 +60,8 @@ fi
 ## Step 6: Enable systemd service
 systemctl_if_exists enable network-configurator.service
 ## END
+
+## Step 7: Install and enable wifi-watchdog
+chmod +x /usr/local/bin/wifi-watchdog
+systemctl_if_exists enable wifi-watchdog.timer
+## END

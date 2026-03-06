@@ -1,0 +1,8 @@
+[Unit]
+Description=WiFi Watchdog — reconnect on connectivity loss
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/wifi-watchdog
