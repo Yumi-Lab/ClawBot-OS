@@ -9,6 +9,7 @@ Replaces the old HTTP-based clawbot-heartbeat.
 Written by Yumi Lab — BUSL-1.1
 """
 import asyncio
+import concurrent.futures
 import json
 import logging
 import os
@@ -16,6 +17,8 @@ import re
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,6 +31,7 @@ PICOCLAW_CONFIG = "/home/pi/.picoclaw/config.json"
 ACTIVATED_SIGNAL = "/tmp/clawbot-activated"
 HEARTBEAT_INTERVAL = 300  # 5 minutes
 BACKOFF_STEPS = [5, 10, 30, 60]  # seconds
+CORE_TIMEOUT = 300  # timeout for ClawbotCore HTTP calls
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -127,7 +131,7 @@ def apply_config(config: dict):
                 "model_name": "default",
                 "model": model,
                 "api_key": sub_key,
-                "api_base": base_url,
+                "base_url": base_url,
                 "request_timeout": 120,
             }
         ],
@@ -184,62 +188,105 @@ def build_heartbeat() -> dict:
     }
 
 
-# ── Chat request tunnel ───────────────────────────────────────────────────────
+# ── Chat request handler (WebSocket tunnel → ClawbotCore) ─────────────────────
+
+_chat_executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+
 
 async def _handle_chat_request(ws, request_id: str, payload: dict):
-    """Forward a cloud chat_request to local ClawbotCore and relay the response."""
-    import urllib.request as _urlib
+    """Forward a cloud chat request to local ClawbotCore with SSE streaming.
 
-    CORE_URL = "http://127.0.0.1:8090/v1/chat/completions"
-    payload = dict(payload)
-    payload["stream"] = True
+    Runs the blocking HTTP call in a thread, pushes SSE events to an asyncio
+    Queue, and the coroutine forwards them over the WebSocket as chat_chunk /
+    chat_done / chat_error messages.  Multiple requests run in parallel.
+    """
+    endpoint = payload.pop("_endpoint", "/v1/chat/completions")
+    payload["_from_tunnel"] = True  # prevent recursive routing back to device
+    payload["stream"] = True        # always request SSE from ClawbotCore
+    url = f"http://127.0.0.1:8090{endpoint}"
 
-    def sync_call() -> str:
-        data = json.dumps(payload).encode()
-        req = _urlib.Request(
-            CORE_URL, data=data,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        full = ""
-        with _urlib.urlopen(req, timeout=300) as resp:
-            for raw in resp:
-                line = raw.decode("utf-8", errors="replace").rstrip("\r\n")
-                if not line.startswith("data: ") or line == "data: [DONE]":
-                    continue
-                try:
-                    d = json.loads(line[6:])
-                    # ClawbotCore custom format: {type: "done", content: "..."}
-                    if d.get("type") == "done":
-                        full = d.get("content", full)
-                    # OpenAI streaming format: choices[0].delta.content
-                    elif d.get("choices"):
-                        delta = (d["choices"][0].get("delta") or {}).get("content", "")
-                        if delta:
-                            full += delta
-                except Exception:
-                    pass
-        return full
+    q: asyncio.Queue = asyncio.Queue()
+    loop = asyncio.get_event_loop()
 
-    try:
-        loop = asyncio.get_event_loop()
-        content = await loop.run_in_executor(None, sync_call)
-        await ws.send(json.dumps({
-            "type": "chat_done",
-            "request_id": request_id,
-            "content": content,
-        }))
-        log.info("chat_request %s done (%d chars)", request_id[:8], len(content))
-    except Exception as e:
-        log.error("chat_request %s failed: %s", request_id[:8], e)
+    def _stream():
+        """Blocking: call ClawbotCore, parse SSE, push to queue."""
         try:
-            await ws.send(json.dumps({
+            data = json.dumps(payload).encode()
+            req = urllib.request.Request(
+                url, data=data,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=CORE_TIMEOUT) as resp:
+                ct = resp.headers.get("Content-Type", "")
+                if "text/event-stream" not in ct:
+                    # Non-streaming response (picoclaw-agent)
+                    body = json.loads(resp.read())
+                    content = (
+                        body.get("choices", [{}])[0]
+                            .get("message", {}).get("content", "")
+                        or body.get("choices", [{}])[0]
+                            .get("delta", {}).get("content", "")
+                        or ""
+                    )
+                    loop.call_soon_threadsafe(q.put_nowait, {
+                        "type": "chat_done",
+                        "request_id": request_id,
+                        "content": content,
+                    })
+                    return
+
+                # SSE streaming — forward events in real time
+                cur_event = None
+                for raw_line in resp:
+                    line = raw_line.decode("utf-8", errors="replace").rstrip("\r\n")
+                    if line.startswith("event: "):
+                        cur_event = line[7:].strip()
+                        continue
+                    if line.startswith("data: "):
+                        raw = line[6:].strip()
+                        if raw == "[DONE]":
+                            break
+                        try:
+                            parsed = json.loads(raw)
+                            etype = cur_event or parsed.get("type", "data")
+                            if etype == "done":
+                                loop.call_soon_threadsafe(q.put_nowait, {
+                                    "type": "chat_done",
+                                    "request_id": request_id,
+                                    "content": parsed.get("content", ""),
+                                })
+                            else:
+                                loop.call_soon_threadsafe(q.put_nowait, {
+                                    "type": "chat_chunk",
+                                    "request_id": request_id,
+                                    "event_type": etype,
+                                    "data": parsed,
+                                })
+                        except json.JSONDecodeError:
+                            pass
+                        cur_event = None
+                    elif not line.strip():
+                        cur_event = None
+        except Exception as e:
+            loop.call_soon_threadsafe(q.put_nowait, {
                 "type": "chat_error",
                 "request_id": request_id,
                 "error": str(e),
-            }))
-        except Exception:
-            pass
+            })
+        finally:
+            loop.call_soon_threadsafe(q.put_nowait, None)  # sentinel
+
+    _chat_executor.submit(_stream)
+
+    try:
+        while True:
+            msg = await q.get()
+            if msg is None:
+                break
+            await ws.send(json.dumps(msg))
+    except Exception as e:
+        log.warning("chat_request forward error (rid=%s): %s", request_id[:8], e)
 
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
@@ -321,19 +368,17 @@ async def run():
                                     stderr=subprocess.DEVNULL,
                                 )
 
+                        elif msg_type == "chat_request":
+                            rid = msg.get("request_id", "")
+                            payload = msg.get("payload", {})
+                            log.info("Chat request %s… — forwarding to ClawbotCore", rid[:8])
+                            asyncio.create_task(_handle_chat_request(ws, rid, payload))
+
                         elif msg_type == "heartbeat_ack":
                             pass  # Normal acknowledgement
 
                         elif msg_type == "pong":
                             pass
-
-                        elif msg_type == "chat_request":
-                            request_id = msg.get("request_id", "")
-                            req_payload = msg.get("payload", {})
-                            log.info("Received chat_request %s", request_id[:8])
-                            asyncio.create_task(
-                                _handle_chat_request(ws, request_id, req_payload)
-                            )
 
                 finally:
                     heartbeat_task.cancel()
