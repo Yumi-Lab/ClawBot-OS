@@ -4,8 +4,8 @@
 # Smart Pi One (H3) — Armbian Trixie (Debian 13) server image
 # These URLs are automatically overridden by the CI workflow (resolve-base-image step)
 # to always use the latest SmartPi-armbian release.
-DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.6.0/Yumi-smartpi1-trixie-server-2026-03-01-2139.img.xz"
-DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.6.0/Yumi-smartpi1-trixie-server-2026-03-01-2139.img.xz.sha256"
+DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.6.0/Yumi-smartpi1-trixie-debian13-server-2026-03-01-2139.img.xz"
+DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.6.0/Yumi-smartpi1-trixie-debian13-server-2026-03-01-2139.img.xz.sha256"
 
 # Base User
 BASE_ADD_USER="yes"

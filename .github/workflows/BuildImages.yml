@@ -66,15 +66,15 @@ jobs:
           TAG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest --jq '.tag_name')
           BASE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/${TAG}"
 
-          # Protocol: Yumi-{device}-{codename}-server-*.img.xz (no OS version suffix)
+          # Protocol: Yumi-{device}-{codename}-{distro+ver}-server-*.img.xz
           SMARTPI1_BOOKWORM_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
-            --jq '.assets[] | select(.name | test("^Yumi-smartpi1-bookworm-server.*\\.img\\.xz$")) | .name')
+            --jq '.assets[] | select(.name | test("^Yumi-smartpi1-bookworm-debian12-server.*\\.img\\.xz$")) | .name')
           SMARTPI1_TRIXIE_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
-            --jq '.assets[] | select(.name | test("^Yumi-smartpi1-trixie-server.*\\.img\\.xz$")) | .name')
+            --jq '.assets[] | select(.name | test("^Yumi-smartpi1-trixie-debian13-server.*\\.img\\.xz$")) | .name')
           SMARTPAD_TRIXIE_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
-            --jq '.assets[] | select(.name | test("^Yumi-smartpad-trixie-server.*\\.img\\.xz$")) | .name')
+            --jq '.assets[] | select(.name | test("^Yumi-smartpad-trixie-debian13-server.*\\.img\\.xz$")) | .name')
           SMARTPAD_BOOKWORM_IMG=$(gh api repos/Yumi-Lab/SmartPi-armbian/releases/latest \
-            --jq '.assets[] | select(.name | test("^Yumi-smartpad-bookworm-server.*\\.img\\.xz$")) | .name')
+            --jq '.assets[] | select(.name | test("^Yumi-smartpad-bookworm-debian12-server.*\\.img\\.xz$")) | .name')
 
           echo "SmartPi-armbian release:          ${TAG}"
           echo "SmartPi One — bookworm image:     ${SMARTPI1_BOOKWORM_IMG}"
