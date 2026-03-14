@@ -2477,311 +2477,700 @@ updateAddonCalc();
 <!-- ============================================================ -->
 <section id="kimi" style="background:var(--bg2)">
 <div class="container">
-  <h2 class="section-title" style="display:flex;align-items:center;gap:12px">
+  <h2 class="section-title" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <span style="background:linear-gradient(135deg,#ff6b35,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">12.</span>
     Kimi — Analyse de la menace concurrentielle
-    <span style="font-size:13px;font-weight:500;background:rgba(255,107,53,.12);color:#ff8c00;border:1px solid rgba(255,107,53,.3);padding:3px 10px;border-radius:20px;-webkit-text-fill-color:#ff8c00">Mars 2026</span>
+    <span style="font-size:13px;font-weight:500;background:rgba(255,107,53,.12);color:#ff8c00;border:1px solid rgba(255,107,53,.3);padding:3px 10px;border-radius:20px;-webkit-text-fill-color:#ff8c00">Mars 2026 — Mise à jour complète</span>
   </h2>
-  <p class="section-sub">Moonshot AI lance 3 produits qui entrent directement en collision avec notre écosystème — K2.5, Kimi Code, Kimi Claw</p>
+  <p class="section-sub">Moonshot AI frappe sur 3 fronts simultanément : modèle fondation ultra-compétitif (K2.5), agent coding à $19/mois (Kimi Code), et clone cloud de notre concurrent OpenClaw (Kimi Claw). Analyse de menace exhaustive — niveau de priorité stratégique élevé.</p>
 
-  <!-- ALERT BANNER -->
-  <div style="background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.3);border-radius:12px;padding:16px 20px;margin-bottom:32px;display:flex;align-items:flex-start;gap:14px">
-    <span style="font-size:20px;flex-shrink:0">⚠️</span>
-    <div>
-      <div style="font-weight:700;color:#ff8c00;margin-bottom:4px">Signal fort — réponse stratégique requise</div>
-      <div style="font-size:13px;color:var(--tx2)">Kimi K2.5 est <strong style="color:#fff">6× moins cher</strong> que Claude Sonnet 4.5 par token output. Kimi Code se positionne à <strong style="color:#fff">$19/mois</strong> vs $200/mois pour Claude Max. Kimi Claw clone OpenClaw sur cloud. Le DIY "ClawBot-like pour $15/mois" est documenté publiquement.</div>
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12.0 MOONSHOT AI — PROFIL ENTREPRISE               -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h3 style="color:#ff8c00;margin:0 0 16px;font-size:18px;display:flex;align-items:center;gap:8px">
+    <span style="display:inline-block;width:6px;height:18px;background:#ff8c00;border-radius:3px"></span>
+    12.0 Moonshot AI — Profil de l'adversaire
+  </h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:40px">
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Identité</div>
+      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Moonshot AI</div>
+      <div style="font-size:12px;color:var(--tx2)">Fondée 2023 — Pékin, Chine</div>
+      <div style="font-size:12px;color:var(--tx2)">Fondateur : Yang Zhilin (ex-Tsinghua, ex-CMU)</div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:6px">Employés : ~500 ingénieurs ML</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Financement</div>
+      <div style="font-size:22px;font-weight:800;color:var(--ok)">$1 Md+</div>
+      <div style="font-size:12px;color:var(--tx2)">Levées de fonds cumulées (Series B+)</div>
+      <div style="font-size:12px;color:var(--tx3);margin-top:6px">Alibaba, Hillhouse, HongShan, IDG Capital</div>
+      <div style="font-size:11px;color:var(--er);margin-top:6px">Entité soumise au droit chinois de surveillance</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Croissance</div>
+      <div style="font-size:22px;font-weight:800;color:#ff8c00">70M+</div>
+      <div style="font-size:12px;color:var(--tx2)">Utilisateurs actifs (jan 2026)</div>
+      <div style="font-size:12px;color:var(--tx3);margin-top:6px">+400% en 12 mois · #3 LLM chinois</div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:6px">Principalement Asie + dev communauté mondiale</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Stratégie 2026</div>
+      <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:8px">Open-source + commoditisation</div>
+      <div style="font-size:12px;color:var(--tx2)">MIT license sur K2.5 → adoption rapide développeurs → lock-in cloud Kimi Claw</div>
+      <div style="font-size:11px;color:#ff8c00;margin-top:8px">Playbook identique à DeepSeek Jan 2025</div>
     </div>
   </div>
 
-  <!-- 3 PRODUCTS GRID -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:40px">
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12.1 ALERT NIVEAU MENACE                           -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div style="background:linear-gradient(135deg,rgba(255,107,53,.1),rgba(255,56,96,.08));border:1px solid rgba(255,107,53,.35);border-radius:14px;padding:20px 24px;margin-bottom:36px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <span style="font-size:24px;flex-shrink:0">⚠️</span>
+      <div style="font-size:16px;font-weight:800;color:#ff8c00">Signal fort — réponse stratégique requise d'ici fin avril 2026</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+      <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:12px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">PRIX API K2.5 vs Sonnet 4.5</div>
+        <div style="font-size:18px;font-weight:800;color:var(--ok)">6× moins cher</div>
+        <div style="font-size:11px;color:var(--tx2)">$2.20 vs $15 /M tokens output</div>
+      </div>
+      <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:12px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">ABONNEMENT CODE vs Claude Max</div>
+        <div style="font-size:18px;font-weight:800;color:var(--ok)">10× moins cher</div>
+        <div style="font-size:11px;color:var(--tx2)">$19/mois vs $200/mois</div>
+      </div>
+      <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:12px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">HACK COMMUNAUTAIRE DIY</div>
+        <div style="font-size:18px;font-weight:800;color:#ff8c00">$15/mois</div>
+        <div style="font-size:11px;color:var(--tx2)">ClawBot-like via K2.5 + Claude Code CLI</div>
+      </div>
+      <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:12px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">KIMI CLAW LANCÉ</div>
+        <div style="font-size:18px;font-weight:800;color:var(--er)">15 fév 2026</div>
+        <div style="font-size:11px;color:var(--tx2)">Clone cloud OpenClaw · 5 000+ skills</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12.2 TROIS PRODUITS EN DÉTAIL                      -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h3 style="color:#ff8c00;margin:0 0 20px;font-size:18px;display:flex;align-items:center;gap:8px">
+    <span style="display:inline-block;width:6px;height:18px;background:#ff8c00;border-radius:3px"></span>
+    12.1 Les 3 produits Kimi — Analyse détaillée
+  </h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:48px">
 
     <!-- K2.5 -->
-    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:16px;padding:24px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-        <div style="width:36px;height:36px;background:linear-gradient(135deg,#ff6b35,#ff8c00);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#000">K</div>
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,#ff6b35,#ff8c00);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#000;flex-shrink:0">K</div>
         <div>
-          <div style="font-size:16px;font-weight:800;color:#fff">Kimi K2.5</div>
-          <div style="font-size:11px;color:var(--tx3)">Modèle fondation MoE — MIT</div>
+          <div style="font-size:17px;font-weight:800;color:#fff">Kimi K2.5</div>
+          <div style="font-size:11px;color:var(--tx3)">Modèle fondation MoE — Open weights MIT</div>
+        </div>
+        <div style="margin-left:auto;background:rgba(34,197,94,.12);color:var(--ok);font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;border:1px solid rgba(34,197,94,.25);white-space:nowrap">MIT</div>
+      </div>
+
+      <!-- Specs grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:var(--bg4);border-radius:8px;padding:10px 12px">
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:2px">Architecture</div>
+          <div style="font-size:15px;font-weight:800;color:#fff">1T MoE</div>
+          <div style="font-size:11px;color:var(--tx3)">32B actifs / passage</div>
+        </div>
+        <div style="background:var(--bg4);border-radius:8px;padding:10px 12px">
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:2px">Fenêtre contexte</div>
+          <div style="font-size:15px;font-weight:800;color:#fff">260K</div>
+          <div style="font-size:11px;color:var(--tx3)">tokens max</div>
+        </div>
+        <div style="background:var(--bg4);border-radius:8px;padding:10px 12px">
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:2px">SWE-bench</div>
+          <div style="font-size:15px;font-weight:800;color:var(--ok)">76.8%</div>
+          <div style="font-size:11px;color:var(--tx3)">Opus 4.6 : 80.8%</div>
+        </div>
+        <div style="background:var(--bg4);border-radius:8px;padding:10px 12px">
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:2px">LiveCodeBench</div>
+          <div style="font-size:15px;font-weight:800;color:var(--ok)">85% #1</div>
+          <div style="font-size:11px;color:var(--tx3)">#1 mondial coding live</div>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div style="background:var(--bg4);border-radius:8px;padding:10px 12px">
-            <div style="font-size:11px;color:var(--tx3);margin-bottom:2px">Paramètres</div>
-            <div style="font-size:14px;font-weight:700;color:#fff">1T MoE</div>
-            <div style="font-size:11px;color:var(--tx3)">32B actifs/pass</div>
+
+      <!-- Pricing -->
+      <div style="background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#ff8c00;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Pricing API</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+          <div>
+            <div style="font-size:10px;color:var(--tx3)">Input</div>
+            <div style="font-size:15px;font-weight:800;color:var(--ok)">$0.45</div>
+            <div style="font-size:10px;color:var(--tx3)">/M tokens</div>
           </div>
-          <div style="background:var(--bg4);border-radius:8px;padding:10px 12px">
-            <div style="font-size:11px;color:var(--tx3);margin-bottom:2px">Contexte</div>
-            <div style="font-size:14px;font-weight:700;color:#fff">260K</div>
-            <div style="font-size:11px;color:var(--tx3)">tokens</div>
-          </div>
-          <div style="background:var(--bg4);border-radius:8px;padding:10px 12px">
-            <div style="font-size:11px;color:var(--tx3);margin-bottom:2px">SWE-bench</div>
-            <div style="font-size:14px;font-weight:700;color:var(--ok)">76.8%</div>
-            <div style="font-size:11px;color:var(--tx3)">vs 80.8% Opus 4.6</div>
-          </div>
-          <div style="background:var(--bg4);border-radius:8px;padding:10px 12px">
-            <div style="font-size:11px;color:var(--tx3);margin-bottom:2px">Licence</div>
-            <div style="font-size:14px;font-weight:700;color:var(--ok)">MIT</div>
-            <div style="font-size:11px;color:var(--tx3)">Open weights</div>
+          <div>
+            <div style="font-size:10px;color:var(--tx3)">Output</div>
+            <div style="font-size:15px;font-weight:800;color:var(--ok)">$2.20</div>
+            <div style="font-size:10px;color:var(--tx3)">/M tokens</div>
           </div>
         </div>
-        <div style="background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);border-radius:8px;padding:12px">
-          <div style="font-size:11px;color:#ff8c00;font-weight:700;margin-bottom:6px">PRICING API</div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--tx2);margin-bottom:4px">
-            <span>Input</span><span style="color:#fff;font-weight:600">$0.45/M tokens</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--tx2)">
-            <span>Output</span><span style="color:#fff;font-weight:600">$2.20/M tokens</span>
-          </div>
-          <div style="margin-top:8px;font-size:11px;color:#ff8c00">Claude Sonnet 4.5 : $3/M in — $15/M out → Kimi 6× moins cher en output</div>
+        <div style="font-size:11px;color:#ff8c00;padding-top:8px;border-top:1px solid rgba(255,107,53,.2)">Claude Sonnet 4.5 : $3 in / $15 out → K2.5 <strong>6.8× moins cher</strong> en output</div>
+      </div>
+
+      <!-- Capacités -->
+      <div>
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Capacités agent</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="font-size:11px;background:rgba(0,255,224,.08);color:var(--ac);border:1px solid rgba(0,255,224,.15);padding:2px 8px;border-radius:20px">100 sous-agents</span>
+          <span style="font-size:11px;background:rgba(0,255,224,.08);color:var(--ac);border:1px solid rgba(0,255,224,.15);padding:2px 8px;border-radius:20px">1 500 tool calls</span>
+          <span style="font-size:11px;background:rgba(0,255,224,.08);color:var(--ac);border:1px solid rgba(0,255,224,.15);padding:2px 8px;border-radius:20px">4.5× plus rapide</span>
+          <span style="font-size:11px;background:rgba(0,255,224,.08);color:var(--ac);border:1px solid rgba(0,255,224,.15);padding:2px 8px;border-radius:20px">Multimodal vidéo</span>
+          <span style="font-size:11px;background:rgba(0,255,224,.08);color:var(--ac);border:1px solid rgba(0,255,224,.15);padding:2px 8px;border-radius:20px">100 tok/s</span>
         </div>
-        <div style="font-size:12px;color:var(--tx3)">Agent Swarm : jusqu'à 100 sous-agents parallèles · 1 500 tool calls · 4.5× plus rapide · Multimodal (image, vidéo)</div>
+      </div>
+
+      <!-- Impact -->
+      <div style="background:rgba(255,107,53,.06);border-left:3px solid #ff8c00;border-radius:0 6px 6px 0;padding:10px 12px;font-size:12px;color:var(--tx2)">
+        <strong style="color:#ff8c00">Impact ClawBot :</strong> Coût tokens divisible par 6. Intégrer K2.5 comme provider secondaire permettrait de réduire les coûts de ~40% sur les tâches légères sans dégrader l'UX.
       </div>
     </div>
 
     <!-- KIMI CODE -->
-    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:16px;padding:24px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-        <div style="width:36px;height:36px;background:linear-gradient(135deg,#ff6b35,#a855f7);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px">💻</div>
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">💻</div>
         <div>
-          <div style="font-size:16px;font-weight:800;color:#fff">Kimi Code</div>
-          <div style="font-size:11px;color:var(--tx3)">Agent de coding — concurrent direct Claude Code</div>
+          <div style="font-size:17px;font-weight:800;color:#fff">Kimi Code</div>
+          <div style="font-size:11px;color:var(--tx3)">Agent coding — concurrent direct Claude Code</div>
         </div>
+        <div style="margin-left:auto;background:rgba(99,102,241,.15);color:#a78bfa;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;border:1px solid rgba(99,102,241,.3);white-space:nowrap">$19/mois</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);border-radius:8px;padding:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:13px;color:var(--tx2)">Kimi Code</span>
-            <span style="font-size:16px;font-weight:800;color:var(--ok)">$19/mois</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-            <span style="font-size:13px;color:var(--tx2)">Claude Code (Max)</span>
-            <span style="font-size:16px;font-weight:800;color:var(--er)">$200/mois</span>
-          </div>
-          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr);font-size:11px;color:#ff8c00">10× moins cher pour des capacités proches</div>
+
+      <!-- Pricing comparison -->
+      <div style="background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#ff8c00;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Comparatif prix abonnement</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:13px;color:var(--tx2)">Kimi Code</span>
+          <span style="font-size:18px;font-weight:800;color:var(--ok)">$19 / mois</span>
         </div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:6px">
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> Terminal + VS Code + Cursor + Zed + JetBrains</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> Agent Swarm — 100 sous-agents parallèles</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> Visual coding — reconstruction depuis vidéo</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> ~100 tokens/s de débit</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> Open-source (MIT)</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--er)">✗</span> SWE-bench 76.8% vs Claude Opus 80.8%</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--er)">✗</span> Contexte 260K vs Claude 1M tokens</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--er)">✗</span> Serveurs chinois — données hors RGPD</li>
-        </ul>
-        <div style="font-size:12px;color:var(--tx3);padding:8px 12px;background:var(--bg4);border-radius:8px">Community hack documenté : Claude Code CLI + backend Kimi K2.5 → $15/mois. Menace sur notre segment Dev.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:13px;color:var(--tx2)">Claude Code Pro</span>
+          <span style="font-size:18px;font-weight:800;color:var(--wn)">$100 / mois</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:13px;color:var(--tx2)">Claude Code Max</span>
+          <span style="font-size:18px;font-weight:800;color:var(--er)">$200 / mois</span>
+        </div>
+        <div style="border-top:1px solid rgba(255,107,53,.2);padding-top:8px;font-size:11px;color:#ff8c00">10× moins cher que Max pour des capacités proches sur 80% des tâches courantes</div>
+      </div>
+
+      <!-- Features -->
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:2px">Fonctionnalités</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> Terminal + VS Code + Cursor + Zed + JetBrains</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> Agent Swarm natif — 100 sous-agents parallèles</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> Visual coding — reconstruction de code depuis vidéo screen</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> ~100 tokens/s · réponse perçue très rapide</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> Open-source MIT — fork et self-host possibles</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--wn);flex-shrink:0">~</span> SWE-bench 76.8% vs Opus 4.6 80.8% — qualité proche mais pas égale</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--wn);flex-shrink:0">~</span> Contexte 260K vs Claude 1M — limite sur grands projets</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--er);flex-shrink:0">✗</span> Serveurs chinois — données hors RGPD</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--er);flex-shrink:0">✗</span> Pas de hardware local — tout cloud</div>
+      </div>
+
+      <!-- DIY hack -->
+      <div style="background:rgba(255,56,96,.06);border:1px solid rgba(255,56,96,.2);border-radius:8px;padding:10px 12px">
+        <div style="font-size:11px;color:var(--er);font-weight:700;margin-bottom:4px">HACK COMMUNAUTAIRE DOCUMENTÉ</div>
+        <div style="font-size:12px;color:var(--tx2)">Claude Code CLI + backend redirigé sur K2.5 API → ~$15/mois. Tutoriels publics sur GitHub Gist et Reddit r/LocalLLaMA. Menace directe sur notre argument prix dans le segment Dev.</div>
+      </div>
+
+      <!-- Impact -->
+      <div style="background:rgba(255,107,53,.06);border-left:3px solid #ff8c00;border-radius:0 6px 6px 0;padding:10px 12px;font-size:12px;color:var(--tx2)">
+        <strong style="color:#ff8c00">Impact ClawBot :</strong> Pression forte sur le positionnement Dev/Pro. Notre réponse : différenciation hardware + RGPD + exécution locale. Le segment dev pur est difficile à défendre — concentration sur familles et PME.
       </div>
     </div>
 
     <!-- KIMI CLAW -->
-    <div style="background:var(--bg3);border:1px solid rgba(255,107,53,.3);border-radius:16px;padding:24px;position:relative">
-      <div style="position:absolute;top:-10px;right:16px;background:#ff8c00;color:#000;font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em">Concurrent direct</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-        <div style="width:36px;height:36px;background:linear-gradient(135deg,#ff6b35,#ff3860);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px">🦞</div>
+    <div style="background:var(--bg3);border:1px solid rgba(255,107,53,.35);border-radius:16px;padding:24px;position:relative;display:flex;flex-direction:column;gap:14px">
+      <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg,#ff6b35,#ff3860);color:#fff;font-size:10px;font-weight:800;padding:3px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.07em">Concurrent direct</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,#ff6b35,#ff3860);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🦞</div>
         <div>
-          <div style="font-size:16px;font-weight:800;color:#fff">Kimi Claw</div>
-          <div style="font-size:11px;color:var(--tx3)">OpenClaw cloud — lancé 15 fév 2026</div>
+          <div style="font-size:17px;font-weight:800;color:#fff">Kimi Claw</div>
+          <div style="font-size:11px;color:var(--tx3)">OpenClaw cloud — lancé 15 février 2026</div>
         </div>
+        <div style="margin-left:auto;background:rgba(255,56,96,.12);color:var(--er);font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;border:1px solid rgba(255,56,96,.3);white-space:nowrap">IAPS Alert</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:6px">
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> 1-click — aucune config, aucun VPS</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> 5 000+ skills ClawHub communautaires</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> 40 Go stockage cloud persistant</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> Mémoire long-terme + persona configurable</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> Automatisations cron 24/7</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">✓</span> BYOC (connecte ton OpenClaw existant)</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--er)">✗</span> Serveurs Moonshot AI — Chine — pas RGPD</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--er)">✗</span> Zéro hardware — dépendance cloud totale</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--er)">✗</span> CVE OpenClaw hérités (7+ vulnérabilités)</li>
-          <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--er)">✗</span> Exécution locale impossible (offline = mort)</li>
-        </ul>
-        <div style="background:rgba(255,56,96,.08);border:1px solid rgba(255,56,96,.2);border-radius:8px;padding:10px 12px">
-          <div style="font-size:11px;color:var(--er);font-weight:700;margin-bottom:4px">RISQUE SÉCURITÉ — IAPS Report Mars 2026</div>
-          <div style="font-size:12px;color:var(--tx2)">"Kimi Claw: Risks from Chinese-Hosted 'Always On' AI Agents" — Institut AI Policy & Strategy. Agent always-on hébergé par entité chinoise soumise aux lois de surveillance nationales.</div>
+
+      <!-- What it is -->
+      <div style="background:rgba(255,56,96,.06);border:1px solid rgba(255,56,96,.2);border-radius:10px;padding:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--er);margin-bottom:6px">QU'EST-CE QUE KIMI CLAW ?</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.7">Fork cloud d'OpenClaw hébergé par Moonshot AI. Reprend l'architecture, le protocole skills et la bibliothèque ClawHub d'OpenClaw, alimenée par K2.5 — sans VPS ni config. Lancé le 15 fév 2026, 5 000+ skills disponibles à J+7.</div>
+      </div>
+
+      <!-- Features -->
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:2px">Capacités</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> 1-click — zéro config, zéro VPS, zéro terminal</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> 5 000+ skills ClawHub communautaires — héritage OpenClaw</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> 40 Go stockage cloud persistant par compte</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> Mémoire long-terme + persona configurable + multi-session</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> Automatisations cron 24/7 — agent always-on</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> BYOC — connecte ton OpenClaw self-hosted existant</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">✓</span> Mobile app iOS/Android (béta)</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--er);flex-shrink:0">✗</span> Serveurs Moonshot AI — Beijing — hors RGPD total</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--er);flex-shrink:0">✗</span> Zéro hardware — dépendance cloud 100% (offline = mort)</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--er);flex-shrink:0">✗</span> 7+ CVE OpenClaw hérités non corrigés</div>
+        <div style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--er);flex-shrink:0">✗</span> Pas d'exécution bash/python locale — sandbox uniquement</div>
+      </div>
+
+      <!-- IAPS Alert -->
+      <div style="background:rgba(255,56,96,.08);border:1px solid rgba(255,56,96,.3);border-radius:10px;padding:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--er);margin-bottom:6px;display:flex;align-items:center;gap:6px">
+          <span style="background:var(--er);color:#fff;border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">!</span>
+          RAPPORT IAPS — MARS 2026
         </div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6">"<em>Kimi Claw: Risks from Chinese-Hosted 'Always On' AI Agents</em>" — Institut for AI Policy &amp; Strategy. Un agent always-on hébergé par une entité chinoise soumise aux lois de surveillance nationales constitue un risque de sécurité nationale documenté. Déjà cité par 3 médias tech européens. <strong style="color:#fff">Capital marketing exploitable immédiatement.</strong></div>
+      </div>
+
+      <!-- Impact -->
+      <div style="background:rgba(255,107,53,.06);border-left:3px solid #ff8c00;border-radius:0 6px 6px 0;padding:10px 12px;font-size:12px;color:var(--tx2)">
+        <strong style="color:#ff8c00">Impact ClawBot :</strong> Concurrent direct sur le segment "agent personnel facile". Kimi Claw est meilleur sur UX et skills mais zéro sur souveraineté, offline et hardware. Notre moat principal est là.
       </div>
     </div>
   </div>
 
-  <!-- BENCHMARKS TABLE -->
-  <h3 style="color:#fff;margin-bottom:16px;font-size:18px">Benchmarks comparés — Kimi K2.5 vs Claude</h3>
-  <div style="overflow-x:auto;margin-bottom:40px">
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12.2 BENCHMARKS COMPARÉS                           -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h3 style="color:#ff8c00;margin:0 0 16px;font-size:18px;display:flex;align-items:center;gap:8px">
+    <span style="display:inline-block;width:6px;height:18px;background:#ff8c00;border-radius:3px"></span>
+    12.2 Benchmarks comparés — Kimi K2.5 vs Claude Sonnet 4.5 vs Opus 4.6
+  </h3>
+  <div style="overflow-x:auto;margin-bottom:48px">
     <table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead>
-        <tr style="border-bottom:2px solid var(--bdr)">
-          <th style="text-align:left;padding:10px 14px;color:var(--tx3);font-weight:600">Benchmark</th>
-          <th style="text-align:center;padding:10px 14px;color:#ff8c00">Kimi K2.5</th>
-          <th style="text-align:center;padding:10px 14px;color:var(--ac2)">Claude Sonnet 4.5</th>
-          <th style="text-align:center;padding:10px 14px;color:var(--ac3)">Claude Opus 4.6</th>
-          <th style="text-align:left;padding:10px 14px;color:var(--tx3)">Verdict</th>
+        <tr style="border-bottom:2px solid rgba(255,107,53,.3)">
+          <th style="text-align:left;padding:12px 14px;color:var(--tx3);font-weight:600;min-width:180px">Benchmark / Dimension</th>
+          <th style="text-align:center;padding:12px 14px;color:#ff8c00;min-width:130px">Kimi K2.5</th>
+          <th style="text-align:center;padding:12px 14px;color:var(--ac2);min-width:150px">Claude Sonnet 4.5</th>
+          <th style="text-align:center;padding:12px 14px;color:var(--ac3);min-width:150px">Claude Opus 4.6</th>
+          <th style="text-align:left;padding:12px 14px;color:var(--tx3)">Verdict</th>
         </tr>
       </thead>
       <tbody>
         <tr style="border-bottom:1px solid var(--bdr)">
-          <td style="padding:10px 14px;color:var(--tx2)">SWE-bench Verified</td>
+          <td style="padding:10px 14px;color:var(--tx2);font-weight:600">SWE-bench Verified</td>
           <td style="text-align:center;padding:10px 14px;color:#ff8c00;font-weight:700">76.8%</td>
           <td style="text-align:center;padding:10px 14px;color:var(--ac2);font-weight:700">77–82%</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok);font-weight:700">80.8%</td>
-          <td style="padding:10px 14px;color:var(--tx3)">Kimi proche mais Claude lead sur tasks complexes</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok);font-weight:700">80.8% ★</td>
+          <td style="padding:10px 14px;color:var(--tx3)">Kimi très proche · Opus lead sur tâches complexes</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02)">
-          <td style="padding:10px 14px;color:var(--tx2)">LiveCodeBench</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok);font-weight:700">85% 🥇</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">—</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">—</td>
-          <td style="padding:10px 14px;color:var(--tx3)">Kimi #1 mondial coding live</td>
+          <td style="padding:10px 14px;color:var(--tx2);font-weight:600">LiveCodeBench</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok);font-weight:700">85% ★</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">nd</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">nd</td>
+          <td style="padding:10px 14px;color:var(--tx3)">Kimi #1 mondial coding live (mars 2026)</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr)">
-          <td style="padding:10px 14px;color:var(--tx2)">BrowseComp (agent swarm)</td>
+          <td style="padding:10px 14px;color:var(--tx2);font-weight:600">BrowseComp (agent swarm)</td>
           <td style="text-align:center;padding:10px 14px;color:#ff8c00;font-weight:700">78.4%</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">—</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">—</td>
-          <td style="padding:10px 14px;color:var(--tx3)">Agent web fort, multi-agent natif</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">nd</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">nd</td>
+          <td style="padding:10px 14px;color:var(--tx3)">Multi-agent web natif — fort avantage</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02)">
-          <td style="padding:10px 14px;color:var(--tx2)">Contexte</td>
+          <td style="padding:10px 14px;color:var(--tx2);font-weight:600">Fenêtre contexte</td>
           <td style="text-align:center;padding:10px 14px;color:#ff8c00;font-weight:700">260K</td>
           <td style="text-align:center;padding:10px 14px;color:var(--ac2);font-weight:700">200K</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok);font-weight:700">1M</td>
-          <td style="padding:10px 14px;color:var(--tx3)">Opus 4.6 très largement devant</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok);font-weight:700">1M ★</td>
+          <td style="padding:10px 14px;color:var(--tx3)">Opus 4.6 largement devant pour longs projets</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr)">
-          <td style="padding:10px 14px;color:var(--tx2)">Prix output (API)</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok);font-weight:700">$2.20/M 🥇</td>
+          <td style="padding:10px 14px;color:var(--tx2);font-weight:600">Prix output API</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok);font-weight:700">$2.20/M ★</td>
           <td style="text-align:center;padding:10px 14px;color:var(--er);font-weight:700">$15/M</td>
           <td style="text-align:center;padding:10px 14px;color:var(--er);font-weight:700">$75/M</td>
-          <td style="padding:10px 14px;color:var(--tx3)">Kimi 6× moins cher que Sonnet</td>
+          <td style="padding:10px 14px;color:var(--tx3)">K2.5 6.8× moins cher que Sonnet · 34× vs Opus</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02)">
+          <td style="padding:10px 14px;color:var(--tx2);font-weight:600">Débit (tokens/s)</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok);font-weight:700">~100 ★</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">~60</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--tx3)">~40</td>
+          <td style="padding:10px 14px;color:var(--tx3)">Kimi plus rapide perceptuellement</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--bdr)">
+          <td style="padding:10px 14px;color:var(--tx2);font-weight:600">Multimodal</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Image + Vidéo ★</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Image</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Image</td>
+          <td style="padding:10px 14px;color:var(--tx3)">Kimi unique sur vidéo → code</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02)">
+          <td style="padding:10px 14px;color:var(--tx2);font-weight:600">Licence modèle</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">MIT ★</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--er)">Propriétaire</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--er)">Propriétaire</td>
+          <td style="padding:10px 14px;color:var(--tx3)">K2.5 self-hostable — disruptif sur le marché</td>
         </tr>
         <tr style="background:rgba(255,255,255,.02)">
-          <td style="padding:10px 14px;color:var(--tx2)">Multimodal</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Oui (vidéo)</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Oui</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Oui</td>
-          <td style="padding:10px 14px;color:var(--tx3)">Kimi unique sur vidéo → code</td>
+          <td style="padding:10px 14px;color:var(--tx2);font-weight:600">Souveraineté données</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--er)">Chine — loi NSL</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--wn)">US (Anthropic)</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--wn)">US (Anthropic) ★</td>
+          <td style="padding:10px 14px;color:var(--tx3)">ClawBot + local = seule option souveraine</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- THREAT MATRIX -->
-  <h3 style="color:#fff;margin-bottom:16px;font-size:18px">Matrice de menace — Kimi vs ClawBot</h3>
-  <div style="overflow-x:auto;margin-bottom:40px">
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12.3 MATRICE DE MENACE MULTI-DIMENSIONS            -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h3 style="color:#ff8c00;margin:0 0 16px;font-size:18px;display:flex;align-items:center;gap:8px">
+    <span style="display:inline-block;width:6px;height:18px;background:#ff8c00;border-radius:3px"></span>
+    12.3 Matrice de menace — Kimi Claw vs ClawBot (12 dimensions)
+  </h3>
+  <div style="overflow-x:auto;margin-bottom:48px">
     <table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead>
-        <tr style="border-bottom:2px solid var(--bdr)">
-          <th style="text-align:left;padding:10px 14px;color:var(--tx3)">Dimension</th>
-          <th style="text-align:center;padding:10px 14px;color:#ff8c00">Kimi Claw</th>
-          <th style="text-align:center;padding:10px 14px;color:var(--ac)">ClawBot</th>
-          <th style="text-align:left;padding:10px 14px;color:var(--tx3)">Avantage</th>
+        <tr style="border-bottom:2px solid rgba(255,107,53,.3)">
+          <th style="text-align:left;padding:10px 14px;color:var(--tx3);font-weight:600;min-width:200px">Dimension</th>
+          <th style="text-align:center;padding:10px 14px;color:#ff8c00;min-width:170px">Kimi Claw</th>
+          <th style="text-align:center;padding:10px 14px;color:var(--ac);min-width:170px">ClawBot (état actuel)</th>
+          <th style="text-align:center;padding:10px 14px;color:var(--ac2);min-width:100px">Score menace</th>
+          <th style="text-align:left;padding:10px 14px;color:var(--tx3)">Analyse</th>
         </tr>
       </thead>
       <tbody>
         <tr style="border-bottom:1px solid var(--bdr)">
-          <td style="padding:10px 14px;color:var(--tx2)">Hardware physique</td>
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Hardware physique</td>
           <td style="text-align:center;padding:10px 14px;color:var(--er)">✗ Cloud only</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">✓ SmartPi/Pad</td>
-          <td style="padding:10px 14px;color:var(--ok)"><strong>ClawBot</strong> — moat non-tech users</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">✓ SmartPi One + SmartPad</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(34,197,94,.12);color:var(--ok);padding:2px 10px;border-radius:20px;font-weight:700">Faible</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Notre moat #1 — impossible à répliquer sans supply chain physique</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02)">
-          <td style="padding:10px 14px;color:var(--tx2)">Exécution locale / offline</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--er)">✗ Internet requis</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">✓ Pi local</td>
-          <td style="padding:10px 14px;color:var(--ok)"><strong>ClawBot</strong> — outils bash/python natifs</td>
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Exécution locale / offline</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--er)">✗ Internet 100% requis</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">✓ bash/python Pi local</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(34,197,94,.12);color:var(--ok);padding:2px 10px;border-radius:20px;font-weight:700">Faible</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Avantage opérationnel + storytelling "vraie IA chez toi"</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr)">
-          <td style="padding:10px 14px;color:var(--tx2)">Conformité RGPD</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--er)">✗ Serveurs Chine</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">✓ Anthropic US + local</td>
-          <td style="padding:10px 14px;color:var(--ok)"><strong>ClawBot</strong> — argument Pro/Enterprise</td>
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Conformité RGPD</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--er)">✗ Chine — loi NSL</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">✓ Anthropic US + data locale</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(34,197,94,.12);color:var(--ok);padding:2px 10px;border-radius:20px;font-weight:700">Faible</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Argument béton côté Pro/Enterprise — rapport IAPS disponible</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02)">
-          <td style="padding:10px 14px;color:var(--tx2)">Qualité modèle max</td>
-          <td style="text-align:center;padding:10px 14px;color:#ff8c00">K2.5 — 76.8%</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Opus 4.6 — 80.8%</td>
-          <td style="padding:10px 14px;color:var(--ok)"><strong>ClawBot</strong> sur tasks difficiles</td>
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Qualité modèle ceiling</td>
+          <td style="text-align:center;padding:10px 14px;color:#ff8c00">K2.5 — SWE 76.8%</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Opus 4.6 — SWE 80.8%</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(34,197,94,.12);color:var(--ok);padding:2px 10px;border-radius:20px;font-weight:700">Faible</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Avantage ClawBot sur tâches complexes réelles</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr)">
-          <td style="padding:10px 14px;color:var(--tx2)">Prix abonnement</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">$19–30/mois</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--wn)">€8–30/mois</td>
-          <td style="padding:10px 14px;color:var(--wn)"><strong>Égal</strong> — ClawBot <em>légèrement</em> moins cher</td>
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Prix abonnement</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">$19–$30/mois</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ac)">€7.99–€30/mois</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(234,179,8,.12);color:var(--wn);padding:2px 10px;border-radius:20px;font-weight:700">Moyen</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Parité prix — ClawBot légèrement moins cher au même niveau</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02)">
-          <td style="padding:10px 14px;color:var(--tx2)">Skills / modules</td>
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Skills / bibliothèque modules</td>
           <td style="text-align:center;padding:10px 14px;color:var(--ok)">5 000+ ClawHub</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--wn)">Module system (early)</td>
-          <td style="padding:10px 14px;color:var(--er)"><strong>Kimi</strong> — avance significative</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--er)">Module system (early)</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(255,56,96,.12);color:var(--er);padding:2px 10px;border-radius:20px;font-weight:700">Élevé</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Gap critique — combler par Module Store est P0 absolu</td>
         </tr>
         <tr style="border-bottom:1px solid var(--bdr)">
-          <td style="padding:10px 14px;color:var(--tx2)">Setup utilisateur</td>
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Facilité d'onboarding</td>
           <td style="text-align:center;padding:10px 14px;color:var(--ok)">1-click browser</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Plug & play physique</td>
-          <td style="padding:10px 14px;color:var(--wn)"><strong>Différents</strong> — segments distincts</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Plug & play hardware</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(234,179,8,.12);color:var(--wn);padding:2px 10px;border-radius:20px;font-weight:700">Moyen</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Différents : Kimi = browser facile · ClawBot = objet physique engageant</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02)">
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Mémoire long-terme</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">✓ Cloud natif</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--er)">✗ Non implémenté</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(255,56,96,.12);color:var(--er);padding:2px 10px;border-radius:20px;font-weight:700">Élevé</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Fonctionnalité attendue en 2026 — Epic 5 prioritaire</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--bdr)">
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Automatisations cron / 24/7</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">✓ Always-on cloud</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--wn)">Partiel — Pi doit rester allumé</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(234,179,8,.12);color:var(--wn);padding:2px 10px;border-radius:20px;font-weight:700">Moyen</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Pi allumé 24/7 = équivalent · cloud = avantage si Pi éteint</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02)">
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Mobile app</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">iOS/Android béta</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--er)">✗ Non planifié</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(234,179,8,.12);color:var(--wn);padding:2px 10px;border-radius:20px;font-weight:700">Moyen</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Dashboard mobile-responsive = contournement acceptable court terme</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--bdr)">
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Risque sécurité documenté</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--er)">7+ CVE + IAPS alert + NSL</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Audit interne propre</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(34,197,94,.12);color:var(--ok);padding:2px 10px;border-radius:20px;font-weight:700">Faible</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Capital confiance — à exploiter activement dans le marketing</td>
         </tr>
         <tr style="background:rgba(255,255,255,.02)">
-          <td style="padding:10px 14px;color:var(--tx2)">Risque sécurité documenté</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--er)">7+ CVE OpenClaw + IAPS alert</td>
-          <td style="text-align:center;padding:10px 14px;color:var(--ok)">Audit interne propre</td>
-          <td style="padding:10px 14px;color:var(--ok)"><strong>ClawBot</strong> — capital confiance</td>
+          <td style="padding:10px 14px;color:#fff;font-weight:600">Adoption communauté / open-source</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--ok)">K2.5 MIT · fork actif</td>
+          <td style="text-align:center;padding:10px 14px;color:var(--wn)">BUSL-1.1 → Apache 2036</td>
+          <td style="text-align:center;padding:10px 14px"><span style="background:rgba(234,179,8,.12);color:var(--wn);padding:2px 10px;border-radius:20px;font-weight:700">Moyen</span></td>
+          <td style="padding:10px 14px;color:var(--tx3)">Kimi communauté tech mondiale · ClawBot = early adopters hardware</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- STRATEGIC RESPONSE -->
-  <h3 style="color:#fff;margin-bottom:20px;font-size:18px">Réponse stratégique recommandée</h3>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:32px">
+  <!-- Score synthèse -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:48px">
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;text-align:center">
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Avantages ClawBot</div>
+      <div style="font-size:28px;font-weight:900;color:var(--ok)">7/12</div>
+      <div style="font-size:12px;color:var(--tx2)">dimensions</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;text-align:center">
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Avantages Kimi Claw</div>
+      <div style="font-size:28px;font-weight:900;color:var(--er)">3/12</div>
+      <div style="font-size:12px;color:var(--tx2)">dimensions</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:16px;text-align:center">
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Parité</div>
+      <div style="font-size:28px;font-weight:900;color:var(--wn)">2/12</div>
+      <div style="font-size:12px;color:var(--tx2)">dimensions</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid rgba(255,56,96,.3);border-radius:12px;padding:16px;text-align:center">
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Lacunes critiques ClawBot</div>
+      <div style="font-size:28px;font-weight:900;color:var(--er)">2</div>
+      <div style="font-size:12px;color:var(--tx2)">Skills store · Mémoire long-terme</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12.4 ANALYSE PAR SEGMENT DE MARCHÉ               -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h3 style="color:#ff8c00;margin:0 0 16px;font-size:18px;display:flex;align-items:center;gap:8px">
+    <span style="display:inline-block;width:6px;height:18px;background:#ff8c00;border-radius:3px"></span>
+    12.4 Analyse de menace par segment de marché
+  </h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:48px">
 
     <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:20px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <span style="font-size:16px">🛡️</span>
-        <span style="font-weight:700;color:#fff">Défense — maintenir les moats</span>
+        <span style="font-size:20px">👨‍👩‍👧‍👦</span>
+        <div>
+          <div style="font-weight:700;color:#fff">Familles / Grand public</div>
+          <div style="font-size:11px;color:var(--tx3)">Notre cible principale</div>
+        </div>
+        <div style="margin-left:auto;background:rgba(34,197,94,.12);color:var(--ok);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid rgba(34,197,94,.2)">Faible</div>
       </div>
-      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">→</span> Marketing "votre IA, vos données" — <strong style="color:#fff">RGPD + Anthropic US</strong> vs Chine</li>
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">→</span> Maintenir €7.99 Starter — <strong style="color:#fff">2× moins cher</strong> que Kimi Claw</li>
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">→</span> Exploiter le rapport IAPS dans les supports Pro/Enterprise</li>
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ok)">→</span> Mettre en avant l'exécution locale — offline possible</li>
-      </ul>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.7">Kimi Claw ne comprend pas un boîtier physique. L'argument "ton IA dans ta maison" résiste. Les parents confiants à qui on vend la promesse "privé, pas sur des serveurs chinois" sont notre cœur de cible. Rapport IAPS = argument marketing concret.</div>
     </div>
 
     <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:20px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <span style="font-size:16px">⚡</span>
-        <span style="font-weight:700;color:#fff">Opportunité — intégrer Kimi</span>
+        <span style="font-size:20px">🏢</span>
+        <div>
+          <div style="font-weight:700;color:#fff">PME / Professionnels</div>
+          <div style="font-size:11px;color:var(--tx3)">Cible Pro — Plan Business</div>
+        </div>
+        <div style="margin-left:auto;background:rgba(234,179,8,.12);color:var(--wn);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid rgba(234,179,8,.2)">Moyen</div>
       </div>
-      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ac)">→</span> Ajouter <strong style="color:#fff">Kimi K2.5 comme provider</strong> dans ClawbotCore — routing intelligent prix/qualité</li>
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ac)">→</span> Tâches légères → Kimi K2 (6× moins cher) · Tâches critiques → Claude Opus</li>
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ac)">→</span> Réduire coûts tokens de ~40% sans dégrader l'UX utilisateur</li>
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--ac)">→</span> ClawBot = <strong style="color:#fff">le seul produit hardware multi-provider</strong> — argument différenciant fort</li>
-      </ul>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.7">RGPD + hébergement EU + exécution locale = argument commercial fort. Les DSI refusent déjà Kimi Claw sur conseil de conformité. Notre credential vault (Epic 3) renforce encore le moat Pro. Risque : si PME ignorent RGPD et choisissent Kimi pour les skills.</div>
     </div>
 
     <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:20px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <span style="font-size:16px">🚀</span>
-        <span style="font-weight:700;color:#fff">Priorités roadmap ajustées</span>
+        <span style="font-size:20px">👨‍💻</span>
+        <div>
+          <div style="font-weight:700;color:#fff">Développeurs / Makers</div>
+          <div style="font-size:11px;color:var(--tx3)">Segment complémentaire</div>
+        </div>
+        <div style="margin-left:auto;background:rgba(255,56,96,.12);color:var(--er);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid rgba(255,56,96,.2)">Élevé</div>
+      </div>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.7">Segment le plus exposé. Kimi Code à $19/mois est attractif pour les devs. Le hack DIY K2.5 + Claude Code CLI est documenté publiquement. Notre réponse : ne pas chasser ce segment sur le prix — le servir via openjarvis.io et un positionnement API/SSH différenciant.</div>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:20px">🎓</span>
+        <div>
+          <div style="font-weight:700;color:#fff">Étudiants / Early adopters</div>
+          <div style="font-size:11px;color:var(--tx3)">Sensibles au prix</div>
+        </div>
+        <div style="margin-left:auto;background:rgba(234,179,8,.12);color:var(--wn);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid rgba(234,179,8,.2)">Moyen</div>
+      </div>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.7">Notre plan Free + boîtier 29€ est une porte d'entrée attractive. Le "fun factor" hardware + l'IA qui fait vraiment des choses sur leur machine est différenciant. Kimi Claw cible le même segment mais sans objet physique et sans exécution locale.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12.5 RÉPONSE STRATÉGIQUE                          -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h3 style="color:#ff8c00;margin:0 0 20px;font-size:18px;display:flex;align-items:center;gap:8px">
+    <span style="display:inline-block;width:6px;height:18px;background:#ff8c00;border-radius:3px"></span>
+    12.5 Réponse stratégique — 4 axes
+  </h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:40px">
+
+    <div style="background:var(--bg3);border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="width:32px;height:32px;background:rgba(34,197,94,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🛡️</span>
+        <div>
+          <div style="font-weight:700;color:#fff">Axe 1 — Défense des moats</div>
+          <div style="font-size:11px;color:var(--ok)">Immédiat — sprint actuel</div>
+        </div>
       </div>
       <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--wn)">P0</span> Multi-provider backend (Kimi + Claude + DeepSeek) — Epic 4</li>
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--wn)">P0</span> Module store — combler le gap 0 vs 5 000 skills Kimi</li>
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--wn)">P1</span> Landing page "Pourquoi pas Kimi Claw" — conversion RGPD/sécurité</li>
-        <li style="font-size:13px;color:var(--tx2);display:flex;gap:8px"><span style="color:var(--wn)">P1</span> Page openjarvis.io — positionnement "IA locale souveraine"</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">→</span> Messaging "votre IA, vos données, pas en Chine" — <strong style="color:#fff">RGPD + rapport IAPS</strong></li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">→</span> Landing page openjarvis.io — rubrique "Pourquoi pas Kimi Claw"</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">→</span> Maintenir €7.99 Starter — <strong style="color:#fff">prix compétitif vs Kimi</strong></li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">→</span> Mettre en avant offline + bash/python locaux dans démos</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--ok);flex-shrink:0">→</span> Exploiter rapport IAPS dans contenus Pro/Enterprise</li>
+      </ul>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="width:32px;height:32px;background:rgba(99,102,241,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⚡</span>
+        <div>
+          <div style="font-weight:700;color:#fff">Axe 2 — Intégrer K2.5</div>
+          <div style="font-size:11px;color:#a78bfa">Epic 4 — multi-provider</div>
+        </div>
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#a78bfa;flex-shrink:0">→</span> Ajouter <strong style="color:#fff">Kimi K2.5 comme provider</strong> dans ClawbotCore — routing qualité/prix</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#a78bfa;flex-shrink:0">→</span> Tâches légères (résumé, Q&amp;A simple) → K2.5 ($0.45 input)</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#a78bfa;flex-shrink:0">→</span> Tâches critiques (code complexe, raisonnement) → Opus 4.6</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#a78bfa;flex-shrink:0">→</span> <strong style="color:#fff">Économie ~40% coût tokens</strong> sans dégradation UX perçue</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#a78bfa;flex-shrink:0">→</span> ClawBot = seul produit hardware <strong style="color:#fff">multi-provider natif</strong> — argument fort</li>
+      </ul>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid rgba(234,179,8,.2);border-radius:12px;padding:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="width:32px;height:32px;background:rgba(234,179,8,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🏗️</span>
+        <div>
+          <div style="font-weight:700;color:#fff">Axe 3 — Combler les lacunes</div>
+          <div style="font-size:11px;color:var(--wn)">Epics 5–6 — priorité haute</div>
+        </div>
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--wn);flex-shrink:0">P0</span> <strong style="color:#fff">Module Store</strong> — combler gap 0 vs 5 000 skills. Interface découverte + install 1-click</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--wn);flex-shrink:0">P0</span> <strong style="color:#fff">Mémoire long-terme</strong> (MEMORY.md + vector store local) — parity fonctionnelle Kimi</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--wn);flex-shrink:0">P1</span> Mobile dashboard responsive amélioré — pas d'app native requise pour l'instant</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:var(--wn);flex-shrink:0">P1</span> Automatisations cron native via ClawbotCore — agents 24/7 Pi allumé</li>
+      </ul>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid rgba(255,107,53,.2);border-radius:12px;padding:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="width:32px;height:32px;background:rgba(255,107,53,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🎯</span>
+        <div>
+          <div style="font-weight:700;color:#fff">Axe 4 — Positionnement</div>
+          <div style="font-size:11px;color:#ff8c00">Communication — dès la landing</div>
+        </div>
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#ff8c00;flex-shrink:0">→</span> Tagline : <strong style="color:#fff">"L'IA qui vit chez toi, pas chez un géant chinois"</strong></li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#ff8c00;flex-shrink:0">→</span> Comparatif public openjarvis.io/vs-kimi-claw — SEO offensif</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#ff8c00;flex-shrink:0">→</span> Page RGPD/souveraineté détaillée — crédibilité entreprise</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#ff8c00;flex-shrink:0">→</span> Intégrer rapport IAPS comme social proof dans communications Pro</li>
+        <li style="font-size:12px;color:var(--tx2);display:flex;gap:7px"><span style="color:#ff8c00;flex-shrink:0">→</span> Ne pas être "anti-Kimi" mais "pro-souveraineté" — ton positif</li>
       </ul>
     </div>
   </div>
 
-  <!-- VERDICT BOX -->
-  <div style="background:linear-gradient(135deg,rgba(0,255,224,.04),rgba(124,77,255,.04));border:1px solid rgba(0,255,224,.15);border-radius:14px;padding:24px">
-    <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:12px">⚖️ Verdict global — Kimi est une menace réelle mais pas existentielle</div>
-    <div style="font-size:13px;color:var(--tx2);line-height:1.8">
-      Kimi K2.5 est le <strong style="color:#fff">modèle open-source le plus capable du marché</strong> à mars 2026 et son prix est agressif. Kimi Claw clône fonctionnellement OpenClaw sur cloud. <strong style="color:#fff">Mais les segments sont différents</strong> : Kimi cible les tech-savvy qui acceptent de mettre leurs données sur des serveurs chinois. ClawBot cible <strong style="color:var(--ac)">les familles, les PME et les professionnels qui veulent leur IA chez eux, privée, physique et souveraine</strong>. Le rapport IAPS sur Kimi Claw est un cadeau marketing qu'il faut exploiter. La réponse technique immédiate : <strong style="color:var(--ac)">intégrer Kimi K2 comme provider low-cost dans le routing ClawbotCore</strong> — on transforme la menace en levier de réduction de coûts.
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12.6 TIMELINE D'ACTION                             -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h3 style="color:#ff8c00;margin:0 0 16px;font-size:18px;display:flex;align-items:center;gap:8px">
+    <span style="display:inline-block;width:6px;height:18px;background:#ff8c00;border-radius:3px"></span>
+    12.6 Actions prioritaires — Timeline vs Kimi
+  </h3>
+  <div style="display:flex;flex-direction:column;gap:0;margin-bottom:40px;position:relative;padding-left:28px">
+    <div style="position:absolute;left:10px;top:12px;bottom:12px;width:2px;background:linear-gradient(180deg,#ff8c00,rgba(255,140,0,.1))"></div>
+
+    <div style="position:relative;margin-bottom:20px">
+      <div style="position:absolute;left:-24px;top:4px;width:12px;height:12px;background:#ff8c00;border-radius:50%;border:2px solid var(--bg2)"></div>
+      <div style="background:var(--bg3);border:1px solid rgba(255,107,53,.25);border-radius:10px;padding:14px 16px">
+        <div style="font-size:12px;font-weight:700;color:#ff8c00;margin-bottom:4px">Maintenant → Avril 2026 (Sprint actuel)</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.7">Déployer auth + Stripe + sandbox (Epic 1 &amp; 3) · Rédiger page "vs Kimi Claw" sur openjarvis.io · Intégrer rapport IAPS dans deck commercial · Configurer provider K2.5 dans ClawbotCore (prototype)</div>
+      </div>
+    </div>
+
+    <div style="position:relative;margin-bottom:20px">
+      <div style="position:absolute;left:-24px;top:4px;width:12px;height:12px;background:#ff8c00;border-radius:50%;border:2px solid var(--bg2);opacity:.8"></div>
+      <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px">
+        <div style="font-size:12px;font-weight:700;color:#ff8c00;margin-bottom:4px">Mai 2026 (Beta launch)</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.7">Beta publique + 50 utilisateurs testeurs · Abonnements Stripe opérationnels · Module Store V1 (20+ modules disponibles) · Multi-provider K2.5 + Claude en production</div>
+      </div>
+    </div>
+
+    <div style="position:relative;margin-bottom:20px">
+      <div style="position:absolute;left:-24px;top:4px;width:12px;height:12px;background:#ff8c00;border-radius:50%;border:2px solid var(--bg2);opacity:.6"></div>
+      <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px">
+        <div style="font-size:12px;font-weight:700;color:var(--wn);margin-bottom:4px">Juin–Juillet 2026</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.7">Mémoire long-terme (MEMORY.md + Chroma local) · Module Store V2 communautaire · Landing page RGPD/souveraineté complète · Campagne "vs Kimi Claw" SEO/contenu</div>
+      </div>
+    </div>
+
+    <div style="position:relative">
+      <div style="position:absolute;left:-24px;top:4px;width:12px;height:12px;background:rgba(255,140,0,.4);border-radius:50%;border:2px solid var(--bg2)"></div>
+      <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px">
+        <div style="font-size:12px;font-weight:700;color:var(--tx3);margin-bottom:4px">Q4 2026 — Consolidation</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.7">OTA updates + ecosystem partenaires · Credential vault Pro opérationnel · App mobile (PWA ou React Native) · Objectif : 500 abonnés payants</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12.7 VERDICT GLOBAL                               -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div style="background:linear-gradient(135deg,rgba(255,107,53,.06),rgba(0,255,224,.04));border:1px solid rgba(255,107,53,.25);border-radius:16px;padding:28px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <span style="font-size:24px">⚖️</span>
+      <div style="font-size:17px;font-weight:800;color:#fff">Verdict global — Menace réelle, réponse disponible, fenêtre de 3 mois</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px">
+      <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:14px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Niveau de menace global</div>
+        <div style="font-size:20px;font-weight:800;color:var(--wn)">MODÉRÉ</div>
+        <div style="font-size:11px;color:var(--tx2)">Pas existentiel · Segments différents</div>
+      </div>
+      <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:14px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Urgence réponse</div>
+        <div style="font-size:20px;font-weight:800;color:var(--er)">HAUTE</div>
+        <div style="font-size:11px;color:var(--tx2)">Fenêtre 3 mois avant Kimi Claw mûrit</div>
+      </div>
+      <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:14px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Nos avantages durables</div>
+        <div style="font-size:20px;font-weight:800;color:var(--ok)">4</div>
+        <div style="font-size:11px;color:var(--tx2)">Hardware · Local · RGPD · Modèle Claude</div>
+      </div>
+      <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:14px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Lacunes à combler</div>
+        <div style="font-size:20px;font-weight:800;color:var(--er)">2</div>
+        <div style="font-size:11px;color:var(--tx2)">Module Store · Mémoire long-terme</div>
+      </div>
+    </div>
+
+    <div style="font-size:13px;color:var(--tx2);line-height:1.9;border-top:1px solid rgba(255,255,255,.06);padding-top:16px">
+      Kimi K2.5 est le <strong style="color:#fff">modèle open-source le plus compétitif du marché en mars 2026</strong> — prix agressif, performances proches de Claude, licence MIT. Kimi Claw clone OpenClaw sur cloud avec 5 000+ skills et zero config. Ces deux produits sont une menace réelle sur notre segment.
+      <br><br>
+      <strong style="color:var(--ac)">Mais les segments sont structurellement différents :</strong> Kimi cible les tech-savvy consentants à mettre leurs données sur des serveurs chinois. ClawBot cible les familles, PME et professionnels qui veulent une IA <em>chez eux</em>, physique, souveraine et hors surveillance chinoise. Le rapport IAPS est un cadeau marketing qu'il faut exploiter agressivement.
+      <br><br>
+      <strong style="color:var(--ac)">La réponse technique immédiate :</strong> intégrer K2.5 comme provider low-cost dans ClawbotCore — on transforme l'adversaire en levier de réduction de coûts de ~40%. La réponse produit : combler le gap Module Store et Mémoire dans les 90 prochains jours. La réponse commerciale : landing page souveraineté + campagne RGPD vs Kimi Claw avant la beta de mai 2026.
     </div>
   </div>
 
