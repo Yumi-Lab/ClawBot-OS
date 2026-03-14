@@ -1,8 +1,8 @@
 [Unit]
 Description=ClawbotOS Kiosk Browser (SmartPad Dashboard)
 Documentation=https://github.com/Yumi-Lab/ClawBot-OS
-After=network-online.target nginx.service picoclaw.service clawbot-core.service
-Wants=network-online.target nginx.service
+After=network-online.target nginx.service picoclaw.service clawbot-core.service seatd.service
+Wants=network-online.target nginx.service seatd.service
 # Only run on devices with a screen (SmartPad)
 ConditionPathExists=/dev/dri/card0
 # Only run after firstboot wizard has completed (sentinel file removed)
@@ -10,18 +10,16 @@ ConditionPathNotExists=/.firstboot_clawbot
 
 [Service]
 Type=simple
-# cage needs XDG_RUNTIME_DIR for Wayland socket; LIBSEAT_BACKEND=direct
-# avoids libseat/logind dependency (system service, no user session)
+# cage refuses to run as root — run as pi (video group → seatd access)
+User=pi
+Group=pi
+# LIBSEAT_BACKEND=seatd: seatd daemon handles DRM seat (direct not compiled in Debian)
 Environment=XDG_RUNTIME_DIR=/run/clawbot-kiosk
-Environment=LIBSEAT_BACKEND=direct
+Environment=LIBSEAT_BACKEND=seatd
+Environment=HOME=/home/pi
 RuntimeDirectory=clawbot-kiosk
 RuntimeDirectoryMode=0700
-# Allocate a virtual terminal so cage can perform VT switching
-StandardInput=tty
-TTYPath=/dev/tty2
-TTYReset=yes
-TTYVHangup=yes
-ExecStart=cage -- /usr/local/bin/clawbot-kiosk-launcher
+ExecStart=/usr/bin/cage -- /usr/local/bin/clawbot-kiosk-launcher
 Restart=on-failure
 RestartSec=5
 TimeoutStartSec=60

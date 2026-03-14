@@ -199,14 +199,14 @@ jobs:
           path: ${{ steps.move-image.outputs.image }}.img.sha256
 
       - name: Deploy to download.yumi-lab.com
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/main'
         env:
           DE_SSH_KEY: ${{ secrets.DE_SSH_KEY }}
         shell: bash
         run: |
           echo "$DE_SSH_KEY" > /tmp/de_key && chmod 600 /tmp/de_key
-          ssh-keyscan 212.227.202.68 >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -i /tmp/de_key root@212.227.202.68 "rm -f /var/www/download.yumi-lab.com/clawbot-os/*.img.xz"
-          scp -i /tmp/de_key ${{ steps.move-image.outputs.image }}.img.xz root@212.227.202.68:/var/www/download.yumi-lab.com/clawbot-os/
+          ssh-keyscan 82.165.249.233 >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -i /tmp/de_key root@82.165.249.233 "rm -f /var/www/download.yumi-lab.com/clawbot-os/*.img.xz"
+          scp -i /tmp/de_key ${{ steps.move-image.outputs.image }}.img.xz root@82.165.249.233:/var/www/download.yumi-lab.com/clawbot-os/
           rm /tmp/de_key
           echo "✅ https://download.yumi-lab.com/clawbot-os/${{ steps.move-image.outputs.image }}.img.xz"

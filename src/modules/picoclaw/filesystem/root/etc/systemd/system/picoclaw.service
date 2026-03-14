@@ -1,6 +1,7 @@
 [Unit]
 Description=PicoClaw AI Gateway
 After=network.target clawbot-swap.service
+ConditionPathExists=/home/pi/.picoclaw/config.json
 
 [Service]
 Type=simple

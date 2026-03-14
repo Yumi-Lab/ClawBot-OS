@@ -227,11 +227,13 @@ headless_wait() {
 
 if ${HAS_SCREEN} && command -v cage &>/dev/null && command -v chromium &>/dev/null; then
     # ── WEB WIZARD MODE (SmartPad: cage + Chromium kiosk) ──
-    # cage needs XDG_RUNTIME_DIR for Wayland socket; LIBSEAT_BACKEND=direct
-    # avoids libseat/logind (system service has no user session)
+    # cage refuses to run as root — must launch as the pi user via runuser.
+    # LIBSEAT_BACKEND=seatd: connects to seatd daemon for DRM seat management.
+    # (LIBSEAT_BACKEND=direct is not compiled in Debian's libseat package)
     export XDG_RUNTIME_DIR=/run/clawbot-wizard
-    export LIBSEAT_BACKEND=direct
+    export LIBSEAT_BACKEND=seatd
     mkdir -p "${XDG_RUNTIME_DIR}"
+    chown pi:pi "${XDG_RUNTIME_DIR}"
     chmod 700 "${XDG_RUNTIME_DIR}"
 
     # Start the Python wizard server in background
@@ -246,7 +248,8 @@ if ${HAS_SCREEN} && command -v cage &>/dev/null && command -v chromium &>/dev/nu
 
     # Launch Chromium in full-screen kiosk via cage (Wayland compositor)
     # cage drives the display directly via DRM/KMS — no X11 needed
-    cage -- chromium \
+    # runuser drops from root to pi (cage refuses to start as root)
+    HOME=/home/pi runuser -u pi -- /usr/bin/cage -- chromium \
         --kiosk \
         --ozone-platform=wayland \
         --no-sandbox \

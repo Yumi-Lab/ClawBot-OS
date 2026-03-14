@@ -106,11 +106,17 @@ echo_green "SSH fix applied."
 ### Install kiosk browser stack for the firstboot web wizard
 ### cage = minimal Wayland compositor (DRM/KMS, no X11 needed)
 ### chromium = full-screen kiosk browser with touch + virtual keyboard support
-echo_green "Installing cage + chromium for firstboot web wizard..."
+echo_green "Installing cage + chromium + seatd for firstboot web wizard..."
 apt-get install -y --no-install-recommends \
     cage \
     chromium \
+    seatd \
+    xwayland \
     || echo_red "Warning: cage/chromium install failed — wizard will fall back to dialog"
+
+# Enable seatd: seat management daemon required by cage (LIBSEAT_BACKEND=seatd)
+# The 'direct' backend is not compiled in Debian's libseat package
+systemctl_if_exists enable seatd.service
 
 # wvkbd: Wayland virtual keyboard (shows automatically on input focus)
 apt-get install -y --no-install-recommends wvkbd \
