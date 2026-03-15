@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClawBot — Design Directions v7</title>
+<style>
+  :root{
+    --bg:#0a0a0a;--bg2:#141414;--bg3:#1e1e1e;--bg-sb:#0f0f0f;--bg-in:#1a1a1a;
+    --ac:#00ffe0;--ac-dim:rgba(0,255,224,.08);--ac-brd:rgba(0,255,224,.15);
+    --tx:#fff;--tx2:#8a8a8a;--tx3:#555;--bd:#222;
+    --ok:#22c55e;--warn:#f59e0b;--err:#ef4444;--purple:#7c3aed;--pink:#ec4899;--blue:#3b82f6;
+    --f:'Inter',system-ui,sans-serif;--fm:'JetBrains Mono','Fira Code',monospace;
+    --r:12px;--rs:8px;--tf:150ms ease;--tb:250ms ease;
+  }
+  html[data-theme="light"]{
+    --bg:#f5f5f5;--bg2:#fff;--bg3:#ebebeb;--bg-sb:#eaeaea;--bg-in:#f0f0f0;
+    --ac:#00897b;--ac-dim:rgba(0,137,123,.08);--ac-brd:rgba(0,137,123,.2);
+    --tx:#1a1a1a;--tx2:#777;--tx3:#aaa;--bd:#e0e0e0;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--f);background:var(--bg);color:var(--tx);line-height:1.6;overflow-x:hidden}
+  .i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .is{width:16px;height:16px}.il{width:24px;height:24px}
+
+  /* NAV */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px;padding:8px 16px;overflow-x:auto}
+  .nav .logo{font-size:14px;font-weight:700;color:var(--ac);margin-right:8px;letter-spacing:-.5px}
+  .nb{background:none;border:1px solid var(--bd);color:var(--tx2);padding:5px 12px;border-radius:20px;font-size:11px;font-family:var(--f);cursor:pointer;white-space:nowrap;transition:all var(--tf)}
+  .nb:hover{border-color:var(--ac);color:var(--tx)}
+  .nb.on{background:var(--ac-dim);border-color:var(--ac);color:var(--ac)}
+  .tt{margin-left:auto;background:var(--bg3);border:1px solid var(--bd);color:var(--tx2);padding:5px 10px;border-radius:20px;font-size:11px;cursor:pointer;font-family:var(--f)}
+
+  .dir{display:none;padding-top:48px;min-height:100vh}.dir.on{display:block}
+  .note{background:var(--bg2);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:var(--rs);padding:12px 16px;margin:14px 20px;font-size:12px;color:var(--tx2);line-height:1.5}
+  .note b{color:var(--tx)}
+
+  /* ══════ DESKTOP ══════ */
+  .dk{display:flex;height:calc(100vh - 48px)}
+  .sb{width:250px;min-width:250px;background:var(--bg-sb);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;transition:width .25s cubic-bezier(.2,.8,.3,1),min-width .25s cubic-bezier(.2,.8,.3,1)}
+  .sb.collapsed{width:50px;min-width:50px}
+  .sb-toggle{background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;color:var(--tx2);transition:color var(--tf)}
+  .sb-toggle:hover{color:var(--ac)}
+  .sb-toggle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+  .sb-open{position:absolute;left:8px;top:56px;z-index:5;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:6px;cursor:pointer;display:none;color:var(--tx2)}
+  .sb-open:hover{color:var(--ac);border-color:var(--ac)}
+  .sb-open svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+  /* sb-open hidden — sandwich stays visible in icon rail */
+  .sb-h{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;transition:padding .25s ease}
+  .sb.collapsed .sb-h{padding:12px 0;justify-content:center}
+  .sb-h h3{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;transition:opacity .2s ease,width .2s ease}
+  .sb.collapsed .sb-h h3{opacity:0;width:0;margin:0;padding:0}
+  .sb-new{background:none;border:1px solid var(--ac-brd);color:var(--ac);padding:4px 8px;border-radius:6px;font-size:10px;cursor:pointer;font-family:var(--f);display:flex;align-items:center;gap:3px;transition:all var(--tf);white-space:nowrap;overflow:hidden}
+  .sb.collapsed .sb-new{width:0;padding:0;border:none;opacity:0}
+  .sb-new:hover{background:var(--ac);color:var(--bg)}
+  .sb-s{margin:0 12px 8px;padding:7px 10px;background:var(--bg-in);border:1px solid var(--bd);border-radius:6px;color:var(--tx);font-size:12px;font-family:var(--f);width:calc(100% - 24px);outline:none;transition:opacity .2s ease,height .2s ease,margin .2s ease,padding .2s ease}
+  .sb.collapsed .sb-s{opacity:0;height:0;margin:0;padding:0;border:none;overflow:hidden}
+  .sb-s:focus{border-color:var(--ac)}.sb-s::placeholder{color:var(--tx3)}
+  .sb-l{padding:10px 14px 3px;font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;overflow:hidden;transition:opacity .2s ease,height .2s ease,padding .2s ease}
+  .sb.collapsed .sb-l{opacity:0;height:0;padding:0;overflow:hidden}
+  .sb-i{padding:8px 14px;font-size:12px;color:var(--tx2);cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:8px;border-left:2px solid transparent;white-space:nowrap;overflow:hidden;position:relative}
+  .sb.collapsed .sb-i{padding:10px 0;justify-content:center;border-left:none;font-size:0;gap:0}
+  .sb-i:hover{background:var(--bg3);color:var(--tx)}
+  .sb-i.on{background:var(--ac-dim);color:var(--ac);border-left-color:var(--ac)}
+  .sb.collapsed .sb-i.on{border-left:none;background:none;color:var(--ac)}
+  .sb-i .ct{margin-left:auto;font-size:10px;background:var(--bg3);padding:1px 6px;border-radius:8px;color:var(--tx3);transition:all .2s ease}
+  .sb.collapsed .sb-i .ct{position:absolute;top:4px;right:4px;margin:0;font-size:7px;width:14px;height:14px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--ac);color:var(--bg);font-weight:700}
+  .sb-d{height:1px;background:var(--bd);margin:5px 14px;transition:margin .2s ease}
+  .sb.collapsed .sb-d{margin:5px 8px}
+  .sb-f{margin-top:auto;border-top:1px solid var(--bd)}
+
+  .chat{flex:1;display:flex;flex-direction:column;min-width:0}
+  .msgs{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;justify-content:flex-end}
+  .msg{width:100%}
+  .mu{display:flex;justify-content:flex-end}
+  .mu .bub{background:var(--ac-dim);border:1px solid var(--ac-brd);border-radius:var(--r) var(--r) 4px var(--r);padding:10px 14px;max-width:70%;font-size:13px}
+  .ma{display:flex;gap:10px}
+  .ma .dot{width:28px;height:28px;background:linear-gradient(135deg,var(--ac),#008b7a);border-radius:50%;flex-shrink:0}
+  .ma .ct{flex:1;font-size:13px;line-height:1.6}
+  .tr{background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;margin:4px 0;font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:6px}
+  .td{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+  .td.ok{background:var(--ok)}.td.run{background:var(--ac);animation:p 1.5s infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+  .fc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;margin-top:6px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:border-color var(--tf)}
+  .fc:hover{border-color:var(--ac)}
+  .fc .fi{width:32px;height:32px;background:var(--ac-dim);border-radius:6px;display:flex;align-items:center;justify-content:center}
+  .fc .fn{font-size:12px;font-weight:500}.fc .fs{font-size:10px;color:var(--tx3)}
+  .fc .fd{color:var(--ac);font-size:11px;margin-left:auto}
+  .ci{padding:12px 20px 16px;border-top:1px solid var(--bd)}
+  .ci-w{position:relative;display:flex;gap:6px;align-items:center}
+  .ci-w input{flex:1;padding:12px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);font-size:13px;font-family:var(--f);outline:none}
+  .ci-w input:focus{border-color:var(--ac)}.ci-w input::placeholder{color:var(--tx3)}
+  .ci-ab{width:34px;height:34px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;transition:background var(--tf);color:var(--tx3)}
+  .ci-ab:hover{background:var(--ac-dim);color:var(--ac)}
+  .ci-ab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .ci .sn{width:34px;height:34px;background:var(--ac);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .ci .sn svg{width:14px;height:14px;stroke:var(--bg);fill:none;stroke-width:2.5}
+  .ci-h{text-align:center;font-size:10px;color:var(--tx3);margin-top:5px}
+
+  /* ══════ MOBILE ══════ */
+  .mw{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;padding:14px}
+  .ml{text-align:center;padding:5px;font-size:11px;color:var(--tx3);font-weight:500}
+  .mf{width:375px;height:740px;border:2px solid var(--bd);border-radius:28px;overflow:hidden;background:var(--bg);position:relative}
+  .ms{padding:5px 18px;display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--tx2)}
+  .mc{position:absolute;top:24px;bottom:60px;left:0;right:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;justify-content:flex-end}
+  .mc-msgs{display:flex;flex-direction:column;gap:12px;width:100%}
+  .mc-msgs .msg{max-width:100%;width:100%}
+  .mc-msgs .bub{max-width:85%}
+  .mc-msgs .ma .ct{max-width:100%}
+
+  /* Mobile bottom — slide-up icon tray */
+  .m-bot{position:absolute;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--bd);z-index:10}
+  .m-input{display:flex;gap:6px;align-items:center;padding:8px 12px}
+  .m-input.lh{flex-direction:row-reverse}
+  .m-inp{flex:1;padding:10px 14px;background:var(--bg-in);border:1px solid var(--bd);border-radius:20px;color:var(--tx);font-size:13px;font-family:var(--f);outline:none}
+  .m-sn{width:34px;height:34px;background:var(--ac);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .m-sn svg{width:14px;height:14px;stroke:var(--bg);fill:none;stroke-width:2.5}
+  .m-ab{width:30px;height:30px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;transition:background var(--tf)}
+  .m-ab:hover{background:var(--ac-dim)}
+  .m-ab svg{width:18px;height:18px;stroke:var(--tx3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .m-grab{width:36px;height:3px;background:var(--tx3);border-radius:2px;margin:0 auto 2px;cursor:pointer;opacity:.5;transition:opacity .2s}
+  .m-grab:hover{opacity:1}
+  .m-icons{display:none;padding:0 20px 10px;justify-content:space-around;align-items:center}
+  .m-bot.expanded .m-icons{display:flex}
+  .m-ic{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 8px;border-radius:8px;transition:all var(--tf)}
+  .m-ic:hover{background:var(--ac-dim)}
+  .m-ic svg{width:22px;height:22px;color:var(--tx2);stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .m-ic span{font-size:8px;color:var(--tx3);text-transform:uppercase;letter-spacing:.3px}
+  .m-ic:hover svg{color:var(--ac)}
+  .m-ic:hover span{color:var(--ac)}
+  .ht{position:absolute;top:28px;right:10px;background:var(--bg2);border:1px solid var(--bd);color:var(--tx2);padding:3px 7px;border-radius:10px;font-size:9px;cursor:pointer;font-family:var(--f);z-index:5}
+
+  /* ══════ CALENDAR ══════ */
+  .cal{flex:1;overflow:auto;padding:16px}
+  .cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .cal-h h2{font-size:16px;font-weight:600}
+  .cal-bn{display:flex;gap:3px}
+  .cal-bn button{background:none;border:1px solid var(--bd);color:var(--tx2);padding:4px 10px;font-size:11px;font-family:var(--f);cursor:pointer;border-radius:6px;transition:all var(--tf)}
+  .cal-bn button:hover{border-color:var(--ac);color:var(--tx)}
+  .cal-bn button.on{background:var(--ac-dim);border-color:var(--ac);color:var(--ac)}
+  .cal-vb{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:2px}
+  .cal-vb button{background:none;border:none;color:var(--tx3);padding:3px 8px;font-size:10px;font-family:var(--f);cursor:pointer;border-radius:4px}
+  .cal-vb button.on{background:var(--ac-dim);color:var(--ac)}
+  .cw{display:grid;grid-template-columns:50px repeat(7,1fr);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;background:var(--bg2)}
+  .ch{padding:8px 4px;text-align:center;font-size:10px;font-weight:600;color:var(--tx3);border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:.5px}
+  .ch.today{color:var(--ac);background:var(--ac-dim)}
+  .ct-col{border-right:1px solid var(--bd)}
+  .ct-s{height:50px;padding:3px 6px;font-size:9px;color:var(--tx3);font-family:var(--fm);border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;justify-content:flex-end}
+  .cd{border-right:1px solid var(--bd);position:relative}.cd:last-child{border-right:none}
+  .cs{height:50px;border-bottom:1px solid var(--bd)}
+  .ce{position:absolute;left:2px;right:2px;border-radius:4px;padding:3px 6px;font-size:10px;line-height:1.2;overflow:hidden}
+  .ce .en{font-weight:600}.ce .es{font-size:9px;opacity:.7;margin-top:1px}
+  .ce .ea{font-size:8px;opacity:.5;font-style:italic}
+  /* Agent colors */
+  .ce.ag-core{background:rgba(0,255,224,.1);border-left:3px solid var(--ac);color:var(--ac)}
+  .ce.ag-recherche{background:rgba(59,130,246,.1);border-left:3px solid var(--blue);color:var(--blue)}
+  .ce.ag-admin{background:rgba(124,58,237,.1);border-left:3px solid var(--purple);color:var(--purple)}
+  .ce.ag-ok{background:rgba(34,197,94,.1);border-left:3px solid var(--ok);color:var(--ok)}
+  .ce.ag-err{background:rgba(239,68,68,.1);border-left:3px solid var(--err);color:var(--err)}
+  .ce.ag-warn{background:rgba(245,158,11,.1);border-left:3px solid var(--warn);color:var(--warn)}
+  .cal-legend{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap}
+  .cal-legend span{font-size:10px;color:var(--tx2);display:flex;align-items:center;gap:4px}
+  .cal-legend span::before{content:'';width:8px;height:8px;border-radius:2px}
+  .cal-legend .lg-core::before{background:var(--ac)}
+  .cal-legend .lg-recherche::before{background:var(--blue)}
+  .cal-legend .lg-admin::before{background:var(--purple)}
+
+  /* ══════ AVATAR ══════ */
+  .av-sec{text-align:center;padding:16px}
+  .av-sec h2{font-size:16px;margin-bottom:2px}
+  .av-sec .sub{font-size:12px;color:var(--tx2);margin-bottom:12px}
+  .af{width:800px;height:480px;margin:0 auto;border:2px solid #222;border-radius:10px;overflow:hidden;position:relative;cursor:pointer}
+  .af canvas{width:100%;height:100%;display:block}
+  .av-slide canvas{width:100%;height:100%;display:block}
+  .av-clk{position:absolute;bottom:12px;right:18px;font-family:var(--fm);font-size:12px;color:rgba(255,255,255,.2);pointer-events:none}
+  .av-st{position:absolute;bottom:12px;left:18px;font-size:10px;color:rgba(255,255,255,.2);display:flex;align-items:center;gap:4px;pointer-events:none}
+  .av-st::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--ok)}
+  .av-ntf{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:8px 18px;font-size:12px;color:rgba(255,255,255,.7);opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+  .av-ntf.show{opacity:1}
+  .av-ctrls{display:flex;justify-content:center;gap:6px;margin-top:12px;flex-wrap:wrap}
+  .av-cb{background:var(--bg2);border:1px solid var(--bd);color:var(--tx2);padding:6px 14px;border-radius:6px;font-size:11px;font-family:var(--f);cursor:pointer;transition:all var(--tf)}
+  .av-cb:hover{border-color:var(--ac);color:var(--ac)}
+  .av-cb.on{background:var(--ac-dim);border-color:var(--ac);color:var(--ac)}
+  .av-styles{display:flex;justify-content:center;gap:6px;margin-top:8px}
+  .av-styles button{background:var(--bg2);border:1px solid var(--bd);color:var(--tx2);padding:6px 14px;border-radius:6px;font-size:11px;font-family:var(--f);cursor:pointer;transition:all var(--tf)}
+  .av-styles button:hover{border-color:var(--ac);color:var(--ac)}
+  .av-styles button.on{background:var(--ac-dim);border-color:var(--ac);color:var(--ac)}
+
+  /* AGENT TABS */
+  .ag-tabs{display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:2px;margin-bottom:14px}
+  .ag-tab{flex:1;text-align:center;padding:7px 10px;font-size:11px;font-family:var(--f);cursor:pointer;border-radius:6px;border:none;background:none;color:var(--tx2);transition:all var(--tf)}
+  .ag-tab:hover{color:var(--tx)}
+  .ag-tab.on{background:var(--ac-dim);color:var(--ac);font-weight:600}
+  .ag-pane{display:none}.ag-pane.on{display:block}
+  /* Org chart */
+  .org{display:flex;flex-direction:column;align-items:center;gap:0}
+  .org-node{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 16px;text-align:center;position:relative;min-width:100px}
+  .org-node.org-user{border-color:var(--ac);background:var(--ac-dim)}
+  .org-node .on-name{font-size:12px;font-weight:600}
+  .org-node .on-role{font-size:9px;color:var(--tx3)}
+  .org-line{width:1px;height:20px;background:var(--bd)}
+  .org-row{display:flex;gap:24px;align-items:flex-start;position:relative}
+  .org-branch{display:flex;flex-direction:column;align-items:center;gap:0}
+  .org-hline{height:1px;background:var(--bd);align-self:stretch}
+
+  /* Avatar carousel — infinite, dual-axis */
+  .av-carousel{position:relative;width:800px;height:480px;margin:0 auto;overflow:hidden;border:2px solid #222;border-radius:10px}
+  .av-slides{display:flex;transition:transform .35s ease;width:300%;height:100%}
+  .av-slides.vert{transition:transform .35s ease}
+  .av-slide{width:calc(100%/3);flex-shrink:0;height:100%;position:relative;overflow:hidden}
+  .av-dots{display:flex;justify-content:center;gap:6px;margin-top:8px}
+  .av-dot{width:8px;height:8px;border-radius:50%;background:var(--bd);cursor:pointer;transition:background var(--tf)}
+  .av-dot.on{background:var(--ac)}
+  .av-arr{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;color:rgba(255,255,255,.5);font-size:16px;transition:all var(--tf)}
+  .av-arr:hover{background:rgba(0,0,0,.8);color:var(--ac);border-color:var(--ac)}
+  .av-arr.left{left:10px}.av-arr.right{right:10px}
+  .av-dir{position:absolute;left:50%;transform:translateX(-50%);width:32px;height:32px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;color:rgba(255,255,255,.5);font-size:16px;transition:all var(--tf)}
+  .av-dir:hover{background:rgba(0,0,0,.8);color:var(--ac);border-color:var(--ac)}
+  .av-dir.up{top:6px}.av-dir.down{bottom:6px}
+  .av-panel-label{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1px;pointer-events:none;z-index:2}
+
+  /* System dashboard panel — responsive grid */
+  .sys-dash{background:#050508;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr auto;gap:8px;padding:12px 16px;height:100%;box-sizing:border-box}
+  .sys-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--rs);padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:0}
+  .sys-card .sys-label{font-size:8px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px}
+  .sys-card .sys-val{font-size:22px;font-weight:700;font-family:var(--fm)}
+  .sys-card .sys-bar{width:100%;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+  .sys-card .sys-fill{height:100%;border-radius:2px}
+  .sys-gauge{width:64px;height:64px;position:relative}
+  .sys-gauge svg{transform:rotate(-90deg)}
+  .sys-gauge .sys-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:15px;font-weight:700;font-family:var(--fm)}
+
+  /* Agents panel on avatar */
+  .av-agents{background:#050508;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:8px;padding:12px 16px;height:100%;box-sizing:border-box}
+  .av-ag{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--rs);padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:border-color var(--tf);min-height:0}
+  .av-ag:hover{border-color:var(--ac)}
+  .av-ag .ag-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--bg)}
+  .av-ag .ag-name{font-size:12px;font-weight:600}
+  .av-ag .ag-desc{font-size:8px;color:var(--tx3);text-align:center}
+  .av-ag .ag-stat{font-size:9px;display:flex;align-items:center;gap:4px}
+  .av-ag .ag-dot{width:5px;height:5px;border-radius:50%}
+
+  /* Settings */
+  .set{flex:1;padding:20px;overflow-y:auto}
+  .set h2{font-size:16px;margin-bottom:14px}
+  .set-sec{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px}
+  .set-sec h3{font-size:12px;font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--tx3)}
+  .set-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd);font-size:13px}
+  .set-row:last-child{border-bottom:none}
+  .set-row .set-k{color:var(--tx2)}
+  .set-row .set-v{color:var(--tx);font-weight:500}
+  .set-row .set-v.ac{color:var(--ac)}
+  .set-toggle{width:36px;height:20px;background:var(--bd);border-radius:10px;position:relative;cursor:pointer;transition:background var(--tf)}
+  .set-toggle.on{background:var(--ac)}
+  .set-toggle::after{content:'';width:16px;height:16px;background:var(--tx);border-radius:50%;position:absolute;top:2px;left:2px;transition:transform var(--tf)}
+  .set-toggle.on::after{transform:translateX(16px)}
+  .set-throttle{background:var(--bg3);border-radius:var(--rs);padding:10px;margin-top:6px;font-size:11px;color:var(--tx2);line-height:1.5}
+  .set-meter{width:100%;height:4px;background:var(--bd);border-radius:2px;margin-top:6px}
+  .set-meter-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--ok),var(--warn),var(--err))}
+
+  /* DRAG & DROP — magnetic fluid reorder */
+  .drag-item{cursor:grab;user-select:none;touch-action:none;transition:transform .25s cubic-bezier(.2,.8,.3,1),box-shadow .25s ease,opacity .25s ease}
+  .drag-item.dragging{opacity:.85;transform:scale(1.06);box-shadow:0 12px 40px rgba(0,255,224,.15);z-index:100;position:relative;cursor:grabbing;transition:box-shadow .15s ease,opacity .15s ease}
+  .drag-item.shift-right{transform:translateX(calc(100% + 8px))}
+  .drag-item.shift-left{transform:translateX(calc(-100% - 8px))}
+  .drag-item.shift-down{transform:translateY(calc(100% + 8px))}
+  .drag-item.shift-up{transform:translateY(calc(-100% - 8px))}
+  .drag-item.settling{transition:transform .35s cubic-bezier(.2,.8,.3,1)}
+  .drag-ghost{position:fixed;pointer-events:none;z-index:1000;opacity:.9;transform:scale(1.05);transition:none}
+  .drag-placeholder{border:2px dashed var(--ac);border-radius:var(--rs);opacity:.3;background:var(--ac-dim)}
+
+  /* ══════ KIOSK ══════ */
+  .ki-sec{padding:16px;display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+  .ki-wrap{text-align:center}
+  .ki-wrap .ki-label{font-size:11px;color:var(--tx2);margin-bottom:8px;font-weight:500}
+  .kf{width:380px;height:620px;border:2px solid var(--bd);border-radius:14px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+  .kh{padding:8px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bd);font-size:11px}
+  .kh .kt{font-weight:600;font-size:12px}
+  .kg{flex:1;padding:8px;display:grid;gap:6px;overflow-y:auto;align-content:start}
+  .kg.g2{grid-template-columns:1fr 1fr}
+  .kg.g1{grid-template-columns:1fr}
+  .kc{background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:10px;font-size:11px;line-height:1.3;text-align:left}
+  .kc:hover{border-color:rgba(255,255,255,.1)}
+  .kc-t{font-size:9px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:flex;align-items:center;gap:4px}
+  .kc-t svg{width:12px;height:12px;stroke:var(--tx3)}
+  .kc-c{font-size:12px;color:var(--tx)}
+  .kc-d{margin-top:4px;font-size:9px;color:var(--tx3);font-family:var(--fm)}
+  .kc-ac{border-left:3px solid var(--ac)}
+  .kc-w{border-left:3px solid var(--warn)}
+  .kc-ok{border-left:3px solid var(--ok)}
+  .ki-in{padding:6px 10px;border-top:1px solid var(--bd);display:flex;gap:6px;align-items:center}
+  .ki-in input{flex:1;padding:7px 10px;background:var(--bg-in);border:1px solid var(--bd);border-radius:16px;color:var(--tx);font-size:12px;font-family:var(--f);outline:none}
+  .ki-sn{width:28px;height:28px;background:var(--ac);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .ki-sn svg{width:12px;height:12px;stroke:var(--bg);fill:none;stroke-width:2.5}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="logo">ClawBot</span>
+  <button class="nb on" onclick="sd(0)">Desktop</button>
+  <button class="nb" onclick="sd(1)">Agents</button>
+  <button class="nb" onclick="sd(2)">Planification</button>
+  <button class="nb" onclick="sd(3)">Mobile</button>
+  <button class="nb" onclick="sd(4)">Avatar</button>
+  <button class="nb" onclick="sd(5)">Kiosk</button>
+  <button class="nb" onclick="sd(6)">Settings</button>
+  <button class="tt" onclick="tth()">Theme</button>
+</nav>
+
+<!-- 1. DESKTOP -->
+<section class="dir on" id="d0">
+<div class="dk">
+  <div class="sb" id="main-sb">
+    <div class="sb-h"><button class="sb-toggle" onclick="tsb()" title="Fermer"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><h3>ClawBot</h3><button class="sb-new"><svg class="i is" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouveau</button></div>
+    <input class="sb-s" placeholder="Rechercher...">
+    <div class="sb-l">Aujourd'hui</div>
+    <div class="sb-i on"><svg class="i is" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Devis Dupont</div>
+    <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Planning semaine</div>
+    <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Deploiement prod</div>
+    <div class="sb-l">Hier</div>
+    <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Emails tries</div>
+    <div class="sb-f">
+      <div class="sb-d"></div>
+      <div class="sb-i" onclick="sd(1)"><svg class="i is" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Mes agents<span class="ct">5</span></div>
+      <div class="sb-i" onclick="sd(2)"><svg class="i is" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Planification</div>
+      <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Mes acces<span class="ct" style="background:var(--ok);color:var(--bg)">3</span></div>
+      <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Fichiers</div>
+      <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Monitor</div>
+      <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Store</div>
+      <div class="sb-d"></div>
+      <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09"/></svg>Settings</div>
+    </div>
+  </div>
+  <div class="chat" style="position:relative">
+    <button class="sb-open" onclick="tsb()"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="msgs">
+      <div class="msg mu"><div class="bub">Genere le devis Dupont, 500 pieces</div></div>
+      <div class="msg ma">
+        <div class="dot"></div>
+        <div class="ct">
+          <div class="tr"><span class="td ok"></span>Recherche dernier devis</div>
+          <div class="tr"><span class="td ok"></span>Calcul prix 500 pcs</div>
+          <div class="tr"><span class="td ok"></span>Generation PDF</div>
+          <p style="margin-top:8px">Voila ton devis, modele du 15 fevrier mis a jour :</p>
+          <div class="fc">
+            <div class="fi"><svg class="i" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div><div class="fn">Devis_Dupont_500pcs.pdf</div><div class="fs">124 KB</div></div>
+            <span class="fd">Telecharger</span>
+          </div>
+          <p style="margin-top:8px;color:var(--tx2);font-size:12px">12 450 EUR HT. Envoyer a Dupont ?</p>
+        </div>
+      </div>
+      <div class="msg mu"><div class="bub">Oui, et rappel dans 7 jours</div></div>
+      <div class="msg ma">
+        <div class="dot"></div>
+        <div class="ct">
+          <div class="tr"><span class="td run"></span>Envoi email dupont@acme.fr</div>
+          <div class="tr"><span class="td run"></span>Planification rappel 15 mars</div>
+        </div>
+      </div>
+    </div>
+    <div class="ci"><div class="ci-w"><button class="ci-ab" title="Fichier"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button><input placeholder="Just ask it..."><button class="ci-ab" title="Vocal"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button><button class="sn"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button></div><div class="ci-h">Acces complet — fichiers, emails, serveurs, code, PDF</div></div>
+  </div>
+</div>
+</section>
+
+<!-- 2. AGENTS (noms de personnes) -->
+<section class="dir" id="d1">
+<div class="dk">
+  <div class="sb">
+    <div class="sb-h"><button style="background:none;border:none;color:var(--ac);font-size:12px;cursor:pointer;font-family:var(--f);display:flex;align-items:center;gap:3px" onclick="sd(0)"><svg class="i is" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Retour</button></div>
+    <div class="sb-l">Mes agents</div>
+    <div class="sb-i on"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg>Alice — Recherche web</div>
+    <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg>Max — Gestion fichiers</div>
+    <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg>Hugo — Developpeur</div>
+    <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg>Nina — Sysadmin</div>
+    <div class="sb-i" style="opacity:.5"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg>Paul — Comptable</div>
+    <div style="margin:8px 12px 6px;padding:8px;background:var(--ac-dim);border:1px solid var(--ac-brd);border-radius:6px;text-align:center;font-size:11px;color:var(--ac);cursor:pointer">Recruter un agent</div>
+  </div>
+  <div class="chat">
+    <div style="padding:20px;overflow-y:auto">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div style="width:44px;height:44px;background:var(--ac-dim);border:1px solid var(--ac-brd);border-radius:var(--r);display:flex;align-items:center;justify-content:center"><svg class="i il" viewBox="0 0 24 24" style="color:var(--ac)"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg></div>
+        <div><h2 style="font-size:16px;font-weight:600">Alice</h2><p style="font-size:12px;color:var(--tx2)">Recherche web, extraction, synthese</p></div>
+        <div style="margin-left:auto;display:flex;gap:4px">
+          <span style="background:var(--ok);color:var(--bg);padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600">Actif</span>
+          <span style="background:var(--bg3);color:var(--tx2);padding:2px 8px;border-radius:10px;font-size:9px">v1.2.0</span>
+        </div>
+      </div>
+
+      <!-- Agent tabs -->
+      <div class="ag-tabs">
+        <button class="ag-tab on" onclick="agTab(0)">Apercu</button>
+        <button class="ag-tab" onclick="agTab(1)">Profil</button>
+        <button class="ag-tab" onclick="agTab(2)">Hierarchie</button>
+      </div>
+
+      <!-- TAB 0: Apercu (analytics) -->
+      <div class="ag-pane on" id="agt0">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--ac)">47</div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Ce mois</div></div>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--ok)">94%</div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Succes</div></div>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--tx)">2.1s</div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Moy. temps</div></div>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blue)">312</div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Total</div></div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Activite — 30 derniers jours</div><div style="font-size:10px;color:var(--ac);font-weight:600">+12% vs mois precedent</div></div>
+          <svg viewBox="0 0 300 80" style="width:100%;height:70px" preserveAspectRatio="none"><defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--ac)" stop-opacity=".25"/><stop offset="100%" stop-color="var(--ac)" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="20" x2="300" y2="20" stroke="var(--bd)" stroke-width=".5"/><line x1="0" y1="40" x2="300" y2="40" stroke="var(--bd)" stroke-width=".5"/><line x1="0" y1="60" x2="300" y2="60" stroke="var(--bd)" stroke-width=".5"/><path d="M0,55 L10,52 20,48 30,50 40,45 50,42 60,46 70,38 80,35 90,40 100,36 110,32 120,38 130,30 140,28 150,32 160,25 170,22 180,28 190,20 200,18 210,24 220,15 230,18 240,12 250,16 260,10 270,14 280,8 290,12 300,5 L300,80 L0,80 Z" fill="url(#ag)"/><path d="M0,55 L10,52 20,48 30,50 40,45 50,42 60,46 70,38 80,35 90,40 100,36 110,32 120,38 130,30 140,28 150,32 160,25 170,22 180,28 190,20 200,18 210,24 220,15 230,18 240,12 250,16 260,10 270,14 280,8 290,12 300,5" fill="none" stroke="var(--ac)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="300" cy="5" r="3" fill="var(--ac)"/></svg>
+          <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--tx3);margin-top:2px"><span>7 fev</span><span>15 fev</span><span>22 fev</span><span>1 mar</span><span>8 mar</span></div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Tokens consommes</div><div style="font-size:10px;color:var(--tx2)">18.4k ce mois</div></div>
+          <svg viewBox="0 0 300 40" style="width:100%;height:35px" preserveAspectRatio="none"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--blue)" stop-opacity=".2"/><stop offset="100%" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs><path d="M0,30 L15,28 30,25 45,30 60,22 75,18 90,20 105,15 120,22 135,12 150,18 165,10 180,15 195,8 210,12 225,6 240,10 255,5 270,8 285,4 300,2 L300,40 L0,40 Z" fill="url(#tg)"/><path d="M0,30 L15,28 30,25 45,30 60,22 75,18 90,20 105,15 120,22 135,12 150,18 165,10 180,15 195,8 210,12 225,6 240,10 255,5 270,8 285,4 300,2" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round"/><circle cx="300" cy="2" r="2.5" fill="var(--blue)"/></svg>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px">
+          <div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Performance</div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--tx2)">Recherches reussies</span><span style="color:var(--ok)">44/47</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--tx2)">Temps moyen</span><span>2.1 sec</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--tx2)">Tokens consommes</span><span>18.4k</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px"><span style="color:var(--tx2)">Erreurs ce mois</span><span style="color:var(--err)">3</span></div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px">
+          <div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Historique recent</div>
+          <div style="padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--ok)"></span><span style="font-family:var(--fm);font-size:10px;color:var(--tx3);min-width:70px">08/03 14:02</span><span style="color:var(--tx2)">Prix composants H3</span><span style="margin-left:auto;font-size:10px;color:var(--tx3)">1.8s</span></div>
+          <div style="padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--ok)"></span><span style="font-family:var(--fm);font-size:10px;color:var(--tx3);min-width:70px">08/03 09:15</span><span style="color:var(--tx2)">Concurrence IA embarquee</span><span style="margin-left:auto;font-size:10px;color:var(--tx3)">3.2s</span></div>
+          <div style="padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--err)"></span><span style="font-family:var(--fm);font-size:10px;color:var(--tx3);min-width:70px">07/03 17:30</span><span style="color:var(--tx2)">Specs ecrans 800x480</span><span style="margin-left:auto;font-size:10px;color:var(--err)">Timeout</span></div>
+          <div style="padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--ok)"></span><span style="font-family:var(--fm);font-size:10px;color:var(--tx3);min-width:70px">07/03 11:00</span><span style="color:var(--tx2)">Fournisseurs PCB Shenzhen</span><span style="margin-left:auto;font-size:10px;color:var(--tx3)">2.5s</span></div>
+          <div style="padding:6px 0;font-size:12px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--ok)"></span><span style="font-family:var(--fm);font-size:10px;color:var(--tx3);min-width:70px">07/03 08:45</span><span style="color:var(--tx2)">Reglementation CE IoT</span><span style="margin-left:auto;font-size:10px;color:var(--tx3)">1.4s</span></div>
+        </div>
+      </div>
+
+      <!-- TAB 1: Profil (prompt + fichiers) -->
+      <div class="ag-pane" id="agt1">
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Prompt systeme</div><button style="background:none;border:1px solid var(--ac-brd);color:var(--ac);padding:3px 10px;border-radius:6px;font-size:10px;cursor:pointer;font-family:var(--f)">Modifier</button></div>
+          <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rs);padding:10px;font-size:12px;font-family:var(--fm);color:var(--tx2);line-height:1.6;max-height:140px;overflow-y:auto">Tu es Alice, une agente de recherche web specialisee. Tu extrais des informations pertinentes de sources fiables, tu synthetises les resultats en fiches claires, et tu cites toujours tes sources. Tu privilegies les sources francophones et les donnees recentes (&lt;6 mois). Tu ne fabriques jamais d'information.</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Fichiers dedies</div><button style="background:none;border:1px solid var(--bd);color:var(--tx2);padding:3px 10px;border-radius:6px;font-size:10px;cursor:pointer;font-family:var(--f)">+ Ajouter</button></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border:1px solid var(--bd);border-radius:var(--rs)"><svg class="i is" viewBox="0 0 24 24" style="color:var(--ac)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div><div style="font-size:12px;font-weight:500">memoire.md</div><div style="font-size:9px;color:var(--tx3)">Contexte persistant — 2.4 KB — modifie il y a 2h</div></div><svg class="i is" viewBox="0 0 24 24" style="color:var(--tx3);margin-left:auto;cursor:pointer"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border:1px solid var(--bd);border-radius:var(--rs)"><svg class="i is" viewBox="0 0 24 24" style="color:var(--blue)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div><div style="font-size:12px;font-weight:500">sources-favorites.json</div><div style="font-size:9px;color:var(--tx3)">Liste sources de confiance — 1.1 KB</div></div><svg class="i is" viewBox="0 0 24 24" style="color:var(--tx3);margin-left:auto;cursor:pointer"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border:1px solid var(--bd);border-radius:var(--rs)"><svg class="i is" viewBox="0 0 24 24" style="color:var(--purple)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div><div style="font-size:12px;font-weight:500">format-rapport.md</div><div style="font-size:9px;color:var(--tx3)">Template de sortie — 0.8 KB</div></div><svg class="i is" viewBox="0 0 24 24" style="color:var(--tx3);margin-left:auto;cursor:pointer"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px">
+          <div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Outils autorises</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            <span style="background:var(--ac-dim);border:1px solid var(--ac-brd);color:var(--ac);padding:3px 10px;border-radius:12px;font-size:10px">web_search</span>
+            <span style="background:var(--ac-dim);border:1px solid var(--ac-brd);color:var(--ac);padding:3px 10px;border-radius:12px;font-size:10px">read_file</span>
+            <span style="background:var(--ac-dim);border:1px solid var(--ac-brd);color:var(--ac);padding:3px 10px;border-radius:12px;font-size:10px">write_file</span>
+            <span style="background:var(--bg3);border:1px solid var(--bd);color:var(--tx3);padding:3px 10px;border-radius:12px;font-size:10px;text-decoration:line-through">bash</span>
+            <span style="background:var(--bg3);border:1px solid var(--bd);color:var(--tx3);padding:3px 10px;border-radius:12px;font-size:10px;text-decoration:line-through">ssh</span>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px">
+          <div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Configuration</div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--tx2)">Modele prefere</span><span>Sonnet</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--tx2)">Max tokens/requete</span><span>4096</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px"><span style="color:var(--tx2)">Timeout</span><span>30s</span></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Hierarchie (organigramme) -->
+      <div class="ag-pane" id="agt2">
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:20px;text-align:center">
+          <div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px">Organigramme — chaine de commande</div>
+          <!-- SVG Org Chart -->
+          <svg viewBox="0 0 500 340" style="width:100%;max-width:500px;height:auto">
+            <!-- User node -->
+            <rect x="200" y="8" width="100" height="44" rx="10" fill="var(--ac-dim)" stroke="var(--ac)" stroke-width="1.5"/>
+            <text x="250" y="28" text-anchor="middle" fill="var(--ac)" font-size="12" font-weight="700" font-family="Inter,system-ui">Vous</text>
+            <text x="250" y="42" text-anchor="middle" fill="var(--ac)" font-size="8" opacity=".6" font-family="Inter,system-ui">Proprietaire</text>
+            <!-- Line down from user -->
+            <line x1="250" y1="52" x2="250" y2="75" stroke="var(--bd)" stroke-width="1"/>
+            <!-- Horizontal connector -->
+            <line x1="65" y1="75" x2="435" y2="75" stroke="var(--bd)" stroke-width="1"/>
+            <!-- Vertical drops -->
+            <line x1="65" y1="75" x2="65" y2="92" stroke="var(--bd)" stroke-width="1"/>
+            <line x1="157" y1="75" x2="157" y2="92" stroke="var(--bd)" stroke-width="1"/>
+            <line x1="250" y1="75" x2="250" y2="92" stroke="var(--bd)" stroke-width="1"/>
+            <line x1="343" y1="75" x2="343" y2="92" stroke="var(--bd)" stroke-width="1"/>
+            <line x1="435" y1="75" x2="435" y2="92" stroke="var(--bd)" stroke-width="1"/>
+            <!-- Alice -->
+            <rect x="15" y="92" width="100" height="44" rx="8" fill="var(--bg)" stroke="var(--blue)" stroke-width="1"/>
+            <text x="65" y="112" text-anchor="middle" fill="var(--blue)" font-size="11" font-weight="600" font-family="Inter,system-ui">Alice</text>
+            <text x="65" y="126" text-anchor="middle" fill="var(--tx3)" font-size="8" font-family="Inter,system-ui">Recherche</text>
+            <!-- Max -->
+            <rect x="107" y="92" width="100" height="44" rx="8" fill="var(--bg)" stroke="var(--ok)" stroke-width="1"/>
+            <text x="157" y="112" text-anchor="middle" fill="var(--ok)" font-size="11" font-weight="600" font-family="Inter,system-ui">Max</text>
+            <text x="157" y="126" text-anchor="middle" fill="var(--tx3)" font-size="8" font-family="Inter,system-ui">Fichiers</text>
+            <!-- Hugo -->
+            <rect x="200" y="92" width="100" height="44" rx="8" fill="var(--bg)" stroke="var(--ac)" stroke-width="1"/>
+            <text x="250" y="112" text-anchor="middle" fill="var(--ac)" font-size="11" font-weight="600" font-family="Inter,system-ui">Hugo</text>
+            <text x="250" y="126" text-anchor="middle" fill="var(--tx3)" font-size="8" font-family="Inter,system-ui">Dev</text>
+            <!-- Nina -->
+            <rect x="293" y="92" width="100" height="44" rx="8" fill="var(--bg)" stroke="var(--purple)" stroke-width="1"/>
+            <text x="343" y="112" text-anchor="middle" fill="var(--purple)" font-size="11" font-weight="600" font-family="Inter,system-ui">Nina</text>
+            <text x="343" y="126" text-anchor="middle" fill="var(--tx3)" font-size="8" font-family="Inter,system-ui">Sysadmin</text>
+            <!-- Paul -->
+            <rect x="385" y="92" width="100" height="44" rx="8" fill="var(--bg)" stroke="var(--warn)" stroke-width="1" stroke-dasharray="4 2"/>
+            <text x="435" y="112" text-anchor="middle" fill="var(--warn)" font-size="11" font-weight="600" font-family="Inter,system-ui">Paul</text>
+            <text x="435" y="126" text-anchor="middle" fill="var(--tx3)" font-size="8" font-family="Inter,system-ui">Comptable</text>
+            <text x="435" y="148" text-anchor="middle" fill="var(--warn)" font-size="7" font-family="Inter,system-ui">inactif</text>
+            <!-- Sub-agents: Hugo controls Alice + Max -->
+            <line x1="250" y1="136" x2="250" y2="170" stroke="var(--bd)" stroke-width="1" stroke-dasharray="3 2"/>
+            <line x1="157" y1="170" x2="250" y2="170" stroke="var(--bd)" stroke-width="1" stroke-dasharray="3 2"/>
+            <line x1="157" y1="136" x2="157" y2="170" stroke="var(--bd)" stroke-width="1" stroke-dasharray="3 2"/>
+            <!-- Delegation labels -->
+            <rect x="170" y="162" width="65" height="16" rx="4" fill="var(--bg2)" stroke="var(--bd)" stroke-width=".5"/>
+            <text x="202" y="173" text-anchor="middle" fill="var(--tx3)" font-size="7" font-family="Inter,system-ui">delegue a</text>
+            <!-- Nina controls Hugo for deploys -->
+            <line x1="343" y1="136" x2="343" y2="200" stroke="var(--bd)" stroke-width="1" stroke-dasharray="3 2"/>
+            <line x1="250" y1="200" x2="343" y2="200" stroke="var(--bd)" stroke-width="1" stroke-dasharray="3 2"/>
+            <line x1="250" y1="136" x2="250" y2="200" stroke="var(--bd)" stroke-width="1" stroke-dasharray="3 2"/>
+            <rect x="262" y="192" width="65" height="16" rx="4" fill="var(--bg2)" stroke="var(--bd)" stroke-width=".5"/>
+            <text x="294" y="203" text-anchor="middle" fill="var(--tx3)" font-size="7" font-family="Inter,system-ui">deploy via</text>
+            <!-- Legend -->
+            <line x1="30" y1="260" x2="60" y2="260" stroke="var(--bd)" stroke-width="1"/>
+            <text x="65" y="263" fill="var(--tx3)" font-size="8" font-family="Inter,system-ui">Lien direct</text>
+            <line x1="30" y1="278" x2="60" y2="278" stroke="var(--bd)" stroke-width="1" stroke-dasharray="3 2"/>
+            <text x="65" y="281" fill="var(--tx3)" font-size="8" font-family="Inter,system-ui">Delegation</text>
+            <rect x="160" y="252" width="12" height="12" rx="3" fill="none" stroke="var(--warn)" stroke-width="1" stroke-dasharray="4 2"/>
+            <text x="178" y="263" fill="var(--tx3)" font-size="8" font-family="Inter,system-ui">Inactif</text>
+          </svg>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-top:12px">
+          <div style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Relations d'Alice</div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--tx2)">Superieur</span><span style="color:var(--ac)">Vous (proprietaire)</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--tx2)">Delegue par</span><span>Hugo (pour recherche tech)</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px"><span style="color:var(--tx2)">Sous-agents</span><span style="color:var(--tx3)">Aucun</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="note"><b>Agents = personnes + 3 onglets.</b> Apercu (analytics complet, courbes, historique), Profil (prompt systeme editable, fichiers dedies = memoire/sources/templates, outils autorises, config), Hierarchie (organigramme SVG — l'utilisateur est au sommet, liens directs + delegations entre agents). Chaque agent = prompt + fichiers + permissions.</div>
+</section>
+
+<!-- 3. PLANIFICATION CALENDRIER avec agents -->
+<section class="dir" id="d2">
+<div class="dk">
+  <div class="sb">
+    <div class="sb-h"><button style="background:none;border:none;color:var(--ac);font-size:12px;cursor:pointer;font-family:var(--f);display:flex;align-items:center;gap:3px" onclick="sd(0)"><svg class="i is" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Retour</button></div>
+    <div class="sb-l">Taches actives</div>
+    <div class="sb-i on"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Rapport emails</div>
+    <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Check emails</div>
+    <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Backup serveur</div>
+    <div class="sb-i"><svg class="i is" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>Rappel Dupont</div>
+    <div class="sb-f"><div class="sb-d"></div>
+      <div class="sb-i" onclick="sd(0)"><svg class="i is" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Conversations</div>
+      <div class="sb-i" onclick="sd(1)"><svg class="i is" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Agents</div>
+    </div>
+  </div>
+  <div class="cal">
+    <div class="cal-h">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h2>Mars 2026</h2>
+        <div class="cal-bn"><button>&lt;</button><button class="on">Aujourd'hui</button><button>&gt;</button></div>
+      </div>
+      <div class="cal-vb"><button>Jour</button><button class="on">Semaine</button><button>Mois</button></div>
+    </div>
+    <div class="cw">
+      <div class="ch"></div><div class="ch">LUN 2</div><div class="ch">MAR 3</div><div class="ch">MER 4</div><div class="ch">JEU 5</div><div class="ch">VEN 6</div><div class="ch today">SAM 7</div><div class="ch">DIM 8</div>
+      <div class="ct-col"><div class="ct-s">06</div><div class="ct-s">07</div><div class="ct-s">08</div><div class="ct-s">09</div><div class="ct-s">10</div><div class="ct-s">11</div><div class="ct-s">12</div><div class="ct-s">13</div><div class="ct-s">14</div><div class="ct-s">15</div><div class="ct-s">16</div><div class="ct-s">17</div><div class="ct-s">18</div><div class="ct-s">19</div></div>
+      <!-- Lun -->
+      <div class="cd"><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div>
+        <div class="ce ag-core" style="top:100px;height:35px"><div class="en">Rapport emails</div><div class="ea">Core — 08:02</div></div>
+        <div class="ce ag-recherche" style="top:300px;height:35px"><div class="en">Check emails</div><div class="ea">Alice — 12:01</div></div>
+        <div class="ce ag-admin" style="top:600px;height:35px"><div class="en">Backup serveur</div><div class="ea">Nina — 18:00</div></div>
+      </div>
+      <!-- Mar -->
+      <div class="cd"><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div>
+        <div class="ce ag-core" style="top:100px;height:35px"><div class="en">Rapport emails</div><div class="ea">Core — 08:01</div></div>
+        <div class="ce ag-recherche" style="top:300px;height:35px"><div class="en">Check emails</div><div class="ea">Alice — 12:00</div></div>
+        <div class="ce ag-err" style="top:600px;height:35px"><div class="en">Backup serveur</div><div class="ea">Nina — Timeout</div></div>
+      </div>
+      <!-- Mer -->
+      <div class="cd"><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div>
+        <div class="ce ag-core" style="top:100px;height:35px"><div class="en">Rapport emails</div><div class="ea">Core — 08:00</div></div>
+        <div class="ce ag-recherche" style="top:300px;height:35px"><div class="en">Check emails</div><div class="ea">Alice — 12:01</div></div>
+        <div class="ce ag-admin" style="top:600px;height:35px"><div class="en">Backup serveur</div><div class="ea">Nina — 18:01</div></div>
+      </div>
+      <!-- Jeu -->
+      <div class="cd"><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div>
+        <div class="ce ag-core" style="top:100px;height:35px"><div class="en">Rapport emails</div><div class="ea">Core — 08:01</div></div>
+        <div class="ce ag-recherche" style="top:300px;height:35px"><div class="en">Check emails</div><div class="ea">Alice — 12:00</div></div>
+        <div class="ce ag-admin" style="top:600px;height:35px"><div class="en">Backup serveur</div><div class="ea">Nina — 18:00</div></div>
+      </div>
+      <!-- Ven -->
+      <div class="cd"><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div>
+        <div class="ce ag-ok" style="top:100px;height:35px"><div class="en">Rapport emails</div><div class="ea">Core — 08:02</div></div>
+        <div class="ce ag-ok" style="top:300px;height:35px"><div class="en">Check emails</div><div class="ea">Alice — En attente</div></div>
+        <div class="ce ag-ok" style="top:600px;height:35px"><div class="en">Backup serveur</div><div class="ea">Nina — Planifie</div></div>
+      </div>
+      <!-- Sam (today) -->
+      <div class="cd" style="background:var(--ac-dim)"><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div>
+        <div class="ce ag-ok" style="top:100px;height:35px"><div class="en">Rapport emails</div><div class="ea">Core — 08:02</div></div>
+        <div class="ce ag-ok" style="top:300px;height:35px"><div class="en">Check emails</div><div class="ea">Alice — En attente</div></div>
+        <div class="ce ag-warn" style="top:450px;height:40px"><div class="en">Rappel Dupont</div><div class="ea">Core — 15/03</div></div>
+        <div class="ce ag-ok" style="top:600px;height:35px"><div class="en">Backup serveur</div><div class="ea">Nina — Planifie</div></div>
+      </div>
+      <!-- Dim -->
+      <div class="cd"><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div><div class="cs"></div></div>
+    </div>
+    <div class="cal-legend">
+      <span class="lg-core">Core</span>
+      <span class="lg-recherche">Alice — Recherche</span>
+      <span class="lg-admin">Nina — Admin</span>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Calendrier lecture seule + agents.</b> Chaque tache montre quel agent l'execute et sa couleur. Legende en bas. Vues jour/semaine/mois. Zero bouton d'action en mode normal.</div>
+</section>
+
+<!-- 4. MOBILE interactif -->
+<section class="dir" id="d3">
+<div class="mw">
+  <div>
+    <div class="ml">Tirer la barre pour voir les icones</div>
+    <div class="mf" id="ph1">
+      <div class="ms"><span>9:41</span><span>ClawBot</span><span>100%</span></div>
+      <button class="ht" onclick="thand('ph1')">Gaucher</button>
+      <div class="mc">
+        <div class="mc-msgs">
+          <div class="msg mu"><div class="bub" style="font-size:12px">Planifie les repas de la semaine</div></div>
+          <div class="msg ma" style="gap:8px"><div class="dot" style="width:24px;height:24px"></div><div class="ct" style="font-size:12px">
+            <div class="tr" style="font-size:10px;padding:5px 8px"><span class="td ok"></span>Analyse preferences</div>
+            <div class="tr" style="font-size:10px;padding:5px 8px"><span class="td ok"></span>Creation planning</div>
+            <p style="margin-top:6px"><b>Lun:</b> Poulet roti<br><b>Mar:</b> Carbonara<br><b>Mer:</b> Poisson riz<br><b>Jeu:</b> Quiche<br><b>Ven:</b> Pizza</p>
+            <p style="margin-top:6px;color:var(--tx2);font-size:11px">Liste de courses ?</p>
+          </div></div>
+          <div class="msg mu"><div class="bub" style="font-size:12px">Oui, envoie a Pierre</div></div>
+          <div class="msg ma" style="gap:8px"><div class="dot" style="width:24px;height:24px"></div><div class="ct" style="font-size:12px">
+            <div class="tr" style="font-size:10px;padding:5px 8px"><span class="td run"></span>Envoi a Pierre</div>
+          </div></div>
+        </div>
+      </div>
+      <div class="m-bot" id="ph1-bot">
+        <div class="m-input" id="ph1-inp">
+          <button class="m-ab" title="Fichier"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+          <input class="m-inp" placeholder="Just ask it..." type="text">
+          <button class="m-ab" title="Vocal"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+          <button class="m-sn"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+        </div>
+        <div class="m-grab" onclick="tslide('ph1-bot')"></div>
+        <div class="m-icons">
+          <div class="m-ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></div>
+          <div class="m-ic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Agents</span></div>
+          <div class="m-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Planning</span></div>
+          <div class="m-ic"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Acces</span></div>
+          <div class="m-ic"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><span>Fichiers</span></div>
+          <div class="m-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09"/></svg><span>Settings</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Slide-up minimal :</b> En bas : barre "Just ask it" + send. Juste en dessous : petite poignee grise. Tirer vers le haut = rangee d'icones SVG (Chat, Agents, Planning, Settings). Tout reste stacke en bas au pouce. Bouton "Gaucher" inverse le send.</div>
+</section>
+
+<!-- 5. AVATAR — infinite scroll carousel: 3 panels -->
+<section class="dir" id="d4">
+<div class="av-sec">
+  <h2>SmartPad Avatar — 800x480</h2>
+  <div class="sub">Scroll infini : haut/bas/gauche/droite — 3 panels en boucle</div>
+  <div class="av-styles">
+    <button class="on" onclick="setStyle(0)">Bulle</button>
+    <button onclick="setStyle(1)">Cozmo LED</button>
+    <button onclick="setStyle(2)">Blob fluide</button>
+  </div>
+  <div class="av-carousel" id="av-carousel">
+    <div class="av-slides" id="av-slides" style="transform:translateX(0)">
+      <!-- Panel 0: Avatar (default/idle) -->
+      <div class="av-slide" onclick="avTap()">
+        <div class="av-panel-label">Avatar</div>
+        <canvas id="avCanvas" width="800" height="480"></canvas>
+        <div class="av-ntf" id="av-ntf"></div>
+        <div class="av-st">Connecte</div>
+        <div class="av-clk" id="av-clk">14:32</div>
+      </div>
+      <!-- Panel 1: System + Coffre + Contrat -->
+      <div class="av-slide">
+        <div class="av-panel-label">Systeme</div>
+        <div class="sys-dash" data-dragzone>
+          <div class="sys-card drag-item">
+            <div class="sys-gauge"><svg viewBox="0 0 80 80" width="64" height="64"><circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="6"/><circle cx="40" cy="40" r="34" fill="none" stroke="var(--ac)" stroke-width="6" stroke-linecap="round" stroke-dasharray="155" stroke-dashoffset="50"/></svg><div class="sys-pct" style="color:var(--ac)">67%</div></div>
+            <div class="sys-label">CPU</div>
+            <div style="font-size:8px;color:var(--tx3)">H3 — 42C</div>
+          </div>
+          <div class="sys-card drag-item">
+            <div class="sys-gauge"><svg viewBox="0 0 80 80" width="64" height="64"><circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="6"/><circle cx="40" cy="40" r="34" fill="none" stroke="var(--warn)" stroke-width="6" stroke-linecap="round" stroke-dasharray="155" stroke-dashoffset="30"/></svg><div class="sys-pct" style="color:var(--warn)">82%</div></div>
+            <div class="sys-label">RAM</div>
+            <div style="font-size:8px;color:var(--tx3)">820/1024 MB</div>
+          </div>
+          <div class="sys-card drag-item">
+            <div class="sys-val" style="font-size:18px;color:var(--ok)">14.2 GB</div>
+            <div class="sys-bar"><div class="sys-fill" style="width:45%;background:var(--ok)"></div></div>
+            <div class="sys-label">Disque</div>
+          </div>
+          <div class="sys-card drag-item">
+            <div style="display:flex;align-items:center;gap:4px"><div style="width:6px;height:6px;border-radius:50%;background:var(--ok)"></div><div class="sys-val" style="font-size:16px;color:var(--ok)">WiFi</div></div>
+            <div style="font-size:8px;color:var(--tx3)">192.168.1.173</div>
+            <div class="sys-label">Reseau</div>
+          </div>
+          <!-- Coffre-fort -->
+          <div class="sys-card drag-item" style="border-color:rgba(0,255,224,.15)">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+            <div class="sys-val" style="font-size:16px;color:var(--ac)">3</div>
+            <div class="sys-label">Coffre-fort</div>
+            <div style="font-size:7px;color:var(--ok)">AES-256</div>
+          </div>
+          <!-- Contrat -->
+          <div class="sys-card drag-item" style="border-color:rgba(124,58,237,.2)">
+            <div class="sys-val" style="font-size:14px;color:var(--purple)">Pro</div>
+            <div style="font-size:8px;color:var(--tx3)">Illimite — 60% fair use</div>
+            <div class="sys-bar" style="margin-top:2px"><div class="sys-fill" style="width:60%;background:linear-gradient(90deg,var(--ok),var(--warn))"></div></div>
+            <div class="sys-label">Contrat</div>
+          </div>
+          <!-- Uptime + Services row -->
+          <div class="sys-card drag-item" style="grid-column:1/-1;flex-direction:row;justify-content:space-between;padding:8px 14px">
+            <div style="display:flex;align-items:center;gap:8px"><div style="font-size:8px;color:var(--tx3)">UPTIME</div><div style="font-size:14px;font-weight:700;font-family:var(--fm)">12j 7h</div></div>
+            <div style="display:flex;gap:3px"><span style="background:var(--ok);color:var(--bg);padding:1px 5px;border-radius:6px;font-size:8px">core</span><span style="background:var(--ok);color:var(--bg);padding:1px 5px;border-radius:6px;font-size:8px">nginx</span><span style="background:var(--ok);color:var(--bg);padding:1px 5px;border-radius:6px;font-size:8px">cloud</span><span style="background:var(--warn);color:var(--bg);padding:1px 5px;border-radius:6px;font-size:8px">mqtt</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Panel 2: Agents overview -->
+      <div class="av-slide">
+        <div class="av-panel-label">Mes agents</div>
+        <div class="av-agents" data-dragzone>
+          <div class="av-ag drag-item">
+            <div class="ag-icon" style="background:var(--blue)">A</div>
+            <div class="ag-name" style="color:var(--blue)">Alice</div>
+            <div class="ag-desc">Recherche web</div>
+            <div class="ag-stat"><div class="ag-dot" style="background:var(--ok)"></div><span style="color:var(--ok)">Actif</span><span style="color:var(--tx3);margin-left:4px">47 ce mois</span></div>
+          </div>
+          <div class="av-ag drag-item">
+            <div class="ag-icon" style="background:var(--ok)">M</div>
+            <div class="ag-name" style="color:var(--ok)">Max</div>
+            <div class="ag-desc">Gestion fichiers</div>
+            <div class="ag-stat"><div class="ag-dot" style="background:var(--ok)"></div><span style="color:var(--ok)">Actif</span><span style="color:var(--tx3);margin-left:4px">23 ce mois</span></div>
+          </div>
+          <div class="av-ag drag-item">
+            <div class="ag-icon" style="background:var(--ac)">H</div>
+            <div class="ag-name" style="color:var(--ac)">Hugo</div>
+            <div class="ag-desc">Developpeur</div>
+            <div class="ag-stat"><div class="ag-dot" style="background:var(--ok)"></div><span style="color:var(--ok)">Actif</span><span style="color:var(--tx3);margin-left:4px">89 ce mois</span></div>
+          </div>
+          <div class="av-ag drag-item">
+            <div class="ag-icon" style="background:var(--purple)">N</div>
+            <div class="ag-name" style="color:var(--purple)">Nina</div>
+            <div class="ag-desc">Sysadmin</div>
+            <div class="ag-stat"><div class="ag-dot" style="background:var(--ok)"></div><span style="color:var(--ok)">Actif</span><span style="color:var(--tx3);margin-left:4px">156 ce mois</span></div>
+          </div>
+          <div class="av-ag drag-item" style="opacity:.45">
+            <div class="ag-icon" style="background:var(--warn)">P</div>
+            <div class="ag-name" style="color:var(--warn)">Paul</div>
+            <div class="ag-desc">Comptable</div>
+            <div class="ag-stat"><div class="ag-dot" style="background:var(--tx3)"></div><span style="color:var(--tx3)">Inactif</span></div>
+          </div>
+          <div class="av-ag drag-item" style="border-style:dashed;border-color:var(--ac-brd)">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="1.5" stroke-linecap="round" style="opacity:.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <div class="ag-name" style="color:var(--ac);opacity:.5">Recruter</div>
+            <div class="ag-desc">Store agents</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="av-arr left" onclick="avNavH(-1)">&lt;</button>
+    <button class="av-arr right" onclick="avNavH(1)">&gt;</button>
+    <button class="av-dir up" onclick="avNavV(-1)">&and;</button>
+    <button class="av-dir down" onclick="avNavV(1)">&or;</button>
+  </div>
+  <div class="av-dots"><div class="av-dot on" onclick="avGo(0)"></div><div class="av-dot" onclick="avGo(1)"></div><div class="av-dot" onclick="avGo(2)"></div></div>
+  <div class="av-ctrls">
+    <button class="av-cb on" onclick="avState('idle')">Idle</button>
+    <button class="av-cb" onclick="avState('work')">Travaille</button>
+    <button class="av-cb" onclick="avState('happy')">Content</button>
+    <button class="av-cb" onclick="avState('sleep')">Nuit</button>
+    <button class="av-cb" onclick="avNotif()">Notification</button>
+  </div>
+</div>
+<div class="note"><b>Scroll infini 3 panels :</b> 1) Avatar anime (idle par defaut), 2) Dashboard systeme (CPU, RAM, disque, WiFi, coffre-fort AES-256, contrat Pro + jauge fair use, uptime, services), 3) Mes agents (carte par agent, cliquer pour details). Swipe dans toutes les directions = panel suivant/precedent en boucle. Cards responsives — plus il y en a, plus elles se reduisent.</div>
+</section>
+
+<!-- 6. KIOSK — 3 variantes -->
+<section class="dir" id="d5">
+<div style="text-align:center;padding:16px 16px 4px"><h2 style="font-size:16px">Kiosk — 3 variantes tablette verticale</h2><div style="font-size:12px;color:var(--tx2)">Vue kiosk de l'app mobile sur tablette 10.5"</div></div>
+<div class="ki-sec">
+  <!-- Variante 1: Grid post-its -->
+  <div class="ki-wrap">
+    <div class="ki-label">A. Grille post-its</div>
+    <div class="kf">
+      <div class="kh"><span style="font-family:var(--fm);color:var(--tx3)" id="kc1">14:32</span><span class="kt">Famille Michaut</span><span style="color:var(--ok);font-size:10px">Connecte</span></div>
+      <div class="kg g2">
+        <div class="kc kc-ac"><div class="kc-t"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Courses</div><div class="kc-c">Lait, oeufs, pain, tomates, poulet</div><div class="kc-d">14:02</div></div>
+        <div class="kc kc-ok"><div class="kc-t"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>Menu</div><div class="kc-c">Poulet roti, legumes, salade</div><div class="kc-d">Planifie</div></div>
+        <div class="kc kc-w"><div class="kc-t"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Rappel</div><div class="kc-c">Dentiste Emma — Mer 15h</div><div class="kc-d">2 jours</div></div>
+        <div class="kc"><div class="kc-t"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="23 7 16 12 16 2"/></svg>Colis</div><div class="kc-c">Amazon — en livraison</div><div class="kc-d">Suivi auto</div></div>
+        <div class="kc"><div class="kc-t"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Meteo</div><div class="kc-c">18C nuageux. Parapluie.</div><div class="kc-d">14:00</div></div>
+        <div class="kc"><div class="kc-t"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Taches</div><div class="kc-c">Rapport OK / Backup att.<br>Rappel Dupont 15/03</div><div class="kc-d">3 actives</div></div>
+      </div>
+      <div class="ki-in"><input placeholder="Just ask it..."><button class="ki-sn"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button></div>
+    </div>
+  </div>
+
+  <!-- Variante 2: Feed vertical -->
+  <div class="ki-wrap">
+    <div class="ki-label">B. Feed vertical</div>
+    <div class="kf">
+      <div class="kh"><span style="font-family:var(--fm);color:var(--tx3)" id="kc2">14:32</span><span class="kt">Famille Michaut</span><span style="color:var(--ok);font-size:10px">Connecte</span></div>
+      <div class="kg g1">
+        <div class="kc kc-w" style="padding:14px"><div class="kc-t"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Important</div><div class="kc-c" style="font-size:14px">Dentiste Emma — Mercredi 15h</div><div class="kc-d">Dans 2 jours</div></div>
+        <div class="kc kc-ac" style="padding:14px"><div class="kc-t"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg>Courses</div><div class="kc-c" style="font-size:14px">Lait, oeufs, pain, tomates, poulet, riz, brocolis</div><div class="kc-d">Mis a jour 14:02</div></div>
+        <div class="kc kc-ok" style="padding:14px"><div class="kc-t"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>Ce soir</div><div class="kc-c" style="font-size:14px">Poulet roti, legumes grilles, salade verte</div><div class="kc-d">Planifie lundi</div></div>
+        <div class="kc" style="padding:14px"><div class="kc-t"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Taches du jour</div><div class="kc-c" style="font-size:14px">Rapport emails — OK<br>Check emails — 12:00<br>Backup serveur — 18:00</div><div class="kc-d">2 en attente</div></div>
+        <div class="kc" style="padding:14px"><div class="kc-t"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="23 7 16 12 16 2"/></svg>Suivi</div><div class="kc-c" style="font-size:14px">Amazon — en cours de livraison</div><div class="kc-d">Suivi auto</div></div>
+      </div>
+      <div class="ki-in"><input placeholder="Just ask it..."><button class="ki-sn"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button></div>
+    </div>
+  </div>
+
+  <!-- Variante 3: Split chat + cards -->
+  <div class="ki-wrap">
+    <div class="ki-label">C. Split chat + cards</div>
+    <div class="kf">
+      <div class="kh"><span style="font-family:var(--fm);color:var(--tx3)" id="kc3">14:32</span><span class="kt">Famille Michaut</span><span style="color:var(--ok);font-size:10px">Connecte</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px">
+          <div class="msg mu"><div class="bub" style="font-size:12px;padding:8px 10px">Courses mises a jour ?</div></div>
+          <div class="msg ma" style="gap:6px"><div class="dot" style="width:22px;height:22px"></div><div class="ct" style="font-size:12px">Oui, j'ai ajoute brocolis et riz. Pierre sera notifie quand il passera pres du supermarche.</div></div>
+          <div class="msg mu"><div class="bub" style="font-size:12px;padding:8px 10px">RDV Emma c'est quand ?</div></div>
+          <div class="msg ma" style="gap:6px"><div class="dot" style="width:22px;height:22px"></div><div class="ct" style="font-size:12px">Mercredi 15h — dentiste. J'ai mis un rappel mardi soir.</div></div>
+        </div>
+        <div style="border-top:1px solid var(--bd);padding:6px;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+          <div class="kc kc-ac" style="padding:8px"><div class="kc-t" style="font-size:8px"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12"/></svg>Courses</div><div class="kc-c" style="font-size:11px">7 articles</div></div>
+          <div class="kc kc-w" style="padding:8px"><div class="kc-t" style="font-size:8px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>Rappel</div><div class="kc-c" style="font-size:11px">Dentiste mer.</div></div>
+          <div class="kc kc-ok" style="padding:8px"><div class="kc-t" style="font-size:8px"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18"/></svg>Menu</div><div class="kc-c" style="font-size:11px">Poulet roti</div></div>
+          <div class="kc" style="padding:8px"><div class="kc-t" style="font-size:8px"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/></svg>Taches</div><div class="kc-c" style="font-size:11px">3 actives</div></div>
+        </div>
+      </div>
+      <div class="ki-in"><input placeholder="Just ask it..."><button class="ki-sn"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button></div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>3 variantes kiosk :</b> A) Grille post-its classique. B) Feed vertical priorise (urgences en haut). C) Split chat en haut + cards resumees en bas — l'IA repond ET les infos sont toujours visibles. Tout est une vue de l'app mobile sur tablette Android.</div>
+</section>
+
+<!-- 7. SETTINGS -->
+<section class="dir" id="d6">
+<div class="dk">
+  <div class="sb">
+    <div class="sb-h"><button style="background:none;border:none;color:var(--ac);font-size:12px;cursor:pointer;font-family:var(--f);display:flex;align-items:center;gap:3px" onclick="sd(0)"><svg class="i is" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Retour</button></div>
+    <div class="sb-l">Reglages</div>
+    <div class="sb-i on" onclick="setTab(0)"><svg class="i is" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Mon profil</div>
+    <div class="sb-i" onclick="setTab(1)"><svg class="i is" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Mon abonnement</div>
+    <div class="sb-i" onclick="setTab(2)"><svg class="i is" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Appareil</div>
+    <div class="sb-i" onclick="setTab(3)"><svg class="i is" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06"/></svg>Affichage</div>
+    <div class="sb-i" onclick="setTab(4)"><svg class="i is" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Agents</div>
+  </div>
+  <div class="set">
+    <h2>Reglages</h2>
+
+    <!-- Profil utilisateur -->
+    <div class="set-sec">
+      <h3>Mon profil</h3>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bd)">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--ac),#008b7a);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--bg);flex-shrink:0">NM</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600">Nicolas Michaut</div><div style="font-size:11px;color:var(--tx2)">nicolas@yumi-lab.com</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Membre depuis mars 2026</div></div>
+        <button style="background:none;border:1px solid var(--ac-brd);color:var(--ac);padding:4px 12px;border-radius:6px;font-size:10px;cursor:pointer;font-family:var(--f)">Modifier</button>
+      </div>
+      <div class="set-row"><span class="set-k">Nom complet</span><span class="set-v">Nicolas Michaut</span></div>
+      <div class="set-row"><span class="set-k">Email</span><span class="set-v" style="font-family:var(--fm);font-size:11px">nicolas@yumi-lab.com</span></div>
+      <div class="set-row"><span class="set-k">Telephone</span><span class="set-v" style="font-family:var(--fm);font-size:11px">+33 6 •• •• •• 42</span></div>
+      <div class="set-row"><span class="set-k">Date de naissance</span><span class="set-v">15/07/1988</span></div>
+      <div class="set-row"><span class="set-k">Age</span><span class="set-v">37 ans</span></div>
+      <div class="set-row"><span class="set-k">Region</span><span class="set-v">Ile-de-France</span></div>
+      <div class="set-row"><span class="set-k">Ville</span><span class="set-v">Hangzhou (detecte via IP)</span></div>
+      <div class="set-row"><span class="set-k">Pays</span><span class="set-v">Chine</span></div>
+      <div class="set-row"><span class="set-k">Fuseau horaire</span><span class="set-v">UTC+8 (Asia/Shanghai)</span></div>
+      <div class="set-row"><span class="set-k">Langue preferee</span><span class="set-v">Francais</span></div>
+      <div class="set-row"><span class="set-k">Devise</span><span class="set-v">EUR (€)</span></div>
+      <div class="set-row"><span class="set-k">Partage de donnees</span><div class="set-toggle on"></div></div>
+      <div class="set-throttle">Vos donnees de profil permettent a ClawBot de personnaliser vos recommandations, devises, et fuseaux horaires. Elles ne sont jamais partagees avec des tiers.</div>
+    </div>
+
+    <!-- Plan & throttling -->
+    <div class="set-sec">
+      <h3>Mon abonnement</h3>
+      <div class="set-row"><span class="set-k">Plan actuel</span><span class="set-v ac">Pro — Illimite</span></div>
+      <div class="set-row"><span class="set-k">Modele</span><span class="set-v">Opus (plafond max)</span></div>
+      <div class="set-row"><span class="set-k">Utilisation aujourd'hui</span><span class="set-v">1.2M tokens</span></div>
+      <div class="set-row">
+        <span class="set-k">Fair use</span>
+        <div style="flex:1;max-width:200px;margin-left:12px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px"><span style="color:var(--ok)">Normal</span><span style="color:var(--tx3)">60%</span></div>
+          <div class="set-meter"><div class="set-meter-fill" style="width:60%"></div></div>
+        </div>
+      </div>
+      <div class="set-throttle">Acces illimite. Au-dela du fair use, le debit est progressivement ralenti (pas de blocage). Votre experience reste fluide en usage normal.</div>
+    </div>
+
+    <!-- Device -->
+    <div class="set-sec">
+      <h3>Appareil</h3>
+      <div class="set-row"><span class="set-k">Nom</span><span class="set-v">SmartPi-ClawBot</span></div>
+      <div class="set-row"><span class="set-k">MAC</span><span class="set-v" style="font-family:var(--fm);font-size:11px">0281662AA2C9</span></div>
+      <div class="set-row"><span class="set-k">IP locale</span><span class="set-v" style="font-family:var(--fm);font-size:11px">192.168.1.173</span></div>
+      <div class="set-row"><span class="set-k">Version firmware</span><span class="set-v">1.4.2-develop</span></div>
+      <div class="set-row"><span class="set-k">Mise a jour auto</span><div class="set-toggle on"></div></div>
+    </div>
+
+    <!-- Display -->
+    <div class="set-sec">
+      <h3>Affichage</h3>
+      <div class="set-row"><span class="set-k">Theme</span><span class="set-v">Sombre</span></div>
+      <div class="set-row"><span class="set-k">Avatar style</span><span class="set-v">Cozmo LED</span></div>
+      <div class="set-row"><span class="set-k">Langue</span><span class="set-v">Francais</span></div>
+      <div class="set-row"><span class="set-k">Mode gaucher</span><div class="set-toggle"></div></div>
+    </div>
+
+    <!-- Agents -->
+    <div class="set-sec">
+      <h3>Agents</h3>
+      <div class="set-row"><span class="set-k">Agents actifs</span><span class="set-v ac">4 / 5</span></div>
+      <div class="set-row"><span class="set-k">Max agents simultanes</span><span class="set-v">3</span></div>
+      <div class="set-row"><span class="set-k">Token budget / agent / jour</span><span class="set-v">50k</span></div>
+      <div class="set-row"><span class="set-k">Delegation inter-agents</span><div class="set-toggle on"></div></div>
+    </div>
+
+    <!-- Security -->
+    <div class="set-sec">
+      <h3>Securite</h3>
+      <div class="set-row"><span class="set-k">Coffre-fort (Mes acces)</span><span class="set-v ac">3 credentials</span></div>
+      <div class="set-row"><span class="set-k">Chiffrement</span><span class="set-v">AES-256</span></div>
+      <div class="set-row"><span class="set-k">Acces SSH</span><div class="set-toggle on"></div></div>
+      <div class="set-row"><span class="set-k">Commandes dangereuses</span><span class="set-v" style="color:var(--err)">Bloquees</span></div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Settings complet.</b> Profil utilisateur (nom, email, telephone, age, region/ville detectes par IP, fuseau, devise, partage de donnees — pour personnalisation + affiliation e-commerce). Plan avec modele throttling : "Illimite" mais fair use progressif. Appareil, affichage, agents (delegation inter-agents activable), securite (coffre AES-256). Les toggles sont cliquables en CSS pur.</div>
+</section>
+
+<script>
+function sd(i){document.querySelectorAll('.dir').forEach(d=>d.classList.remove('on'));document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));document.getElementById('d'+i).classList.add('on');document.querySelectorAll('.nb')[i].classList.add('on')}
+// Agent tabs
+function agTab(i){document.querySelectorAll('.ag-tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.ag-tab')[i].classList.add('on');document.querySelectorAll('.ag-pane').forEach(p=>p.classList.remove('on'));document.getElementById('agt'+i).classList.add('on')}
+// Avatar infinite carousel — 3 panels, dual-axis animation
+let avPanel=0;const avTotal=3;let avBusy=false;
+function avGo(i){
+  avPanel=((i%avTotal)+avTotal)%avTotal;
+  const s=document.getElementById('av-slides');
+  s.style.transform='translateX(-'+(avPanel*100/avTotal)+'%)';
+  document.querySelectorAll('.av-dot').forEach(d=>d.classList.remove('on'));
+  document.querySelectorAll('.av-dot')[avPanel].classList.add('on');
+}
+function avNavH(dir){if(avBusy)return;avBusy=true;const s=document.getElementById('av-slides');s.style.transition='transform .35s ease';avGo(avPanel+dir);setTimeout(()=>{avBusy=false},380)}
+function avNavV(dir){
+  if(avBusy)return;avBusy=true;
+  const next=((avPanel+dir)%avTotal+avTotal)%avTotal;
+  const s=document.getElementById('av-slides');
+  const slides=s.children;
+  // Slide current out vertically, snap new in
+  const cur=slides[avPanel];const nxt=slides[next];
+  cur.style.transition='transform .35s ease';
+  nxt.style.transition='none';
+  nxt.style.transform='translateY('+(dir>0?'100%':'-100%')+')';
+  // Force reflow
+  nxt.offsetHeight;
+  nxt.style.transition='transform .35s ease';
+  cur.style.transform='translateY('+(dir>0?'-100%':'100%')+')';
+  nxt.style.transform='translateY(0)';
+  setTimeout(()=>{
+    cur.style.transition='none';cur.style.transform='';
+    nxt.style.transition='none';nxt.style.transform='';
+    avPanel=next;
+    s.style.transition='none';
+    s.style.transform='translateX(-'+(avPanel*100/avTotal)+'%)';
+    document.querySelectorAll('.av-dot').forEach(d=>d.classList.remove('on'));
+    document.querySelectorAll('.av-dot')[avPanel].classList.add('on');
+    avBusy=false;
+  },380);
+}
+function avNav(dir){avNavH(dir)}
+// Wheel: horizontal delta = horizontal slide, vertical delta = vertical slide
+document.addEventListener('DOMContentLoaded',function(){const c=document.getElementById('av-carousel');if(c)c.addEventListener('wheel',function(e){e.preventDefault();if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){avNavH(e.deltaX>0?1:-1)}else{avNavV(e.deltaY>0?1:-1)}},{passive:false})})
+// Settings tab (sidebar highlight)
+function setTab(i){const items=document.querySelectorAll('#d6 .sb-i');items.forEach(s=>s.classList.remove('on'));items[i].classList.add('on')}
+// Toggle switches
+document.addEventListener('click',function(e){if(e.target.classList.contains('set-toggle'))e.target.classList.toggle('on')})
+function tth(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark')}
+function tsb(){const s=document.getElementById('main-sb');s.classList.toggle('collapsed')}
+
+// Hand toggle
+function thand(id){const f=document.getElementById(id);const r=f.querySelector('.m-input');const b=f.querySelector('.ht');if(r.classList.contains('lh')){r.classList.remove('lh');b.textContent='Gaucher'}else{r.classList.add('lh');b.textContent='Droitier'}}
+
+// Slide up
+function tslide(id){const b=document.getElementById(id);b.classList.toggle('expanded')}
+
+// Clocks
+function uc(){const t=new Date(),s=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');['av-clk','kc1','kc2','kc3'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=s})}
+uc();setInterval(uc,30000);
+
+// ══════ AVATAR ENGINE ══════
+const cvs=document.getElementById('avCanvas');
+const ctx=cvs.getContext('2d');
+let avStyle=0; // 0=bubble,1=eyes,2=blob
+let avSt='idle';
+let ax=400,ay=220,avx=0.7,avy=0.5;
+let eyeL=0.95,eyeR=0.95,mouthW=24,mouthCurve=12;
+let blinkT=0,blinkInterval=240+Math.random()*200;
+let happyT=0,workT=0;
+let blobPts=[];
+for(let i=0;i<12;i++)blobPts.push({a:i/12*Math.PI*2,r:80+Math.random()*10,v:(Math.random()-.5)*.3});
+
+const acColor='#00ffe0';
+
+function avState(s){
+  avSt=s;
+  if(s==='happy')happyT=60;
+  document.querySelectorAll('.av-cb').forEach(b=>b.classList.remove('on'));
+  event.target.classList.add('on');
+}
+function setStyle(s){
+  avStyle=s;
+  document.querySelectorAll('.av-styles button').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.av-styles button')[s].classList.add('on');
+}
+const notifMsgs=['Liste de courses mise a jour','Thomas a lance le deploiement','Dentiste Emma demain 15h','Backup serveur OK — 2.3GB','3 emails importants'];
+function avNotif(){const n=document.getElementById('av-ntf');n.textContent=notifMsgs[Math.floor(Math.random()*notifMsgs.length)];n.classList.add('show');setTimeout(()=>n.classList.remove('show'),5000)}
+function avTap(){avNotif()}
+
+function drawFrame(){
+  ctx.clearRect(0,0,800,480);
+  // Background
+  const grad=ctx.createRadialGradient(ax,ay,0,ax,ay,300);
+  grad.addColorStop(0,'#0a0f12');grad.addColorStop(1,'#050508');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,800,480);
+
+  // Movement
+  if(avSt==='idle'){ax+=avx;ay+=avy;if(ax<120||ax>680)avx*=-1;if(ay<100||ay>380)avy*=-1;avx+=(Math.random()-.5)*.05;avy+=(Math.random()-.5)*.05;avx=Math.max(-1.2,Math.min(1.2,avx));avy=Math.max(-0.8,Math.min(0.8,avy))}
+  else if(avSt==='work'){ax+=Math.sin(workT*.05)*0.8;ay+=Math.cos(workT*.07)*0.5;workT++}
+  else if(avSt==='happy'){if(happyT>0){ax+=Math.sin(happyT*.3)*2;ay-=happyT*.05;happyT--}}
+  else if(avSt==='sleep'){ax+=(400-ax)*.005;ay+=(260-ay)*.005}
+
+  // Blink
+  blinkT++;
+  if(blinkT>blinkInterval){eyeL=0.05;eyeR=0.05;if(blinkT>blinkInterval+8){blinkT=0;blinkInterval=240+Math.random()*200;eyeL=0.95;eyeR=0.95}}
+
+  // State modifiers
+  let scale=1,alpha=1,mC=12,mW=24;
+  if(avSt==='work'){scale=.95+Math.sin(workT*.1)*.03;mC=0;mW=12}
+  if(avSt==='happy'){scale=1.05;mC=18;mW=30}
+  if(avSt==='sleep'){alpha=.35;eyeL=.05;eyeR=.05;mC=0;mW=8}
+
+  ctx.globalAlpha=alpha;
+
+  if(avStyle===0){
+    // BUBBLE
+    ctx.save();ctx.translate(ax,ay);ctx.scale(scale,scale);
+    // Body
+    const bg=ctx.createRadialGradient(-20,-20,0,0,0,90);
+    bg.addColorStop(0,'#1a3a4a');bg.addColorStop(1,'#0a1a2a');
+    ctx.beginPath();ctx.arc(0,0,80,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
+    // Eyes
+    ctx.fillStyle=acColor;
+    ctx.save();ctx.translate(-22,-8);ctx.scale(1,eyeL);ctx.beginPath();ctx.ellipse(0,0,10,13,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.save();ctx.translate(22,-8);ctx.scale(1,eyeR);ctx.beginPath();ctx.ellipse(0,0,10,13,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    // Mouth
+    ctx.strokeStyle=acColor;ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.arc(0,20,mW/2,0.1,Math.PI-0.1);ctx.stroke();
+    ctx.restore();
+
+  }else if(avStyle===1){
+    // COZMO/VECTOR style — just 2 filled rounded rectangles on pure black
+    ctx.save();ctx.translate(ax,ay);ctx.scale(scale,scale);
+    const ew=55,eh=50,er=14; // eye width, height, corner radius
+    const gap=22; // half-gap between eyes
+    const lookX=Math.sin(blinkT*.012)*8; // subtle gaze shift
+    const lookY=Math.sin(blinkT*.008)*3;
+    // Helper: filled rounded rect
+    function rrect(x,y,w,h,r){
+      ctx.beginPath();
+      ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+      ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+      ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+      ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+      ctx.closePath();ctx.fill();
+    }
+    ctx.fillStyle=acColor;
+    // Left eye — apply blink as height scale
+    const lh=eh*eyeL;
+    const lOff=(eh-lh)/2; // center vertically during blink
+    rrect(-gap-ew+lookX, -lh/2+lOff+lookY, ew, lh, er*eyeL);
+    // Right eye
+    const rh=eh*eyeR;
+    const rOff=(eh-rh)/2;
+    rrect(gap+lookX, -rh/2+rOff+lookY, ew, rh, er*eyeR);
+    // Mouth (small, only when expressive)
+    if(mC>5){
+      ctx.strokeStyle=acColor;ctx.lineWidth=2.5;ctx.lineCap='round';
+      ctx.beginPath();ctx.arc(lookX,eh/2+14+lookY,mW*.35,.15,Math.PI-.15);ctx.stroke();
+    }else if(mC<2 && avSt!=='idle'){
+      // Flat line for working/sleeping
+      ctx.strokeStyle=acColor;ctx.lineWidth=2;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(-10+lookX,eh/2+12+lookY);ctx.lineTo(10+lookX,eh/2+12+lookY);ctx.stroke();
+    }
+    ctx.restore();
+
+  }else{
+    // BLOB FLUID
+    ctx.save();ctx.translate(ax,ay);ctx.scale(scale,scale);
+    // Update blob
+    const t=Date.now()*.001;
+    ctx.beginPath();
+    for(let i=0;i<blobPts.length;i++){
+      const p=blobPts[i];
+      p.r+=p.v;if(p.r>95||p.r<65)p.v*=-1;
+      const r=p.r+Math.sin(t*2+i)*8;
+      const x=Math.cos(p.a)*r;const y=Math.sin(p.a)*r;
+      if(i===0)ctx.moveTo(x,y);
+      else{
+        const pp=blobPts[(i-1)];
+        const pr=pp.r+Math.sin(t*2+i-1)*8;
+        const px=Math.cos(pp.a)*pr;const py=Math.sin(pp.a)*pr;
+        const cx=(px+x)/2,cy=(py+y)/2;
+        ctx.quadraticCurveTo(px,py,cx,cy);
+      }
+    }
+    ctx.closePath();
+    const bg2=ctx.createRadialGradient(-15,-15,0,0,0,100);
+    bg2.addColorStop(0,'#1a3a4a');bg2.addColorStop(1,'#0a1a2a');
+    ctx.fillStyle=bg2;ctx.fill();
+    // Eyes
+    ctx.fillStyle=acColor;
+    ctx.save();ctx.translate(-20,-10);ctx.scale(1,eyeL);ctx.beginPath();ctx.ellipse(0,0,10,13,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.save();ctx.translate(20,-10);ctx.scale(1,eyeR);ctx.beginPath();ctx.ellipse(0,0,10,13,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    // Mouth
+    ctx.strokeStyle=acColor;ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.arc(0,18,mW/2,.1,Math.PI-.1);ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.globalAlpha=1;
+  requestAnimationFrame(drawFrame);
+}
+drawFrame();
+
+// ══════ DRAG & DROP — magnetic fluid reorder ══════
+(function(){
+  let dragEl=null,ghost=null,zone=null,items=[],rects=[],origIdx=-1,curIdx=-1;
+  let startX,startY,offX,offY,isDragging=false;
+  const DRAG_THRESHOLD=5;
+
+  function getItems(z){return Array.from(z.querySelectorAll('.drag-item'))}
+  function getCenter(r){return{x:r.left+r.width/2,y:r.top+r.height/2}}
+
+  document.addEventListener('pointerdown',function(e){
+    const el=e.target.closest('.drag-item');
+    if(!el)return;
+    const z=el.closest('[data-dragzone]');
+    if(!z)return;
+    e.preventDefault();
+    startX=e.clientX;startY=e.clientY;
+    dragEl=el;zone=z;isDragging=false;
+    items=getItems(zone);
+    rects=items.map(i=>i.getBoundingClientRect());
+    origIdx=items.indexOf(dragEl);curIdx=origIdx;
+    const r=dragEl.getBoundingClientRect();
+    offX=e.clientX-r.left;offY=e.clientY-r.top;
+    document.addEventListener('pointermove',onMove);
+    document.addEventListener('pointerup',onUp);
+  });
+
+  function onMove(e){
+    if(!dragEl)return;
+    const dx=e.clientX-startX,dy=e.clientY-startY;
+    if(!isDragging){
+      if(Math.abs(dx)<DRAG_THRESHOLD&&Math.abs(dy)<DRAG_THRESHOLD)return;
+      isDragging=true;
+      // Create ghost
+      const r=dragEl.getBoundingClientRect();
+      ghost=dragEl.cloneNode(true);
+      ghost.classList.add('drag-ghost');
+      ghost.style.width=r.width+'px';
+      ghost.style.height=r.height+'px';
+      ghost.style.left=(e.clientX-offX)+'px';
+      ghost.style.top=(e.clientY-offY)+'px';
+      document.body.appendChild(ghost);
+      dragEl.classList.add('dragging');
+      dragEl.style.opacity='0.15';
+    }
+    // Move ghost
+    ghost.style.left=(e.clientX-offX)+'px';
+    ghost.style.top=(e.clientY-offY)+'px';
+    // Find nearest slot by center distance
+    const gCx=e.clientX-offX+rects[origIdx].width/2;
+    const gCy=e.clientY-offY+rects[origIdx].height/2;
+    let closest=-1,minDist=Infinity;
+    for(let i=0;i<rects.length;i++){
+      if(items[i]===dragEl)continue;
+      const c=getCenter(rects[i]);
+      const d=Math.hypot(gCx-c.x,gCy-c.y);
+      if(d<minDist){minDist=d;closest=i}
+    }
+    if(closest!==-1&&closest!==curIdx){
+      curIdx=closest;
+      // Magnetic: each displaced item slides to its neighbor's position
+      items.forEach((item,i)=>{
+        if(item===dragEl)return;
+        item.style.transition='transform .25s cubic-bezier(.2,.8,.3,1)';
+        if(origIdx<curIdx){
+          // Dragged forward: items between orig+1..cur each shift to position i-1
+          if(i>origIdx&&i<=curIdx){
+            const tdx=rects[i-1].left-rects[i].left;
+            const tdy=rects[i-1].top-rects[i].top;
+            item.style.transform='translate('+tdx+'px,'+tdy+'px)';
+          }else{
+            item.style.transform='';
+          }
+        }else{
+          // Dragged backward: items between cur..orig-1 each shift to position i+1
+          if(i>=curIdx&&i<origIdx){
+            const tdx=rects[i+1].left-rects[i].left;
+            const tdy=rects[i+1].top-rects[i].top;
+            item.style.transform='translate('+tdx+'px,'+tdy+'px)';
+          }else{
+            item.style.transform='';
+          }
+        }
+      });
+    }
+  }
+
+  function onUp(e){
+    document.removeEventListener('pointermove',onMove);
+    document.removeEventListener('pointerup',onUp);
+    if(!dragEl)return;
+    if(!isDragging){dragEl=null;zone=null;return}
+    // Remove ghost
+    if(ghost){ghost.remove();ghost=null}
+    dragEl.classList.remove('dragging');
+    dragEl.style.opacity='';
+    // Actually reorder DOM
+    if(curIdx!==origIdx&&curIdx>=0){
+      // Reset transforms first
+      items.forEach(item=>{item.style.transition='none';item.style.transform=''});
+      // Reorder
+      const ref=items[curIdx];
+      if(origIdx<curIdx){ref.after(dragEl)}
+      else{ref.before(dragEl)}
+      // Quick settle animation on all items
+      const z=zone;
+      requestAnimationFrame(()=>{
+        getItems(z).forEach(item=>{
+          item.classList.add('settling');
+          setTimeout(()=>item.classList.remove('settling'),380);
+        });
+      });
+    }else{
+      items.forEach(item=>{item.style.transition='';item.style.transform=''});
+    }
+    dragEl=null;zone=null;items=[];rects=[];
+  }
+})();
+</script>
+</body>
+</html>

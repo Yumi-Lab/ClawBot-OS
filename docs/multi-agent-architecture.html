@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClawBot — Architecture Multi-Agent</title>
+<style>
+  :root {
+    --bg: #0a0a0a; --bg-c: #111; --bg-i: #1a1a1a; --bg-h: #1e2a2a;
+    --br: #2a2a2a; --ac: #00ffe0; --ac-d: #00ffe015; --ac-m: #00ffb0;
+    --tp: #f0f0f0; --ts: #aaa; --td: #666;
+    --ok: #22c55e; --er: #ef4444; --wn: #f59e0b; --inf: #3b82f6;
+    --fm: 'Inter', system-ui, sans-serif;
+    --fmo: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--tp); font-family: var(--fm); line-height: 1.6; }
+
+  /* Layout */
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  nav { background: var(--bg-c); border-right: 1px solid var(--br); padding: 24px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  nav .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--br); margin-bottom: 16px; }
+  nav .logo h1 { font-size: .9rem; font-weight: 700; color: var(--ac); letter-spacing: .05em; }
+  nav .logo p { font-size: .65rem; color: var(--td); font-family: var(--fmo); margin-top: 2px; }
+  nav a { display: block; padding: 6px 20px; font-size: .72rem; color: var(--ts); text-decoration: none; transition: all .15s; border-left: 2px solid transparent; }
+  nav a:hover { color: var(--ac); background: var(--ac-d); border-left-color: var(--ac); }
+  nav .nav-section { padding: 12px 20px 4px; font-size: .58rem; font-family: var(--fmo); color: var(--td); text-transform: uppercase; letter-spacing: .1em; }
+  main { padding: 40px 48px; max-width: 960px; }
+
+  /* Typography */
+  h1 { font-size: 1.8rem; font-weight: 700; color: var(--tp); margin-bottom: 8px; }
+  h2 { font-size: 1.2rem; font-weight: 700; color: var(--ac); margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--br); }
+  h3 { font-size: .95rem; font-weight: 600; color: var(--tp); margin: 24px 0 10px; }
+  h4 { font-size: .8rem; font-weight: 600; color: var(--ts); margin: 16px 0 8px; text-transform: uppercase; letter-spacing: .05em; }
+  p { font-size: .82rem; color: var(--ts); margin-bottom: 12px; }
+  .subtitle { font-size: .85rem; color: var(--td); font-family: var(--fmo); margin-bottom: 32px; }
+
+  /* Cards */
+  .card { background: var(--bg-c); border: 1px solid var(--br); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .card-accent { border-left: 3px solid var(--ac); }
+  .card-warn { border-left: 3px solid var(--wn); }
+  .card-ok { border-left: 3px solid var(--ok); }
+  .card-er { border-left: 3px solid var(--er); }
+  .card-info { border-left: 3px solid var(--inf); }
+
+  /* Code */
+  pre { background: #0d1117; border: 1px solid var(--br); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0; }
+  code { font-family: var(--fmo); font-size: .75rem; color: #e6edf3; }
+  .il { font-family: var(--fmo); font-size: .75rem; background: var(--bg-i); border: 1px solid var(--br); border-radius: 4px; padding: 1px 6px; color: var(--ac); }
+
+  /* Flow diagram */
+  .flow { display: flex; align-items: flex-start; gap: 0; margin: 16px 0; flex-wrap: wrap; }
+  .flow-box { background: var(--bg-i); border: 1px solid var(--br); border-radius: 8px; padding: 10px 14px; font-size: .72rem; font-family: var(--fmo); color: var(--tp); text-align: center; min-width: 100px; }
+  .flow-box.ac { border-color: var(--ac); color: var(--ac); background: var(--ac-d); }
+  .flow-box.ok { border-color: var(--ok); color: var(--ok); }
+  .flow-box.wn { border-color: var(--wn); color: var(--wn); }
+  .flow-box.er { border-color: var(--er); color: var(--er); }
+  .flow-box.inf { border-color: var(--inf); color: var(--inf); }
+  .flow-box small { display: block; font-size: .6rem; color: var(--td); margin-top: 2px; }
+  .flow-arrow { display: flex; align-items: center; padding: 0 8px; color: var(--td); font-size: .9rem; }
+  .flow-down { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 4px 0; }
+  .arrow-down { color: var(--td); font-size: .8rem; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: .78rem; margin: 12px 0; }
+  th { background: var(--bg-i); color: var(--ts); font-weight: 600; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--br); font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--br); color: var(--ts); vertical-align: top; }
+  tr:hover td { background: var(--bg-h); }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: .6rem; font-family: var(--fmo); border: 1px solid; }
+  .tag-ac { color: var(--ac); border-color: var(--ac); background: var(--ac-d); }
+  .tag-ok { color: var(--ok); border-color: var(--ok); background: #22c55e10; }
+  .tag-wn { color: var(--wn); border-color: var(--wn); background: #f59e0b10; }
+  .tag-er { color: var(--er); border-color: var(--er); background: #ef444410; }
+  .tag-inf { color: var(--inf); border-color: var(--inf); background: #3b82f610; }
+  .tag-gray { color: var(--td); border-color: var(--br); }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 12px 0; }
+
+  /* Badge */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: .6rem; font-family: var(--fmo); }
+  .badge-ac { background: var(--ac-d); border: 1px solid var(--ac); color: var(--ac); }
+  .badge-ok { background: #22c55e10; border: 1px solid var(--ok); color: var(--ok); }
+  .badge-wn { background: #f59e0b10; border: 1px solid var(--wn); color: var(--wn); }
+
+  /* Decision box */
+  .decision { background: var(--bg-i); border: 1px solid var(--br); border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .decision .q { font-size: .78rem; font-weight: 600; color: var(--tp); margin-bottom: 8px; }
+  .decision .opts { display: flex; flex-direction: column; gap: 6px; }
+  .decision .opt { display: flex; gap: 10px; align-items: flex-start; font-size: .75rem; }
+  .decision .opt .label { font-family: var(--fmo); min-width: 60px; font-weight: 600; }
+  .decision .opt.y .label { color: var(--ok); }
+  .decision .opt.n .label { color: var(--er); }
+  .decision .opt .val { color: var(--ts); }
+
+  /* Highlight */
+  .hl { background: linear-gradient(135deg, var(--ac-d), #00ffe008); border: 1px solid #00ffe030; border-radius: 8px; padding: 12px 16px; margin: 12px 0; }
+  .hl p { margin: 0; font-size: .8rem; color: var(--tp); }
+
+  /* Improvement item */
+  .improv { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+  .improv .num { background: var(--ac-d); border: 1px solid var(--ac); color: var(--ac); font-family: var(--fmo); font-size: .65rem; font-weight: 700; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .improv .body { flex: 1; }
+  .improv .body strong { display: block; font-size: .82rem; color: var(--tp); margin-bottom: 4px; }
+  .improv .body p { font-size: .75rem; color: var(--ts); margin: 0; }
+  .improv .effort { font-family: var(--fmo); font-size: .58rem; padding: 1px 6px; border-radius: 4px; float: right; margin-left: 8px; }
+
+  /* Section anchor */
+  section { padding-top: 8px; }
+  .sep { border: none; border-top: 1px solid var(--br); margin: 32px 0; }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    nav { display: none; }
+    main { padding: 24px 20px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <h1>ClawBot Multi-Agent</h1>
+    <p>Architecture & Référence</p>
+  </div>
+  <div class="nav-section">Vue d'ensemble</div>
+  <a href="#overview">Architecture globale</a>
+  <a href="#modes">Les 2 modes de chat</a>
+  <a href="#models">Modèles disponibles</a>
+  <div class="nav-section">Mode Core-Agent</div>
+  <a href="#routing">Routage automatique</a>
+  <a href="#agents">Structure d'un agent</a>
+  <a href="#execution">Exécution parallèle</a>
+  <a href="#tools">Outils disponibles</a>
+  <a href="#sse">Events SSE</a>
+  <div class="nav-section">Par modèle</div>
+  <a href="#haiku">Haiku 4.5</a>
+  <a href="#sonnet">Sonnet 4.6</a>
+  <a href="#opus">Opus 4.6</a>
+  <a href="#kimi">KimiCode 2.5</a>
+  <div class="nav-section">Améliorations</div>
+  <a href="#limits">Limites actuelles</a>
+  <a href="#improvements">Pistes d'amélioration</a>
+  <a href="#decisions">Table de décisions</a>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <h1>Architecture Multi-Agent ClawBot</h1>
+  <p class="subtitle">orchestrator.py · main.py · index.html — v2026.03</p>
+
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <h2>Architecture globale</h2>
+
+    <div class="flow" style="flex-direction:column;gap:8px;">
+      <div class="flow" style="justify-content:center;">
+        <div class="flow-box">Dashboard<br><small>index.html</small></div>
+        <div class="flow-arrow">→ POST /v1/chat/agents</div>
+        <div class="flow-box ac">ClawbotCore :8090<br><small>main.py</small></div>
+      </div>
+      <div class="flow" style="justify-content:center;padding-left:200px;">
+        <div class="flow-arrow" style="transform:rotate(90deg)">→</div>
+      </div>
+      <div class="flow" style="justify-content:center;">
+        <div class="flow-box wn">Haiku Router<br><small>_route_via_llm()</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box ok">Agent sélectionné<br><small>chat_with_agent_stream()</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">LLM Cloud<br><small>_call_llm_stream()</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box inf">Anthropic / Kimi<br><small>API upstream</small></div>
+      </div>
+      <div class="flow" style="justify-content:center;padding-left:200px;">
+        <div class="flow-arrow" style="transform:rotate(90deg)">→</div>
+      </div>
+      <div class="flow" style="justify-content:center;">
+        <div class="flow-box">SSE stream<br><small>tool_call · tool_result · done</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box ac">Dashboard render<br><small>traceWrap · agent cards</small></div>
+      </div>
+    </div>
+
+    <div class="card card-accent" style="margin-top:16px;">
+      <h4>Règle fondamentale — pas d'IA dans l'IA</h4>
+      <p>Les agents ne peuvent pas spawner d'autres agents. <code class="il">chat_with_agent_stream()</code> appelle <code class="il">chat_with_tools_stream()</code>, jamais <code class="il">chat_with_multi_agents_stream()</code>. Pas de récursion infinie possible.</p>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- MODES -->
+  <section id="modes">
+    <h2>Les 2 modes de chat actifs</h2>
+    <table>
+      <thead><tr><th>Bouton</th><th>Endpoint</th><th>Fonction backend</th><th>Comportement</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-ac">ClawBot Core</span></td>
+          <td><code class="il">/v1/chat/completions</code></td>
+          <td><code class="il">chat_with_tools_stream()</code></td>
+          <td>Un seul LLM, tool loop complet, tous les outils disponibles</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-ok">Core-Agent</span></td>
+          <td><code class="il">/v1/chat/agents</code></td>
+          <td><code class="il">chat_with_multi_agents_stream()</code></td>
+          <td>Haiku route → agent sélectionné → tool loop avec skills filtrés</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="card card-warn">
+      <p><strong>Mode Auto (PicoClaw)</strong> — supprimé. Il appelait le binaire Go <code class="il">picoclaw</code> qui tentait de se connecter à <code class="il">148.163.48.215:443</code> (service cloud mort). Ne pas réactiver.</p>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- MODELS -->
+  <section id="models">
+    <h2>Modèles disponibles</h2>
+    <table>
+      <thead><tr><th>Modèle</th><th>ID API</th><th>Provider</th><th>Appelé depuis</th><th>Tools</th><th>Contexte</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-ac">Haiku 4.5</span></td>
+          <td><code class="il">claude-haiku-4-5-20251001</code></td>
+          <td>Anthropic</td>
+          <td>Cloud → Anthropic API</td>
+          <td><span class="badge badge-ok">✓</span></td>
+          <td>200k</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-ac">Sonnet 4.6</span></td>
+          <td><code class="il">claude-sonnet-4-6</code></td>
+          <td>Anthropic</td>
+          <td>Cloud → Anthropic API</td>
+          <td><span class="badge badge-ok">✓</span></td>
+          <td>200k</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-ac">Opus 4.6</span></td>
+          <td><code class="il">claude-opus-4-6</code></td>
+          <td>Anthropic</td>
+          <td>Cloud → Anthropic API</td>
+          <td><span class="badge badge-ok">✓</span></td>
+          <td>200k</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-wn">KimiCode 2.5</span></td>
+          <td><code class="il">kimi-for-coding</code></td>
+          <td>Moonshot AI</td>
+          <td>Cloud → api.kimi.com/coding/v1</td>
+          <td><span class="badge badge-ok">✓</span></td>
+          <td>262k</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-gray">Haiku (routeur)</span></td>
+          <td><code class="il">claude-haiku-4-5-20251001</code></td>
+          <td>Anthropic</td>
+          <td>Cloud → Anthropic API</td>
+          <td>—</td>
+          <td>30 tokens max</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Le <strong>routeur Haiku</strong> est toujours Haiku, indépendamment du modèle sélectionné dans le dashboard. C'est intentionnel : classification rapide, cheap, max 30 tokens.</p>
+    <div class="card card-info">
+      <h4>Comment le modèle est transmis aux agents</h4>
+      <p><code class="il">request_body</code> contient <code class="il">model: "kimi-for-coding"</code> (ou autre). Ce dict est passé tel quel à <code class="il">chat_with_agent_stream(request_body, agent_id)</code> → puis à <code class="il">chat_with_tools_stream(body, override_tools)</code> → puis à <code class="il">_call_llm_stream(body)</code>. Le modèle ne change jamais en cours de route.</p>
+      <p style="margin:8px 0 0;"><strong>Conclusion :</strong> sélectionner KimiCode 2.5 dans le dashboard = tous les agents travaillent avec KimiCode 2.5.</p>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- ROUTING -->
+  <section id="routing">
+    <h2>Routage automatique (Core-Agent)</h2>
+
+    <h3>Algorithme de routage</h3>
+    <div class="flow" style="flex-direction:column;gap:6px;align-items:flex-start;">
+      <div class="decision">
+        <div class="q">Message ≤ 3 mots ?</div>
+        <div class="opts">
+          <div class="opt y"><span class="label">OUI →</span><span class="val">Core direct. Pas d'appel LLM routeur. Économie tokens.</span></div>
+          <div class="opt n"><span class="label">NON →</span><span class="val">Appel Haiku (_route_via_llm)</span></div>
+        </div>
+      </div>
+      <div class="decision">
+        <div class="q">Haiku retourne un agent_id ?</div>
+        <div class="opts">
+          <div class="opt y"><span class="label">OUI →</span><span class="val">chat_with_agent_stream(request_body, agent_id) — agent sélectionné</span></div>
+          <div class="opt n"><span class="label">"none" →</span><span class="val">Fallback Core — chat_with_tools_stream(data) — tous les outils, pas de persona</span></div>
+        </div>
+      </div>
+      <div class="decision">
+        <div class="q">Haiku échoue (timeout, erreur) ?</div>
+        <div class="opts">
+          <div class="opt n"><span class="label">ERREUR →</span><span class="val">_route_via_keywords() — matching par mots-clés (score), fallback keyword</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Prompt du routeur Haiku</h3>
+    <pre><code>"Tu es un routeur. Décide si le message nécessite un agent spécialisé ou peut être traité directement.
+Règle principale : réponds 'none' si :
+- la conversation est simple, générale ou conversationnelle
+- aucune compétence spécifique n'est clairement requise
+Ne sélectionne un agent QUE si la tâche nécessite ses compétences précises.
+
+Agents disponibles:
+- id: python-dev | name: Python Dev | skills: system__bash, system__python | role: ...
+- id: sysadmin | name: SysAdmin | skills: system__bash, system__ssh | role: ...
+...
+
+Message: "[user_message]"
+
+Réponds UNIQUEMENT avec l'id de l'agent ou: none"</code></pre>
+    <p>Haiku a <code class="il">max_tokens: 30</code> et <code class="il">timeout: 15s</code>. Il retourne juste un mot.</p>
+
+    <h3>Routing multi-agent (plusieurs agent_ids)</h3>
+    <p>Si le frontend envoie <code class="il">agent_ids: ["sysadmin", "python-dev"]</code>, le routage automatique est bypassé et les deux agents tournent en parallèle via <code class="il">ThreadPoolExecutor</code>.</p>
+  </section>
+
+  <hr class="sep">
+
+  <!-- AGENTS -->
+  <section id="agents">
+    <h2>Structure d'un agent</h2>
+
+    <h3>Format JSON (stocké dans /home/pi/.clawbot/agents/)</h3>
+    <pre><code>{
+  "id": "python-dev",
+  "name": "Python Developer",
+  "avatar": "🐍",
+  "color": "#f59e0b",
+  "enabled": true,
+  "system_prompt": "Tu es un expert Python. Tu écris du code propre...",
+  "skills": [
+    "system__bash",
+    "system__python",
+    "system__read_file",
+    "system__write_file"
+  ],
+  "keywords": ["python", "script", "code", "bug", "erreur"],
+  "twins_partner": false
+}</code></pre>
+
+    <h3>Champs clés</h3>
+    <table>
+      <thead><tr><th>Champ</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code class="il">skills</code></td><td>string[]</td><td>Filtre les outils disponibles. Si vide = tous les outils. Format : <code class="il">module_id__tool_name</code></td></tr>
+        <tr><td><code class="il">keywords</code></td><td>string[]</td><td>Fallback routing si Haiku échoue. Score += 1 par keyword trouvé dans le message.</td></tr>
+        <tr><td><code class="il">twins_partner</code></td><td>bool</td><td>Active le cycle de review Haiku post-réponse. Haiku évalue et peut demander une révision.</td></tr>
+        <tr><td><code class="il">system_prompt</code></td><td>string</td><td>Injecté en premier message system. + liste des outils disponibles. + skills contextuels si match.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Agents par défaut (4 inclus)</h3>
+    <div class="grid-2">
+      <div class="card"><h4>🐍 Python Dev</h4><p>Skills : bash, python, read_file, write_file<br>Keywords : python, script, code, bug, erreur</p></div>
+      <div class="card"><h4>🔧 SysAdmin</h4><p>Skills : bash, ssh<br>Keywords : service, système, logs, cpu, disk, port</p></div>
+      <div class="card"><h4>🔍 Web Researcher</h4><p>Skills : web_search<br>Keywords : recherche, internet, article, actualité</p></div>
+      <div class="card"><h4>📁 File Manager</h4><p>Skills : read_file, write_file<br>Keywords : fichier, lire, écrire, contenu</p></div>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- EXECUTION -->
+  <section id="execution">
+    <h2>Exécution parallèle</h2>
+
+    <h3>Un seul agent sélectionné</h3>
+    <div class="flow">
+      <div class="flow-box">route_to_agents<br><small>→ [sysadmin]</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box ok">chat_with_agent_stream<br><small>sysadmin</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">chat_with_tools_stream<br><small>tool loop</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box ac">SSE stream<br><small>agent_id: sysadmin</small></div>
+    </div>
+
+    <h3>Plusieurs agents (parallel)</h3>
+    <pre><code>chat_with_multi_agents_stream(request_body, ["sysadmin", "python-dev"])
+    │
+    ├── ThreadPoolExecutor(max_workers=N)
+    │   ├── Thread A → chat_with_agent_stream(body, "sysadmin")
+    │   └── Thread B → chat_with_agent_stream(body, "python-dev")
+    │
+    └── queue.Queue() — events mergés dans l'ordre d'arrivée
+        → SSE avec agent_id dans chaque event</code></pre>
+
+    <div class="card card-info">
+      <h4>Parallel tool calls dans un seul tour</h4>
+      <p>Dans <code class="il">chat_with_tools_stream()</code>, quand le LLM retourne plusieurs <code class="il">tool_calls</code> dans une seule réponse (ex: Kimi K2 appelle <code class="il">bash</code> + <code class="il">web_search</code> en même temps), ils sont exécutés en parallèle :</p>
+      <pre><code>if len(tool_calls) > 1:
+    with ThreadPoolExecutor(max_workers=min(len(tool_calls), 4)) as ex:
+        futures = {ex.submit(_run_tc_stream, tc): tc.get("id") for tc in tool_calls}
+        for fut in as_completed(futures):
+            tc_id, name, result = fut.result()</code></pre>
+      <p>C'est la feature "parallelization" de Kimi K2 — il peut émettre plusieurs tool_calls en une passe. Notre système les exécute déjà en parallèle nativement.</p>
+    </div>
+
+    <h3>Twins Partner (cycle de review)</h3>
+    <pre><code>chat_with_agent_stream()
+    1. LLM génère réponse complète (full_response)
+    2. Si twins_partner == true :
+       a. Haiku évalue : [APPROVED] ou [NEEDS_REVISION] + feedback
+       b. Si NEEDS_REVISION → nouvelle requête LLM avec feedback
+       c. Retourne réponse révisée
+    3. Yield event "done" final</code></pre>
+    <p>Le reviewer Haiku est hardcodé et appelle Anthropic directement (pas via le cloud), avec sa propre clé API.</p>
+  </section>
+
+  <hr class="sep">
+
+  <!-- TOOLS -->
+  <section id="tools">
+    <h2>Outils disponibles</h2>
+    <table>
+      <thead><tr><th>Tool ID</th><th>Description</th><th>Timeout</th><th>Sécurité</th></tr></thead>
+      <tbody>
+        <tr><td><code class="il">system__bash</code></td><td>Exécute une commande bash sur le Pi</td><td>30s</td><td>Commandes critiques bloquées</td></tr>
+        <tr><td><code class="il">system__python</code></td><td>Exécute un script Python complet</td><td>30s</td><td>—</td></tr>
+        <tr><td><code class="il">system__read_file</code></td><td>Lit un fichier du filesystem Pi</td><td>10s</td><td>—</td></tr>
+        <tr><td><code class="il">system__write_file</code></td><td>Écrit un fichier sur le Pi</td><td>10s</td><td>—</td></tr>
+        <tr><td><code class="il">system__web_search</code></td><td>Recherche DuckDuckGo HTML (5 résultats)</td><td>10s</td><td>—</td></tr>
+        <tr><td><code class="il">system__ssh</code></td><td>SSH vers un autre hôte (sshpass)</td><td>30s</td><td>—</td></tr>
+        <tr><td><code class="il">{module}__{tool}</code></td><td>Outils des modules installés (store)</td><td>10s</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <div class="card card-warn">
+      <h4>Commandes bash bloquées</h4>
+      <p>Les commandes <code class="il">systemctl stop/restart/kill/disable/mask</code> sur les services protégés sont bloquées : <code class="il">clawbot-core</code>, <code class="il">picoclaw</code>, <code class="il">nginx</code>, <code class="il">clawbot-cloud</code>, <code class="il">clawbot-status-api</code>.</p>
+    </div>
+    <p>Résultats tronqués à <code class="il">TOOL_RESULT_MAX_CHARS = 6000</code> chars.</p>
+  </section>
+
+  <hr class="sep">
+
+  <!-- SSE EVENTS -->
+  <section id="sse">
+    <h2>Events SSE — format complet</h2>
+
+    <h3>Core-Agent mode (/v1/chat/agents)</h3>
+    <pre><code>event: agent_start
+data: {"type":"agent_start","agents":[{"id":"sysadmin","name":"SysAdmin","avatar":"🔧","color":"#22c55e"}]}
+
+event: thinking
+data: {"type":"thinking","message":"Agent SysAdmin initializing...","agent_id":"sysadmin"}
+
+event: tool_call
+data: {"type":"tool_call","round":1,"calls":[{"id":"call_abc","name":"system__bash","args":{"command":"df -h"}}],"agent_id":"sysadmin"}
+
+event: tool_result
+data: {"type":"tool_result","round":1,"results":[{"name":"system__bash","result":"Filesystem Size Used..."}],"agent_id":"sysadmin"}
+
+event: done
+data: {"type":"done","content":"Le disque est utilisé à 45%...","agent_id":"sysadmin"}
+
+event: all_done
+data: {"type":"all_done"}</code></pre>
+
+    <h3>Fallback Core (aucun agent trouvé)</h3>
+    <pre><code>event: agent_start
+data: {"type":"agent_start","agents":[{"id":"core","name":"Core","avatar":"⚡","color":"#00ffe0"}]}
+
+event: tool_call
+data: {"type":"tool_call","round":1,"calls":[...],"agent_id":"core"}
+
+event: done
+data: {"type":"done","content":"...","agent_id":"core"}</code></pre>
+
+    <h3>Condition d'affichage dans index.html</h3>
+    <pre><code>// tool_call et tool_result affichés si :
+curEvent === 'tool_call' && !isAgent   // isAgent = mode === 'agent' (supprimé)
+// → s'affiche en Core ET Core-Agent (fix 2026-03-16)
+
+// En Core-Agent, les events avec agent_id vont aussi dans le branch agents :
+curEvent === 'tool_call' && isAgents && parsed.agent_id  // → agent cards</code></pre>
+  </section>
+
+  <hr class="sep">
+
+  <!-- PAR MODELE -->
+  <section id="haiku">
+    <h2>Haiku 4.5 en mode agent</h2>
+    <div class="grid-2">
+      <div class="card card-ok">
+        <h4>Points forts</h4>
+        <p>Très rapide (< 1s pour routing). Économique. Bon pour tâches simples, questions courtes, file operations.</p>
+      </div>
+      <div class="card card-warn">
+        <h4>Limites</h4>
+        <p>Parallel tool calls moins agressifs. Raisonnement limité pour tâches multi-étapes complexes. Max 200k ctx.</p>
+      </div>
+    </div>
+    <p>Recommandé pour : usage quotidien, queries simples, économiser les tokens du plan.</p>
+  </section>
+
+  <section id="sonnet">
+    <h2>Sonnet 4.6 en mode agent</h2>
+    <div class="grid-2">
+      <div class="card card-ok">
+        <h4>Points forts</h4>
+        <p>Bon équilibre vitesse/intelligence. Tool calling fiable. Génère du code de qualité. 200k ctx.</p>
+      </div>
+      <div class="card card-warn">
+        <h4>Limites</h4>
+        <p>Plus lent que Haiku. Coût $3/$15 /M tokens. Pas de reasoning natif (pas de thinking visible).</p>
+      </div>
+    </div>
+    <p>Recommandé pour : développement, debugging, tâches techniques modérément complexes.</p>
+  </section>
+
+  <section id="opus">
+    <h2>Opus 4.6 en mode agent</h2>
+    <div class="grid-2">
+      <div class="card card-ok">
+        <h4>Points forts</h4>
+        <p>Le plus puissant. Excellent pour planification complexe, décomposition de tâches, architecture système. 200k ctx.</p>
+      </div>
+      <div class="card card-er">
+        <h4>Limites</h4>
+        <p>Coût $15/$75 /M tokens. Lent. À utiliser avec parcimonie. Peut être overkill pour tâches simples.</p>
+      </div>
+    </div>
+    <p>Recommandé pour : refactoring majeur, architecture, tâches nécessitant un raisonnement multi-étapes profond.</p>
+  </section>
+
+  <section id="kimi">
+    <h2>KimiCode 2.5 en mode agent</h2>
+    <div class="grid-2">
+      <div class="card card-ok">
+        <h4>Points forts</h4>
+        <p>262k contexte (vs 200k Claude). Parallel tool calls natifs. Entraîné pour l'agentic coding. Budget économique. Reasoning intégré (<code class="il">reasoning_content</code>).</p>
+      </div>
+      <div class="card card-warn">
+        <h4>Spécificités</h4>
+        <p>Requiert <code class="il">User-Agent: claude-code/1.0</code>. Appelé via cloud (IONOS → api.kimi.com). Format OpenAI natif (pas de conversion Anthropic nécessaire).</p>
+      </div>
+    </div>
+
+    <h3>Comportement parallel tool calls de Kimi K2</h3>
+    <p>Kimi K2 peut émettre plusieurs <code class="il">tool_calls</code> dans une seule réponse — c'est sa feature "parallel agent deployment". Exemple :</p>
+    <pre><code>{
+  "choices": [{
+    "message": {
+      "tool_calls": [
+        {"id": "call_1", "function": {"name": "system__bash", "arguments": "{\"command\":\"ls /var/log\"}"}},
+        {"id": "call_2", "function": {"name": "system__python", "arguments": "{\"code\":\"import os; print(os.listdir('.'))\"}"}},
+        {"id": "call_3", "function": {"name": "system__web_search", "arguments": "{\"query\":\"nginx error 502\"}"}}
+      ]
+    },
+    "finish_reason": "tool_calls"
+  }]
+}</code></pre>
+    <p>Ces 3 tools sont exécutés simultanément par <code class="il">ThreadPoolExecutor(max_workers=4)</code>. C'est la "parallelisation" observée dans les démos Kimi K2.</p>
+
+    <div class="card card-info">
+      <h4>Reasoning content</h4>
+      <p>Kimi K2 inclut un champ <code class="il">reasoning_content</code> dans ses réponses streaming — sa réflexion interne. ClawbotCore l'accumule dans <code class="il">reasoning_acc</code> mais ne l'affiche pas encore dans le dashboard (il est conservé pour le round-trip de context).</p>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- LIMITES -->
+  <section id="limits">
+    <h2>Limites actuelles</h2>
+
+    <div class="card card-er">
+      <div class="improv">
+        <div class="num">L1</div>
+        <div class="body">
+          <strong>Un seul agent par requête (auto-routing)</strong>
+          <p>Le routeur Haiku ne sélectionne qu'un agent (<code class="il">matched[:1]</code>). Même si la tâche nécessiterait Python Dev + SysAdmin en parallèle, seul le premier est appelé. Le routing multi-agent parallèle nécessite un <code class="il">agent_ids</code> explicite depuis le frontend.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-er">
+      <div class="improv">
+        <div class="num">L2</div>
+        <div class="body">
+          <strong>Twins Partner utilise Anthropic direct (pas le cloud)</strong>
+          <p>Le reviewer <code class="il">_twins_review()</code> appelle <code class="il">api.anthropic.com/v1/messages</code> directement avec la clé Anthropic locale. Si la clé n'est pas dans l'env du Pi, le review échoue silencieusement.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-wn">
+      <div class="improv">
+        <div class="num">L3</div>
+        <div class="body">
+          <strong>Reasoning content Kimi non affiché</strong>
+          <p>Le champ <code class="il">reasoning_content</code> de Kimi K2 est accumulé côté orchestrateur mais pas rendu dans le dashboard. L'utilisateur ne voit pas la réflexion interne de Kimi.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-wn">
+      <div class="improv">
+        <div class="num">L4</div>
+        <div class="body">
+          <strong>Compaction auto peut interrompre le mode agent</strong>
+          <p>Quand <code class="il">COMPACT_THRESHOLD = 15000</code> est atteint, Haiku résume la conversation via <code class="il">/v1/chat/completions</code> (Core mode), ignorant le contexte agent. Le résumé perd la notion d'agent actif.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-wn">
+      <div class="improv">
+        <div class="num">L5</div>
+        <div class="body">
+          <strong>MAX_TOOL_ROUNDS = 15 partagé entre tous les agents</strong>
+          <p>En mode multi-agent parallèle, chaque agent a son propre compteur. Mais en séquentiel (un seul agent), la limite de 15 rounds peut bloquer des tâches complexes avant complétion.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- AMELIORATIONS -->
+  <section id="improvements">
+    <h2>Pistes d'amélioration</h2>
+
+    <div class="card card-ok">
+      <div class="improv">
+        <div class="num">A1</div>
+        <div class="body">
+          <strong>Routeur multi-agent — sélectionner plusieurs agents en une passe <span class="tag tag-ok effort">Facile</span></strong>
+          <p>Modifier <code class="il">_route_via_llm()</code> pour retourner une liste d'IDs au lieu d'un seul. Haiku décide "cette tâche nécessite python-dev ET sysadmin". Changer <code class="il">matched[:1]</code> → <code class="il">matched[:3]</code> dans main.py.</p>
+          <pre style="margin-top:8px;"><code># Prompt modifié :
+"Réponds avec les IDs séparés par virgule (ex: python-dev,sysadmin) ou: none"
+# Parsing :
+chosen_ids = [x.strip() for x in chosen.split(",") if x.strip() in enabled]</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-ok">
+      <div class="improv">
+        <div class="num">A2</div>
+        <div class="body">
+          <strong>Afficher le reasoning_content de Kimi dans le dashboard <span class="tag tag-ok effort">Facile</span></strong>
+          <p>Ajouter un event SSE <code class="il">reasoning</code> depuis <code class="il">_call_llm_stream()</code> quand <code class="il">reasoning_acc</code> est non vide. Le dashboard l'affiche en italique/gris avant la réponse (bouton Trace activé).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-ac">
+      <div class="improv">
+        <div class="num">A3</div>
+        <div class="body">
+          <strong>Routeur KimiCode — laisser le modèle sélectionné router <span class="tag tag-wn effort">Moyen</span></strong>
+          <p>Passer <code class="il">routing_model = data.get("model", "claude-haiku-4-5-20251001")</code> à <code class="il">route_to_agents()</code> puis à <code class="il">_route_via_llm()</code>. Si KimiCode sélectionné : Kimi classe les agents. Avantage : Kimi K2 est meilleur que Haiku pour la planification de tâches coding. Coût : légèrement plus cher pour le routing.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-ac">
+      <div class="improv">
+        <div class="num">A4</div>
+        <div class="body">
+          <strong>Agent "Planner" dédié — décompose en sous-tâches parallèles <span class="tag tag-wn effort">Moyen</span></strong>
+          <p>Créer un agent Planner avec un prompt qui force la décomposition : "Décompose cette tâche en sous-tâches indépendantes, retourne un JSON <code class="il">[{agent_id, subtask}]</code>". Le résultat est parsé et lance plusieurs <code class="il">chat_with_agent_stream()</code> en parallèle.</p>
+          <pre style="margin-top:8px;"><code># orchestrator.py
+def chat_with_planner_agents_stream(request_body):
+    plan = _call_planner(request_body)  # retourne [{agent_id, task}]
+    agent_ids = [p["agent_id"] for p in plan]
+    yield from chat_with_multi_agents_stream(request_body, agent_ids)</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-info">
+      <div class="improv">
+        <div class="num">A5</div>
+        <div class="body">
+          <strong>Handoff inter-agents — un agent passe la main <span class="tag tag-er effort">Complexe</span></strong>
+          <p>Outil <code class="il">system__handoff</code> déjà prévu dans le code (skill <code class="il">system__handoff</code> injecte la liste des agents disponibles). Implémenter l'outil réellement : quand appelé, spawn un nouveau <code class="il">chat_with_agent_stream()</code> avec le contexte actuel. Attention aux boucles (agent A passe à B qui repasse à A).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-info">
+      <div class="improv">
+        <div class="num">A6</div>
+        <div class="body">
+          <strong>Mémoire partagée inter-agents <span class="tag tag-er effort">Complexe</span></strong>
+          <p>Actuellement chaque agent reçoit le même <code class="il">request_body</code>. Pas de mémoire partagée entre agents parallèles. Implémenter un blackboard (dict partagé accessible via outil <code class="il">system__memory_set/get</code>) pour que SysAdmin partage ses findings avec Python Dev.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- DECISIONS -->
+  <section id="decisions">
+    <h2>Table de décisions</h2>
+
+    <table>
+      <thead><tr><th>Situation</th><th>Mode recommandé</th><th>Modèle recommandé</th><th>Pourquoi</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Question simple, réponse rapide</td>
+          <td><span class="tag tag-ac">ClawBot Core</span></td>
+          <td>Haiku</td>
+          <td>Pas besoin de routing, pas d'agent overhead</td>
+        </tr>
+        <tr>
+          <td>Debug système Pi (services, logs)</td>
+          <td><span class="tag tag-ok">Core-Agent</span></td>
+          <td>Haiku ou Sonnet</td>
+          <td>SysAdmin agent avec bash/ssh skills</td>
+        </tr>
+        <tr>
+          <td>Écrire / refactorer du code</td>
+          <td><span class="tag tag-ok">Core-Agent</span></td>
+          <td>KimiCode 2.5</td>
+          <td>262k ctx, parallel tools natifs, entraîné coding</td>
+        </tr>
+        <tr>
+          <td>Tâche multi-domaines (code + système + recherche)</td>
+          <td><span class="tag tag-ok">Core-Agent</span></td>
+          <td>KimiCode 2.5 ou Opus</td>
+          <td>Kimi spawne plusieurs tool_calls en parallèle, Opus plan mieux</td>
+        </tr>
+        <tr>
+          <td>Analyse long document / contexte étendu</td>
+          <td><span class="tag tag-ac">ClawBot Core</span></td>
+          <td>KimiCode 2.5</td>
+          <td>262k ctx vs 200k Anthropic</td>
+        </tr>
+        <tr>
+          <td>Architecture / décisions stratégiques</td>
+          <td><span class="tag tag-ac">ClawBot Core</span></td>
+          <td>Opus</td>
+          <td>Raisonnement le plus profond</td>
+        </tr>
+        <tr>
+          <td>Production : économiser tokens</td>
+          <td><span class="tag tag-ok">Core-Agent</span></td>
+          <td>KimiCode 2.5 (plan Free)</td>
+          <td>Budget model, alloué aux plans Free en fallback</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="hl" style="margin-top:24px;">
+      <p><strong>Résumé :</strong> Pour du coding agentic parallèle, <strong>Core-Agent + KimiCode 2.5</strong> est le setup optimal. Kimi K2 émet plusieurs tool_calls par tour, l'orchestrateur les exécute en parallèle, 262k de contexte. Le routeur Haiku (30 tokens, ~100ms) sélectionne le bon agent sans impacter les performances.</p>
+    </div>
+  </section>
+
+  <div style="height:60px;"></div>
+</main>
+</div>
+</body>
+</html>
