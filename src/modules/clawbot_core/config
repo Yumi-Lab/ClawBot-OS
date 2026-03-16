@@ -5,4 +5,4 @@
 [[ -n "$CLAWBOT_CORE_REPO" ]]   || CLAWBOT_CORE_REPO="https://github.com/Yumi-Lab/clawbot-core.git"
 [[ -n "$CLAWBOT_CORE_BRANCH" ]] || CLAWBOT_CORE_BRANCH="main"
 [[ -n "$CLAWBOT_CORE_PORT" ]]   || CLAWBOT_CORE_PORT="8090"
-[[ -n "$CLAWBOT_CORE_DEPS" ]]   || CLAWBOT_CORE_DEPS="python3 python3-pip git curl"
+[[ -n "$CLAWBOT_CORE_DEPS" ]]   || CLAWBOT_CORE_DEPS="python3 python3-pip git curl sshpass"
