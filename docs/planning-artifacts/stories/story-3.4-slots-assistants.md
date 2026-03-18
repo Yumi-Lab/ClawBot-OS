@@ -24,7 +24,7 @@ So that **je sache combien d'assistants je peux utiliser et comment en avoir plu
 
 **Given** l'utilisateur atteint sa limite de slots
 **When** il tente de creer un nouvel assistant
-**Then** le systeme propose : ajouter un slot (+€3/mois) ou upgrader vers le plan superieur
+**Then** le systeme propose : ajouter un slot (+$3/mois) ou upgrader vers le plan superieur
 **And** le message est non-bloquant et non-anxiogene
 
 **Given** l'utilisateur veut supprimer un assistant
@@ -41,8 +41,8 @@ Valeurs indicatives (a confirmer avec le nouveau modele de pricing) :
 ```python
 PLAN_SLOTS = {
     "free":        3,
-    "particulier": 5,    # +slot add-on : +2 pour €3/mois
-    "pro":         15,   # +slot add-on : +5 pour €5/mois
+    "particulier": 5,    # +slot add-on : +2 pour $3/mois
+    "pro":         15,   # +slot add-on : +5 pour $5/mois
     "pro_business": 30,  # illimite en pratique
 }
 ```
@@ -61,7 +61,7 @@ PLAN_SLOTS = {
 ### Upsell non-bloquant
 - Quand slots pleins ET l'utilisateur tente de creer :
   - Toast ou banner doux (pas de modal bloquante)
-  - Message : "Tu as atteint tes 5 assistants. Ajoute un slot (+€3/mois) ou passe au plan superieur."
+  - Message : "Tu as atteint tes 5 assistants. Ajoute un slot (+$3/mois) ou passe au plan superieur."
   - Lien vers la page upgrade (openjarvis.io/upgrade)
 - L'utilisateur peut toujours utiliser ses assistants existants
 

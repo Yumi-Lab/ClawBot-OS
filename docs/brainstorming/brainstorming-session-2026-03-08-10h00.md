@@ -22,7 +22,7 @@ context_file: 'clawbot skill'
 ## First Principles — Fondamentaux
 
 ### Essence du produit
-ClawBot = boitier agentique cle en main. Hardware a €30 que tu branches, tu scannes le QR code, et tu as une IA qui travaille pour toi. Donnees locales, souverainete totale.
+ClawBot = boitier agentique cle en main. Hardware a $30 que tu branches, tu scannes le QR code, et tu as une IA qui travaille pour toi. Donnees locales, souverainete totale.
 
 ### Architecture
 - Le boitier est un HUB orchestrateur (pas un cerveau IA)
@@ -73,7 +73,7 @@ Pattern identique a Klipper/Moonraker/Mainsail dans l'impression 3D.
 ## Business Model — Triple Revenue
 
 1. **Hardware** (one-shot) : marge sur boitier, usine Chine
-2. **Abonnement** (recurring) : Particulier €8/mois, Pro €200-300/mois
+2. **Abonnement** (recurring) : Particulier $8/mois, Pro $200-300/mois
 3. **Marketplace** (commission) : skills/modules communaute, modele Shopify/N8N
 
 ## Prochaine etape

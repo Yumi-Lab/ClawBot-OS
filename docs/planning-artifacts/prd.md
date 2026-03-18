@@ -23,9 +23,9 @@ classification:
 
 ClawBot est un boitier d'IA agentique cle en main destine aux professionnels (TPE/PME) et aux particuliers. Il transforme une stack open source complexe (orchestrateur Python, API cloud, dashboard web) en un produit physique que n'importe qui peut utiliser : brancher, scanner le QR code, c'est pret en moins de 10 minutes.
 
-Le produit cible en priorite les entrepreneurs et dirigeants de TPE/PME (Phase 2 de lancement) qui perdent des heures sur des taches automatisables — devis, factures, emails, planning. ClawBot leur rend ce temps. Le marche grand public (familles, €8/mois) ouvre en Phase 3 quand les temoignages Pro circulent et que le bouche-a-oreille est amorce.
+Le produit cible en priorite les entrepreneurs et dirigeants de TPE/PME (Phase 2 de lancement) qui perdent des heures sur des taches automatisables — devis, factures, emails, planning. ClawBot leur rend ce temps. Le marche grand public (familles, $8/mois) ouvre en Phase 3 quand les temoignages Pro circulent et que le bouche-a-oreille est amorce.
 
-L'architecture repose sur ClawbotCore, un aggregateur pur (pattern Moonraker) qui route les requetes LLM et expose des modules independants via un systeme de manifests. Le hardware (Smart Pi One, H3) est fabrique dans l'usine du fondateur en Chine a cout marginal. Deux SKUs : ClawBot Home (~€80, familles) et ClawBot Pro (~€200, ecran + stockage + dock).
+L'architecture repose sur ClawbotCore, un aggregateur pur (pattern Moonraker) qui route les requetes LLM et expose des modules independants via un systeme de manifests. Le hardware (Smart Pi One, H3) est fabrique dans l'usine du fondateur en Chine a cout marginal. Deux SKUs : ClawBot Home (~$80, familles) et ClawBot Pro (~$200, ecran + stockage + dock).
 
 ### Ce qui rend ClawBot unique
 
@@ -35,7 +35,7 @@ L'architecture repose sur ClawbotCore, un aggregateur pur (pattern Moonraker) qu
 
 3. **Pattern prouve** — Le fondateur a deja transforme un ecosysteme open source complexe en produit hardware turnkey vendu a des milliers d'unites. Meme strategie, meme execution, nouveau marche.
 
-4. **Triple revenue** — Hardware (marge one-shot) + abonnement (€8-300/mois recurring) + marketplace communautaire (commission sur les modules).
+4. **Triple revenue** — Hardware (marge one-shot) + abonnement ($8-300/mois recurring) + marketplace communautaire (commission sur les modules).
 
 ## Project Classification
 
@@ -62,8 +62,8 @@ L'architecture repose sur ClawbotCore, un aggregateur pur (pattern Moonraker) qu
 | Horizon | Phase | Objectif | KPI mesurable |
 |---------|-------|----------|---------------|
 | **0-3 mois** | Beta GeekTech | Validation technique | 50-100 boitiers actifs, retention >80%, zero crash critique 7j consecutifs |
-| **3-6 mois** | Lancement Pro | Premiers revenus | 10+ ClawBot Pro vendus, MRR >€2k, temoignages video |
-| **6-12 mois** | Ouverture Particulier | Croissance organique | 500+ boitiers (Pro+Home), MRR >€20k, bouche-a-oreille mesurable |
+| **3-6 mois** | Lancement Pro | Premiers revenus | 10+ ClawBot Pro vendus, MRR >$2k, temoignages video |
+| **6-12 mois** | Ouverture Particulier | Croissance organique | 500+ boitiers (Pro+Home), MRR >$20k, bouche-a-oreille mesurable |
 | **12+ mois** | Scale | Machine autonome | 1000+ boitiers, marketplace active, marge Particulier positive |
 
 ### Technical Success
@@ -81,13 +81,13 @@ L'architecture repose sur ClawbotCore, un aggregateur pur (pattern Moonraker) qu
 - **NPS >50** — recommandation organique, le bouche-a-oreille est le moteur de croissance
 - **Churn <5% Pro, <10% Particulier** — si les gens restent, le produit marche
 - **Cout API moyen par user** — a definir apres beta, c'est la marge reelle
-- **Revenue par user Pro €200 → €400+** en 6 mois — la montee en valeur prouve l'adoption
+- **Revenue par user Pro $200 → $400+** en 6 mois — la montee en valeur prouve l'adoption
 
 ## User Journeys
 
 ### Journey 1 — Marc decouvre la puissance (Pro, happy path)
 
-Marc, 42 ans, patron d'une boite de services avec 8 salaries. Il fait tout lui-meme : compta, devis, planning, depannage IT. 60h/semaine. Il voit une pub LinkedIn : "Votre assistant IA pour €200/mois au lieu d'un salarie".
+Marc, 42 ans, patron d'une boite de services avec 8 salaries. Il fait tout lui-meme : compta, devis, planning, depannage IT. 60h/semaine. Il voit une pub LinkedIn : "Votre assistant IA pour $200/mois au lieu d'un salarie".
 
 Il commande le ClawBot Pro. Le boitier arrive — ecran tactile, stockage, dock. Il branche, scanne le QR code. En 2 minutes il a un compte, mode Pro active. Le dashboard s'ouvre.
 
@@ -111,7 +111,7 @@ Si le tunnel ne revient pas, le boitier reste fonctionnel en local : il peut acc
 
 ### Journey 3 — Sophie et la famille (Particulier, Phase 3)
 
-Sophie, 38 ans, 2 enfants, mi-temps. Son mari ramene un ClawBot Home pour Noel (€80). Elle le branche dans la cuisine, scanne le QR code. Mode Safe automatique — pas de jargon, pas de config.
+Sophie, 38 ans, 2 enfants, mi-temps. Son mari ramene un ClawBot Home pour Noel ($80). Elle le branche dans la cuisine, scanne le QR code. Mode Safe automatique — pas de jargon, pas de config.
 
 Premier reflexe : "Qu'est-ce qu'on mange cette semaine avec ce qu'il y a dans le frigo ?" ClawBot genere un planning repas. Elle est bluffee.
 
@@ -192,11 +192,11 @@ Thomas touche une commission sur chaque installation payante.
 
 **1. Nouvelle categorie de produit : le boitier agentique turnkey**
 
-Aucun produit n'existe aujourd'hui a l'intersection de : hardware physique abordable (<€200) + IA agentique cloud + onboarding turnkey pour non-techniciens. Les tentatives anterieures (Rabbit R1, Humane AI Pin) ciblaient le remplacement du smartphone et ont echoue (~$200M perdus). ClawBot ne remplace rien — il ajoute une capacite inexistante.
+Aucun produit n'existe aujourd'hui a l'intersection de : hardware physique abordable (<$200) + IA agentique cloud + onboarding turnkey pour non-techniciens. Les tentatives anterieures (Rabbit R1, Humane AI Pin) ciblaient le remplacement du smartphone et ont echoue (~$200M perdus). ClawBot ne remplace rien — il ajoute une capacite inexistante.
 
 **2. Architecture hybride edge-cloud optimisee pour le cout**
 
-Contrairement aux "Home AI Servers" qui cherchent a tout faire tourner localement (hardware cher, Jetson a €200+), ClawBot utilise un hardware minimal (H3, €15) comme orchestrateur et delegue l'inference au cloud. C'est l'inverse du consensus "local-first" du CES 2026 — et c'est delibere : le cloud est le moat, pas un compromis.
+Contrairement aux "Home AI Servers" qui cherchent a tout faire tourner localement (hardware cher, Jetson a $200+), ClawBot utilise un hardware minimal (H3, $15) comme orchestrateur et delegue l'inference au cloud. C'est l'inverse du consensus "local-first" du CES 2026 — et c'est delibere : le cloud est le moat, pas un compromis.
 
 **3. Modele "box telecom" applique a l'IA**
 
@@ -262,7 +262,7 @@ ClawBot est un produit IoT/Embedded hybride : un device physique (Smart Pi One, 
 
 - Consommation V1 : ~2.5W idle, ~3W en charge (H3 + WiFi + SD)
 - Alimentation secteur 5V/2A obligatoire V1 — pas de batterie
-- Cout energetique negligeable pour l'utilisateur (~€3/an)
+- Cout energetique negligeable pour l'utilisateur (~$3/an)
 - V2 Pocket : batterie rechargeable, consommation a optimiser
 
 ### Security Model

@@ -632,11 +632,11 @@ So that **l'utilisateur obtienne la meilleure reponse possible sans choisir un m
 
 **Acceptance Criteria:**
 
-**Given** un utilisateur avec un plan Particulier (€7.99)
+**Given** un utilisateur avec un plan Particulier ($7.99)
 **When** il envoie un message simple
 **Then** le systeme route vers un modele leger (Haiku) pour optimiser les couts
 
-**Given** un utilisateur avec un plan Pro (€80+)
+**Given** un utilisateur avec un plan Pro ($80+)
 **When** il envoie un message
 **Then** le systeme peut router vers le meilleur modele disponible (Opus)
 
@@ -664,7 +664,7 @@ So that **je sache combien d'assistants je peux utiliser et comment en avoir plu
 
 **Given** l'utilisateur atteint sa limite de slots
 **When** il tente de creer un nouvel assistant
-**Then** le systeme propose : ajouter un slot (+€3/mois) ou upgrader vers le plan superieur
+**Then** le systeme propose : ajouter un slot (+$3/mois) ou upgrader vers le plan superieur
 **And** le message est non-bloquant et non-anxiogene
 
 **Given** l'utilisateur a un plan Pro Business+ (30 slots)

@@ -49,11 +49,11 @@ Un boitier hardware a cout marginal (Smart Pi One, H3, fabrique dans notre propr
 
 1. **Hardware propre** — usine en Chine, cout marginal, capacite de production de dizaines de milliers d'unites/mois avec 5 personnes
 2. **Pattern prouve par le fondateur** — a deja transforme un ecosysteme open source complexe en produit hardware turnkey vendu a des milliers d'unites, avec la meme strategie
-3. **Experience zero friction** — QR code, zero configuration, valeur immediate en <10 min. Deux SKUs adaptes (Home €80, Pro €200)
+3. **Experience zero friction** — QR code, zero configuration, valeur immediate en <10 min. Deux SKUs adaptes (Home $80, Pro $200)
 4. **Effet drogue** — Une fois que l'utilisateur a goute a l'IA agentique, il ne revient pas en arriere. Le produit se vend par l'experience et le bouche-a-oreille, pas par l'explication
 5. **Cercle vertueux auto-referentiel** — ClawBot developpe ClawBot (armee de boitiers-agents comme equipe de dev)
 6. **Timing parfait** — 2026, les LLM sont matures mais personne n'a fait le hardware agentique cle en main
-7. **Triple revenue** — hardware (marge one-shot) + abonnement (recurring €8-300/mois) + marketplace (commission sur skills communautaires)
+7. **Triple revenue** — hardware (marge one-shot) + abonnement (recurring $8-300/mois) + marketplace (commission sur skills communautaires)
 
 ---
 
@@ -77,7 +77,7 @@ Les Particuliers sont a des annees-lumiere de comprendre ce que l'IA agentique p
 2. **Phase 2 — Lancement Pro (3-6 mois)** : Cible entrepreneurs/TPE/PME, ROI immediat demontrable, les Pros financent la croissance
 3. **Phase 3 — Ouverture Particulier (6-12 mois)** : Quand les temoignages Pro existent, que les videos "regarde ce que mon boitier fait" circulent, et que le bouche-a-oreille est amorce
 
-Le plan Particulier a €8/mois est un **produit d'appel a marge potentiellement negative** au debut. C'est viable uniquement si les Pros financent la croissance. Le pricing Particulier augmentera progressivement avec l'usage et la valeur percue.
+Le plan Particulier a $8/mois est un **produit d'appel a marge potentiellement negative** au debut. C'est viable uniquement si les Pros financent la croissance. Le pricing Particulier augmentera progressivement avec l'usage et la valeur percue.
 
 ### Primary Users
 
@@ -87,7 +87,7 @@ Le plan Particulier a €8/mois est un **produit d'appel a marge potentiellement
 - **Probleme :** Gere tout seul (compta, devis, planning, depannage IT), travaille 60h/semaine
 - **Ce qu'il veut :** Puissance x10 — ce qui prenait des heures prend 10 minutes
 - **Experience ClawBot :** Branche, scanne, en 10 min il a un assistant qui genere ses devis, classe ses factures, repond a ses mails. Il recupere 2h/jour.
-- **Budget :** €200-600/mois sans hesiter (ROI immediat vs cout salarial)
+- **Budget :** $200-600/mois sans hesiter (ROI immediat vs cout salarial)
 - **Moment "aha" :** "Attendez, je faisais ca avant, ca me prenait l'apres-midi. La j'ai mis 10 minutes."
 - **Segment :** Tous les entrepreneurs independants, patrons TPE/PME, managers, artisans, consultants
 
@@ -97,7 +97,7 @@ Le plan Particulier a €8/mois est un **produit d'appel a marge potentiellement
 - **Probleme :** Jongle entre ecole, courses, devoirs, organisation familiale, budget
 - **Ce qu'il veut :** Se simplifier la vie — un assistant familial intelligent
 - **Experience ClawBot :** Un boitier dans la cuisine, branche sur l'ecran HDMI ou via l'app mobile. Tableau familial intelligent — planning repas, aide devoirs, budget, rappels, listes. Toute la famille est connectee au meme boitier.
-- **Budget :** €8/mois (modele Netflix familial)
+- **Budget :** $8/mois (modele Netflix familial)
 - **Moment "aha" :** Les enfants demandent de l'aide pour leurs devoirs au boitier au lieu de la deranger quand elle travaille.
 - **Segment :** Familles, un boitier par foyer. C'est la cible la plus dure mais le plus gros volume.
 
@@ -114,8 +114,8 @@ Le plan Particulier a €8/mois est un **produit d'appel a marge potentiellement
 
 #### Journey Pro (Marc)
 
-1. **Decouverte :** Pub LinkedIn/Instagram "Votre assistant IA pour €200/mois au lieu d'un salarie"
-2. **Achat :** Commande le ClawBot Pro en ligne (€200, credit abo equivalent offert)
+1. **Decouverte :** Pub LinkedIn/Instagram "Votre assistant IA pour $200/mois au lieu d'un salarie"
+2. **Achat :** Commande le ClawBot Pro en ligne ($200, credit abo equivalent offert)
 3. **Onboarding :** Recoit le boitier avec ecran + stockage, le branche, scanne le QR code, cree son compte, mode Pro
 4. **Premiere valeur :** En 10 min, il demande a ClawBot de lui generer un modele de devis. Ca marche. Il est accro.
 5. **Usage quotidien :** ClawBot gere ses mails, ses factures, son planning. Il installe des skills metier (compta, gestion projet).
@@ -123,8 +123,8 @@ Le plan Particulier a €8/mois est un **produit d'appel a marge potentiellement
 
 #### Journey Famille (Sophie)
 
-1. **Decouverte :** Bouche-a-oreille, pub Instagram/TikTok "Un cerveau IA pour toute la famille, €8/mois"
-2. **Achat :** ClawBot Home a €80, offert pour Noel ou achat impulsif (1er mois offert)
+1. **Decouverte :** Bouche-a-oreille, pub Instagram/TikTok "Un cerveau IA pour toute la famille, $8/mois"
+2. **Achat :** ClawBot Home a $80, offert pour Noel ou achat impulsif (1er mois offert)
 3. **Onboarding :** Branche dans la cuisine, scanne le QR code, mode Safe active par defaut
 4. **Premiere valeur :** Demande un planning de repas pour la semaine avec ce qu'il y a dans le frigo
 5. **Usage quotidien :** Les enfants utilisent pour les devoirs, elle pour l'organisation, le mari pour bricoler
@@ -137,8 +137,8 @@ Meme carte (Smart Pi One) a l'interieur, packaging et accessoires differents pou
 | | ClawBot Home | ClawBot Pro |
 |---|---|---|
 | **Hardware** | Smart Pi One, boitier acrylique, SD | Smart Pi One + SmartPad (ecran tactile), dock, 2x 1TB USB |
-| **Prix** | ~€80 | ~€200 |
-| **Offre lancement** | 1er mois abo offert (€8) | Credit abo equivalent au prix du boitier (€200) |
+| **Prix** | ~$80 | ~$200 |
+| **Offre lancement** | 1er mois abo offert ($8) | Credit abo equivalent au prix du boitier ($200) |
 | **Cible** | Familles (Phase 3) | Entrepreneurs/TPE/PME (Phase 2) |
 | **Perception** | "Assistant familial abordable" | "Outil pro serieux et complet" |
 
@@ -170,8 +170,8 @@ Meme carte (Smart Pi One) a l'interieur, packaging et accessoires differents pou
 | Horizon | Phase | Objectif | KPI |
 |---------|-------|----------|-----|
 | **0-3 mois** | Beta GeekTech | Valider que ca marche | 50-100 boitiers, retention >80%, bugs critiques resolus |
-| **3-6 mois** | Lancement Pro | Premiers clients payants | 10+ ClawBot Pro vendus, MRR >€2k, temoignages video |
-| **6-12 mois** | Ouverture Particulier | Croissance organique | 500+ boitiers (Pro+Home), MRR >€20k, bouche-a-oreille mesurable |
+| **3-6 mois** | Lancement Pro | Premiers clients payants | 10+ ClawBot Pro vendus, MRR >$2k, temoignages video |
+| **6-12 mois** | Ouverture Particulier | Croissance organique | 500+ boitiers (Pro+Home), MRR >$20k, bouche-a-oreille mesurable |
 | **12+ mois** | Scale | Machine qui tourne | 1000+ boitiers, marketplace active, marge Particulier positive |
 
 ### Key Performance Indicators
@@ -179,7 +179,7 @@ Meme carte (Smart Pi One) a l'interieur, packaging et accessoires differents pou
 | KPI | Pourquoi | Cible |
 |-----|----------|-------|
 | **Churn mensuel** | Si les gens restent, le produit marche | <5% Pro, <10% Particulier |
-| **Revenue par user Pro** | Monte = plus de valeur percue | €200 → €400+ en 6 mois |
+| **Revenue par user Pro** | Monte = plus de valeur percue | $200 → $400+ en 6 mois |
 | **Cout API moyen par user** | La marge reelle | A definir apres beta |
 | **Time-to-first-value** | Entre scan QR et "wow" | <10 minutes |
 | **NPS** | Recommandation organique | >50 |
@@ -208,7 +208,7 @@ ClawbotCore est un **aggregateur pur** (pattern Moonraker) : il ne fait que rout
 3. **Dashboard unifie** — SPA modulaire : les panels s'affichent uniquement si le module correspondant est installe. Chat, fichiers, moniteur systeme, config, setup en base. Panels agents/workspace uniquement si agent-manager present.
 4. **QR code onboarding** — Scan → creation compte → choix mode (Safe/Geek/Pro) → pret en <10 min. Wizard de premiere connexion integre.
 5. **Tunnel cloud** — WebSocket device↔cloud, sessions paralleles, failover. L'utilisateur accede a son boitier depuis n'importe ou.
-6. **Plans d'abonnement** — Free (10k tokens/jour, Haiku), Particulier (200k/jour, Sonnet, €8/mois, lancement Phase 3), Pro (2M/jour, Opus, €200+/mois, lancement Phase 2). Credit abo offert a l'achat du boitier. Pricing Particulier progressif selon usage.
+6. **Plans d'abonnement** — Free (10k tokens/jour, Haiku), Particulier (200k/jour, Sonnet, $8/mois, lancement Phase 3), Pro (2M/jour, Opus, $200+/mois, lancement Phase 2). Credit abo offert a l'achat du boitier. Pricing Particulier progressif selon usage.
 7. **OS image buildable** — CI/CD 4 variantes (Smart Pi One + SmartPad, Bookworm + Trixie), image flashable sur SD.
 
 ### Out of Scope pour le MVP

@@ -242,8 +242,8 @@ ClawBot ne s'engage avec aucun LLM provider. L'interface provider est abstraite 
 - CGV comme filet de securite si besoin
 
 **Pricing :**
-- Adulte : €8/mois → +200k tokens/jour au pool
-- Enfant/membre supplementaire : €2-3/mois → +50k tokens/jour au pool
+- Adulte : $8/mois → +200k tokens/jour au pool
+- Enfant/membre supplementaire : $2-3/mois → +50k tokens/jour au pool
 - Plus de membres = plus de tokens au global
 
 ### Sequence d'Implementation
@@ -688,7 +688,7 @@ Cloud supporte toujours `protocol_version` N et N-1. Version trop vieille → `{
 
 - **Statut :** Accepte
 - **Contexte :** Couts maitrisables et previsibles.
-- **Options :** A) VPS IONOS/Hetzner/Hostinger (~€5-15/mois fixe) | B) AWS/GCP (auto-scaling, vendor lock-in, couts imprevisibles) | C) Hybride VPS + Cloudflare DNS
+- **Options :** A) VPS IONOS/Hetzner/Hostinger (~$5-15/mois fixe) | B) AWS/GCP (auto-scaling, vendor lock-in, couts imprevisibles) | C) Hybride VPS + Cloudflare DNS
 - **Decision :** VPS prix fixe + Cloudflare DNS optionnel
 - **Consequences :** Scaling manuel. Pas de managed DB. Pre-provisionning avant Kickstarter.
 - **Risque accepte :** Scaling manuel peut prendre quelques heures en pic. Mitigue par pre-provisionning.
@@ -735,7 +735,7 @@ Cloud supporte toujours `protocol_version` N et N-1. Version trop vieille → `{
 - **Contexte :** Familles avec plusieurs membres, besoin de partager quotas.
 - **Options :** A) Pool sans limite de membres (regulation naturelle) | B) Pool avec limite (max 5, restrictif) | C) Pas de pool (penalise familles)
 - **Decision :** Pool sans limite + CGV comme filet de securite
-- **Consequences :** Rate limiting sur somme quotas groupe. Pricing adulte €8 (+200k/jour), enfant €2-3 (+50k/jour). Schema : `Group` + `User.group_id`.
+- **Consequences :** Rate limiting sur somme quotas groupe. Pricing adulte $8 (+200k/jour), enfant $2-3 (+50k/jour). Schema : `Group` + `User.group_id`.
 - **Risque accepte :** Abus theorique (groupe 100 inconnus). Irrationnel en pratique. CGV en dernier recours.
 
 ### ADR-009 : Versionnement API par URL Prefix

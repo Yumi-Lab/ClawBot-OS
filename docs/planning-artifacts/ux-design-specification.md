@@ -56,9 +56,9 @@ Ce qui reste visible : spinner/throbber, streaming texte token par token, result
 
 ### Target Users
 
-**Marc (Pro)** — Entrepreneur 42 ans, 8 salaries, gere tout seul, 60h/semaine. Veut puissance x10 : devis en 10s, emails classes, compta automatisee. Budget €200-600/mois. Utilise : dashboard (bureau), app mobile (deplacement), SmartPad kiosk (bureaux), desktop widget (pilotage PC).
+**Marc (Pro)** — Entrepreneur 42 ans, 8 salaries, gere tout seul, 60h/semaine. Veut puissance x10 : devis en 10s, emails classes, compta automatisee. Budget $200-600/mois. Utilise : dashboard (bureau), app mobile (deplacement), SmartPad kiosk (bureaux), desktop widget (pilotage PC).
 
-**Sophie (Famille)** — Mere 38 ans, 2 enfants, mi-temps. Veut se simplifier la vie : planning repas, devoirs, budget familial. Budget €8/mois. Utilise : dashboard (cuisine), app mobile, SmartPad avatar (visage du boitier).
+**Sophie (Famille)** — Mere 38 ans, 2 enfants, mi-temps. Veut se simplifier la vie : planning repas, devoirs, budget familial. Budget $8/mois. Utilise : dashboard (cuisine), app mobile, SmartPad avatar (visage du boitier).
 
 **Nicolas (Admin)** — Ops, gere la flotte de boitiers. Dashboard admin separe (URL/serveur dedie), monitoring, SSH distant, OTA, alerting.
 
@@ -89,7 +89,7 @@ Ce qui reste visible : spinner/throbber, streaming texte token par token, result
 - L'utilisateur cree des "assistants" — nom, description en langage naturel, avatar
 - Pas de system_prompt visible — l'utilisateur decrit ce qu'il veut, le systeme genere le prompt technique
 - Le systeme choisit automatiquement quel assistant utiliser selon la demande
-- **Systeme de slots** : l'abo de base inclut X slots (ex: 5 Particulier, 15 Pro). Pack +10 slots = +€5/mois
+- **Systeme de slots** : l'abo de base inclut X slots (ex: 5 Particulier, 15 Pro). Pack +10 slots = +$5/mois
 
 **Planification de taches :**
 - "Fais ca toutes les heures / tous les jours / tous les lundis a 9h"
@@ -121,7 +121,7 @@ Chiffrement AES-256 (pycryptodome). Cle derivee du MAC du boitier + secret local
 
 | Catalogue | Contenu | Exemples | Modele economique |
 |-----------|---------|----------|-------------------|
-| **Agent Store** | Assistants specialises (prompts + skills + config) | "Agent Comptable", "Agent Immobilier", "Agent Juridique" | Gratuit ou payant (€1-10 one-shot ou inclus dans l'abo) |
+| **Agent Store** | Assistants specialises (prompts + skills + config) | "Agent Comptable", "Agent Immobilier", "Agent Juridique" | Gratuit ou payant ($1-10 one-shot ou inclus dans l'abo) |
 | **Module Store** | Modules techniques (code + manifest + service) | "Module Orange", "Module Free/SFR", "Module 1Password", "Module MQTT" | Gratuit (entreprises qui veulent etre integrees) ou payant (devs communaute) |
 
 **Agent Store :**
@@ -285,7 +285,7 @@ ClawBot n'est PAS un outil de productivite. C'est un outil de **recuperation de 
 **Premiere utilisation** → "Attends... il a VRAIMENT fait ca ?" (emerveillement)
 **Semaine 1** → "J'ai recupere 2h hier" (prise de conscience)
 **Mois 1** → "Je ne pourrais plus m'en passer" (dependance positive)
-**Recommandation** → "Achete ca, ca va changer ta vie — pour 7€/mois" (evangelisation)
+**Recommandation** → "Achete ca, ca va changer ta vie — pour 7$/mois" (evangelisation)
 
 Le mot-cle de la recommandation : **"ca va changer ta vie"**. Pas "c'est un bon outil". Pas "c'est pratique". **Changer ta vie.** C'est l'emotion qui fait vendre sans budget marketing.
 
@@ -343,8 +343,8 @@ ClawBot depasse l'assistant personnel pour devenir un **reseau de communication 
 - Groupes d'amis/d'equipe sur OpenJarvis — le nouveau reseau social de l'IA
 
 **Impact enterprise :**
-- €200/utilisateur/mois → justifiable quand on remplace assistant humain + Slack + Trello + WhatsApp pro
-- Petites entreprises (8-15 personnes) : €1000-3000/mois → ROI immediat
+- $200/utilisateur/mois → justifiable quand on remplace assistant humain + Slack + Trello + WhatsApp pro
+- Petites entreprises (8-15 personnes) : $1000-3000/mois → ROI immediat
 - Lock-in emotionnel : une fois connecte, le cout de sortie est emotionnel, pas technique
 
 **Note :** Cette vision est documentee ici pour guider l'architecture emotionnelle des maintenant. L'emotion MVP doit fonctionner SANS le reseau. Le reseau la decuple apres.
@@ -358,7 +358,7 @@ ClawBot depasse l'assistant personnel pour devenir un **reseau de communication 
 | Attachement (SmartPad) | Avatar mignon, 3 registres de templates, animations expressives, personnalite. |
 | Serenite (mental load) | Taches planifiees, notifications contextuelles (geoloc), rappels automatiques. |
 | "Il me connait" | Anticipation contextuelle, geoloc, preferences apprises, historique. |
-| Evangelisation | Prix accessible (€7/mois). Resultats concrets racontables. |
+| Evangelisation | Prix accessible ($7/mois). Resultats concrets racontables. |
 | Soulagement relationnel | L'IA absorbe la friction entre les gens. Coordination sans SMS. |
 
 ### Emotional Design Principles
@@ -373,7 +373,7 @@ ClawBot depasse l'assistant personnel pour devenir un **reseau de communication 
 
 5. **"Le systeme pense a ta place"** — Notifications contextuelles (geolocalisation), rappels intelligents, listes automatiques. L'utilisateur n'a plus besoin de SE SOUVENIR — le systeme se souvient pour lui.
 
-6. **"Connecte sans deranger"** — L'IA est l'intermediaire qui rend les relations humaines MEILLEURES. Le patron ne reveille plus personne a 2h du mat'. Le conjoint recoit la liste de courses au supermarche. L'IA respecte le temps de chacun.
+6. **"Connecte sans deranger"** — L'IA est l'intermediaire qui rend les relations humaines MEILLUSDES. Le patron ne reveille plus personne a 2h du mat'. Le conjoint recoit la liste de courses au supermarche. L'IA respecte le temps de chacun.
 
 7. **"Il te connait"** — Le systeme anticipe, contextualise, personnalise sans qu'on lui demande. Geolocalisation, preferences, historique — tout converge pour que l'IA comprenne ton quotidien.
 
@@ -410,7 +410,7 @@ Meilleur que Tesla sur l'UX embarquee :
 
 Pattern direct pour SmartPad Avatar : un template de base kawaii, des variantes, et un marche de skins communautaires.
 
-**4. Montres connectees chinoises (Xiaomi Band, Amazfit) — Puissance sur hardware a 10€**
+**4. Montres connectees chinoises (Xiaomi Band, Amazfit) — Puissance sur hardware a 10$**
 
 L'inspiration technique fondamentale : un tout petit processeur, tres peu de RAM, et pourtant une UI fluide. 90% de l'experience Apple Watch a 5% du prix.
 
@@ -452,7 +452,7 @@ L'app mobile est le client principal en mobilite. Architecture :
 | Pattern | Source | Application ClawBot |
 |---------|--------|---------------------|
 | Dark theme epure | Tesla | Dark cyan existant (#00ffe0) |
-| Animations legeres, fluides | Montres a 10€ | CSS animations, vanilla JS, zero framework lourd |
+| Animations legeres, fluides | Montres a 10$ | CSS animations, vanilla JS, zero framework lourd |
 | Personnage expressif kawaii | Xiaomi SU7, Tamagotchi | SmartPad Avatar — 1 template base + variantes |
 | Progressive disclosure | WeChat mini-apps | Panels qui apparaissent avec les modules installes |
 
@@ -481,7 +481,7 @@ L'app mobile est le client principal en mobilite. Architecture :
 **Adapter pour ClawBot :**
 - **WeChat groups → reseau ClawBot** — messagerie de groupe avec IA comme intermediaire (Phase 3+)
 - **Commissions d'affiliation** → liens d'achat via connecteurs de marques, revenus passifs (Phase 4+)
-- **Marche de skins** → templates Avatar, €0.99 le skin, 70/30 split createur/plateforme
+- **Marche de skins** → templates Avatar, $0.99 le skin, 70/30 split createur/plateforme
 
 **Eviter absolument :**
 - Toute complexite a la Notion/N8N — si ca demande un tutoriel, c'est rate
@@ -501,7 +501,7 @@ Pas de framework CSS externe (Tailwind, Bootstrap). Pas de framework JS (React, 
 **Justification :**
 - Controle total sur chaque pixel — necessaire pour 7 surfaces tres differentes
 - Zero dependance externe, zero build step, zero bundle lourd
-- Coherent avec la contrainte hardware H3/1GB RAM (philosophie "montre a 10€")
+- Coherent avec la contrainte hardware H3/1GB RAM (philosophie "montre a 10$")
 - Le dashboard existant (~2500 lignes vanilla JS) est une base technique solide, mais le design visuel doit etre entierement revu — actuellement moche et illisible
 - Tailwind CSS = classes CSS pre-faites utiles pour React/Vue mais overkill pour vanilla JS pur
 
@@ -1247,7 +1247,7 @@ L'affiliation est un ecosysteme complet : bots de recrutement H24 de programmes 
 - **But :** Afficher les resultats de recherche produit dans un panel lateral dedie (pas inline dans le chat)
 - **Contenu :** N `ProductCard` en grille 2-3 colonnes, tri par prix/avis/pertinence, filtre par source
 - **Etats :** recherche en cours (skeleton grid), resultats affiches, "Meilleur choix" (border cyan + badge)
-- **Interaction :** Tri cliquable (prix croissant/decroissant, avis), scroll horizontal sur mobile. Le chat affiche un resume : "J'ai trouve N resultats. Le moins cher est a X€. [Voir les resultats]" — le clic ouvre le panel.
+- **Interaction :** Tri cliquable (prix croissant/decroissant, avis), scroll horizontal sur mobile. Le chat affiche un resume : "J'ai trouve N resultats. Le moins cher est a X$. [Voir les resultats]" — le clic ouvre le panel.
 - **Surface :** Dashboard (panel lateral droit), App mobile (bottom sheet)
 
 **ProductCompare**

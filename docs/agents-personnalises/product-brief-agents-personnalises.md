@@ -116,7 +116,7 @@ L'agent conserve un résumé structuré et évolutif de tout ce qu'il apprend su
     "prénom": "Marc",
     "entreprise": "Michaut Services",
     "clients_principaux": ["Dupont SA", "Martin SARL"],
-    "tarif_journalier": "850€"
+    "tarif_journalier": "850$"
   },
   "facts": [
     {"date": "2026-03-10", "content": "Marc a envoyé sa déclaration TVA Q1"},

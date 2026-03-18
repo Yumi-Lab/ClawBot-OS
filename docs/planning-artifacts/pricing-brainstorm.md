@@ -18,17 +18,17 @@ ClawBot est au-dessus de Claude Code en termes de valeur : plug & play, zero set
 - Chaque palier debloque de la vitesse + des agents + des outils
 - On deduit le prorata au jour lors d'un upgrade
 
-### Add-on agent : 2.90€/mois
+### Add-on agent : 2.90$/mois
 - Levier d'upsell naturel
 - Le pricing est calibre pour que le plan superieur soit TOUJOURS plus interessant que l'achat d'agents a l'unite
 - Exemples :
-  - Free + 3 agents = 3 × 2.90 = 8.70€ → Starter a 7.99€ est mieux
-  - Starter + 7 agents = 7 × 2.90 = 20.30€ + 7.99 = 28.29€ → Plus a 29.99€ est mieux
+  - Free + 3 agents = 3 × 2.90 = 8.70$ → Starter a 7.99$ est mieux
+  - Starter + 7 agents = 7 × 2.90 = 20.30$ + 7.99 = 28.29$ → Plus a 29.99$ est mieux
 
 ### Hardware = porte d'entree
-- Boitier a 29€ (prix public)
-- 30€ de credit abo inclus = premier mois gratuit minimum
-- Offres promo possibles a 15€ → on offre quand meme 30€ de credit
+- Boitier a 29$ (prix public)
+- 30$ de credit abo inclus = premier mois gratuit minimum
+- Offres promo possibles a 15$ → on offre quand meme 30$ de credit
 - Le hardware est DECOUPLE de l'abo : autant de boitiers que tu veux, un seul abo
 - Deux versions : SmartPi (sans ecran, acrylique) / SmartPad (ecran tactile capacitif)
 
@@ -45,10 +45,10 @@ ClawBot est au-dessus de Claude Code en termes de valeur : plug & play, zero set
 
 | Plan | Prix | Agents inclus | Vitesse | Modeles | Outils |
 |------|------|--------------|---------|---------|--------|
-| Free | 0€ | 1 | Lent (throttle fort) | Haiku | Base (chat, fichiers) |
-| Starter | ~7.99€ | 3 | Normal | Haiku + Sonnet | Base |
-| Plus | ~29.99€ | 10 | Rapide | Haiku + Sonnet | Base + web search |
-| Geek | ~80€ | 15 | Rapide+ | Tous | Tous + mode Geek |
+| Free | 0$ | 1 | Lent (throttle fort) | Haiku | Base (chat, fichiers) |
+| Starter | ~7.99$ | 3 | Normal | Haiku + Sonnet | Base |
+| Plus | ~29.99$ | 10 | Rapide | Haiku + Sonnet | Base + web search |
+| Geek | ~80$ | 15 | Rapide+ | Tous | Tous + mode Geek |
 
 ### Onglet "Pro" (entreprises)
 - Vision : "Ca securise et accelere mon business"
@@ -60,16 +60,16 @@ ClawBot est au-dessus de Claude Code en termes de valeur : plug & play, zero set
 
 | Plan | Prix | Agents inclus | Vitesse | Modeles | Outils |
 |------|------|--------------|---------|---------|--------|
-| Pro Starter | ~29-39€ | 5 | Rapide | Tous | Pro tools (SSH, API, MCP) |
-| Pro | ~189€ | 15 | Prioritaire | Tous | Tous + support |
-| Pro+ | ~300€ | 30 | Prioritaire+ | Tous | Tous + multi-user |
-| Business | 500€+ | Illimite | Max | Tous | Tous + team + SLA |
+| Pro Starter | ~29-39$ | 5 | Rapide | Tous | Pro tools (SSH, API, MCP) |
+| Pro | ~189$ | 15 | Prioritaire | Tous | Tous + support |
+| Pro+ | ~300$ | 30 | Prioritaire+ | Tous | Tous + multi-user |
+| Business | 500$+ | Illimite | Max | Tous | Tous + team + SLA |
 
 ### Le Pro qui "triche"
-- Un Pro peut commencer sur Perso a 7.99€ pour tester
-- Il consomme vite → throttle → pousse vers 30€
-- A 30€, l'onglet Pro montre plus d'outils pour le meme prix
-- Le switch Perso 30€ → Pro 30€ est lateral : meme prix, plus de fonctions
+- Un Pro peut commencer sur Perso a 7.99$ pour tester
+- Il consomme vite → throttle → pousse vers 30$
+- A 30$, l'onglet Pro montre plus d'outils pour le meme prix
+- Le switch Perso 30$ → Pro 30$ est lateral : meme prix, plus de fonctions
 
 ## Mecaniques
 
@@ -86,7 +86,7 @@ ClawBot est au-dessus de Claude Code en termes de valeur : plug & play, zero set
 
 ### Credit hardware
 - Prix boitier deduit sous forme de mois gratuits
-- Exemple : boitier 29€ → ~1 mois de Starter offert (ou ~4 mois de Free equivalent)
+- Exemple : boitier 29$ → ~1 mois de Starter offert (ou ~4 mois de Free equivalent)
 - Calcul transparent affiche a l'utilisateur
 
 ## Points ouverts (post-MVP / a brainstormer)
@@ -97,7 +97,7 @@ ClawBot est au-dessus de Claude Code en termes de valeur : plug & play, zero set
 - [ ] Options RGPD / modeles francais specifiques
 - [ ] Hardware upgrades (cles USB 512Go, RAID, stockage) — pricing decouple
 - [ ] Interconnexion boitiers Pro <-> Perso collaborateurs
-- [ ] Gap de prix entre Perso Plus (29.99€) et Pro Starter (29-39€) — eviter confusion
+- [ ] Gap de prix entre Perso Plus (29.99$) et Pro Starter (29-39$) — eviter confusion
 - [ ] Quotas tokens exacts par palier
 - [ ] Store agents : agents gratuits vs agents payants dans le marketplace
 

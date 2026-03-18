@@ -29,6 +29,11 @@ echo_green "Installing Python websockets package ..."
 pip3 install --no-cache-dir --break-system-packages websockets
 ## END Step 5
 
+## Step 5b: Install Google Drive connector dependencies
+echo_green "Installing Google Drive connector dependencies ..."
+pip3 install --no-cache-dir --break-system-packages google-api-python-client google-auth-oauthlib
+## END Step 5b
+
 ## Step 6: Install systemd services and scripts
 echo_green "Installing systemd units and scripts ..."
 unpack /filesystem/root /

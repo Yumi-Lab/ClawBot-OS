@@ -188,6 +188,40 @@ def build_heartbeat() -> dict:
     }
 
 
+# ── GET request handler (WebSocket tunnel → ClawbotCore) ──────────────────────
+
+async def _handle_get_request(ws, request_id: str, endpoint: str):
+    """Forward a GET request to local ClawbotCore and return JSON response."""
+    url = f"http://127.0.0.1:8090{endpoint}"
+    loop = asyncio.get_event_loop()
+
+    def _fetch():
+        try:
+            req = urllib.request.Request(url, method="GET")
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                return json.loads(resp.read())
+        except Exception as e:
+            return {"_error": str(e)}
+
+    try:
+        result = await loop.run_in_executor(_chat_executor, _fetch)
+        if "_error" in result:
+            await ws.send(json.dumps({
+                "type": "get_error",
+                "request_id": request_id,
+                "error": result["_error"],
+                "status": 502,
+            }))
+        else:
+            await ws.send(json.dumps({
+                "type": "get_response",
+                "request_id": request_id,
+                "data": result,
+            }))
+    except Exception as e:
+        log.warning("get_request error (rid=%s): %s", request_id[:8], e)
+
+
 # ── Chat request handler (WebSocket tunnel → ClawbotCore) ─────────────────────
 
 _chat_executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
@@ -367,6 +401,12 @@ async def run():
                                     ["systemctl", "restart", "clawbot-core.service"],
                                     stderr=subprocess.DEVNULL,
                                 )
+
+                        elif msg_type == "get_request":
+                            rid = msg.get("request_id", "")
+                            endpoint = msg.get("endpoint", "/core/health")
+                            log.info("GET request %s… → %s", rid[:8], endpoint)
+                            asyncio.create_task(_handle_get_request(ws, rid, endpoint))
 
                         elif msg_type == "chat_request":
                             rid = msg.get("request_id", "")
