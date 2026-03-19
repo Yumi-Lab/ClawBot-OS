@@ -44,4 +44,58 @@ systemctl_if_exists enable clawbot-core.service
 systemctl_if_exists enable clawbot-cloud.service
 ## END Step 6
 
+## Step 7: Install Node.js 18+ for WhatsApp bridge (armv7 compatible)
+echo_green "Checking Node.js for WhatsApp bridge ..."
+NODE_MAJOR=18
+if ! command -v node &>/dev/null || [ "$(node -e 'process.exit(parseInt(process.version.slice(1)) < 18 ? 1 : 0)' 2>/dev/null; echo $?)" = "1" ]; then
+    echo_green "Installing Node.js ${NODE_MAJOR} from NodeSource ..."
+    curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash -
+    apt-get install -y nodejs
+else
+    echo_green "Node.js $(node --version) already installed"
+fi
+## END Step 7
+
+## Step 7b: Install whatsapp-bridge npm dependencies
+BRIDGE_DIR="/usr/local/lib/clawbot-core/modules/whatsapp-bridge"
+if [ -f "${BRIDGE_DIR}/package.json" ]; then
+    echo_green "Installing whatsapp-bridge npm dependencies ..."
+    cd "${BRIDGE_DIR}"
+    npm install --production --no-fund --no-audit
+    mkdir -p /home/pi/.clawbot/wa-auth
+    chown -R pi:pi /home/pi/.clawbot/wa-auth
+    cd /
+else
+    echo_green "whatsapp-bridge not found in repo — skipping npm install"
+fi
+## END Step 7b
+
+## Step 7c: Install whatsapp-bridge systemd service (disabled by default)
+echo_green "Installing whatsapp-bridge.service (disabled by default) ..."
+cat > /etc/systemd/system/whatsapp-bridge.service << 'SVCEOF'
+[Unit]
+Description=WhatsApp Baileys Bridge for ClawbotCore
+After=network.target clawbot-core.service
+Wants=clawbot-core.service
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/usr/local/lib/clawbot-core/modules/whatsapp-bridge
+Environment=AUTH_DIR=/home/pi/.clawbot/wa-auth
+Environment=CORE_URL=http://127.0.0.1:8090
+ExecStart=/usr/bin/node /usr/local/lib/clawbot-core/modules/whatsapp-bridge/bridge.js
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=whatsapp-bridge
+
+[Install]
+WantedBy=multi-user.target
+SVCEOF
+systemctl daemon-reload
+# NOT enabling by default — user activates via Services panel in dashboard
+## END Step 7c
+
 echo_green "Installing ClawbotCore ... DONE!"
