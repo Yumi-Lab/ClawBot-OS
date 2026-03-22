@@ -1,7 +1,7 @@
 [Unit]
 Description=ClawbotOS Kiosk Browser (SmartPad Dashboard)
 Documentation=https://github.com/Yumi-Lab/ClawBot-OS
-After=network-online.target nginx.service picoclaw.service clawbot-core.service seatd.service
+After=network-online.target nginx.service clawbot-core.service seatd.service
 Wants=network-online.target nginx.service seatd.service
 # Only run on devices with a screen (SmartPad)
 ConditionPathExists=/dev/dri/card0

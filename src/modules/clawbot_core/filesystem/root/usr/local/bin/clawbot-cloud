@@ -27,7 +27,7 @@ logging.basicConfig(
 log = logging.getLogger("clawbot-cloud")
 
 CLOUD_WS_URL = "wss://clawbot-api.yumi-lab.com/v1/ws"
-PICOCLAW_CONFIG = "/home/pi/.picoclaw/config.json"
+OPENJARVIS_CONFIG = "/home/pi/.openjarvis/config.json"
 ACTIVATED_SIGNAL = "/tmp/clawbot-activated"
 HEARTBEAT_INTERVAL = 300  # 5 minutes
 BACKOFF_STEPS = [5, 10, 30, 60]  # seconds
@@ -105,7 +105,7 @@ def service_active(name: str) -> str:
 
 
 def apply_config(config: dict):
-    """Write PicoClaw config and restart the service."""
+    """Write OpenJarvis LLM config and restart ClawbotCore."""
     sub_key = config.get("subscription_key", "")
     model = config.get("model", "clawbot-smart")
     # Always route through Yumi proxy — subscription_key is NOT an Anthropic key
@@ -115,13 +115,12 @@ def apply_config(config: dict):
         log.warning("Config received but no subscription_key — skipping")
         return
 
-    os.makedirs(os.path.dirname(PICOCLAW_CONFIG), exist_ok=True)
-    picoclaw_cfg = {
-        "gateway": {"host": "0.0.0.0", "port": 8080},
+    os.makedirs(os.path.dirname(OPENJARVIS_CONFIG), exist_ok=True)
+    llm_cfg = {
         "agents": {
             "defaults": {
                 "model": "default",
-                "workspace": "~/.picoclaw/workspace",
+                "workspace": "~/.openjarvis/workspace",
                 "max_tokens": 4096,
                 "temperature": 0.7,
             }
@@ -135,36 +134,26 @@ def apply_config(config: dict):
                 "request_timeout": 120,
             }
         ],
-        # maixcam channel satisfies picoclaw v0.2.0 requirement of ≥1 channel
-        "channels": {
-            "maixcam": {
-                "enabled": True,
-                "host": "127.0.0.1",
-                "port": 18790,
-                "allow_from": [],
-                "reasoning_channel_id": "",
-            }
-        },
         "tools": {"web": {"duckduckgo": {"enabled": True, "max_results": 5}}},
         "log_level": "info",
     }
 
-    with open(PICOCLAW_CONFIG, "w") as f:
-        json.dump(picoclaw_cfg, f, indent=2)
-    os.chmod(PICOCLAW_CONFIG, 0o600)
+    with open(OPENJARVIS_CONFIG, "w") as f:
+        json.dump(llm_cfg, f, indent=2)
+    os.chmod(OPENJARVIS_CONFIG, 0o600)
     # chown pi:pi
     try:
         import pwd
         pw = pwd.getpwnam("pi")
-        os.chown(PICOCLAW_CONFIG, pw.pw_uid, pw.pw_gid)
+        os.chown(OPENJARVIS_CONFIG, pw.pw_uid, pw.pw_gid)
     except Exception:
         pass
 
-    log.info("PicoClaw config updated (model: %s)", model)
+    log.info("LLM config updated (model: %s)", model)
 
-    # Restart picoclaw
+    # Restart clawbot-core to pick up new config
     subprocess.run(
-        ["systemctl", "restart", "picoclaw.service"],
+        ["systemctl", "restart", "clawbot-core.service"],
         stderr=subprocess.DEVNULL,
     )
 
@@ -182,7 +171,6 @@ def build_heartbeat() -> dict:
         "firmware": get_firmware(),
         "ip": get_ip(),
         "services": {
-            "picoclaw": service_active("picoclaw.service"),
             "clawbot_core": service_active("clawbot-core.service"),
         },
     }
@@ -254,7 +242,7 @@ async def _handle_chat_request(ws, request_id: str, payload: dict):
             with urllib.request.urlopen(req, timeout=CORE_TIMEOUT) as resp:
                 ct = resp.headers.get("Content-Type", "")
                 if "text/event-stream" not in ct:
-                    # Non-streaming response (picoclaw-agent)
+                    # Non-streaming response
                     body = json.loads(resp.read())
                     content = (
                         body.get("choices", [{}])[0]
@@ -391,12 +379,7 @@ async def run():
                         elif msg_type == "command":
                             action = msg.get("action", "")
                             log.info("Received command: %s", action)
-                            if action == "restart_picoclaw":
-                                subprocess.run(
-                                    ["systemctl", "restart", "picoclaw.service"],
-                                    stderr=subprocess.DEVNULL,
-                                )
-                            elif action == "restart_core":
+                            if action in ("restart_core",):
                                 subprocess.run(
                                     ["systemctl", "restart", "clawbot-core.service"],
                                     stderr=subprocess.DEVNULL,

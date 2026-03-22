@@ -49,14 +49,12 @@ So that **je n'ai aucun choix technique a faire — je parle, ca fait**.
 
 ### Endpoints existants
 - Core : `POST /v1/chat/completions` → `chat_with_tools_stream()`
-- Agent : `POST /v1/picoclaw-agent` → PicoClaw :8080
-- Core-Agent : `POST /v1/chat/agents` → Haiku routing
+- Agent : `POST /v1/chat/agents` → Haiku routing
 
 ### Routing automatique (a implementer)
 - Simple question → Core (plus rapide, moins de ressources)
 - Demande complexe avec outils → Core
 - Demande "specialiste" → Core-Agent avec l'assistant selectionne
-- PicoClaw : sera retire progressivement (voir UX spec)
 
 ### Streaming SSE events
 ```

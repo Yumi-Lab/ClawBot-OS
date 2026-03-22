@@ -6,8 +6,7 @@ A pre-built Armbian-based operating system for **Yumi Lab Smart Pi One** and **S
 
 | Component | Port | Description |
 |-----------|------|-------------|
-| **[PicoClaw](https://github.com/sipeed/picoclaw)** | 8080 | Lightweight AI agent (Go, by Sipeed) — OpenAI-compatible API |
-| **[ClawbotCore](https://github.com/Yumi-Lab/clawbot-core)** | 8090 | Module registry, tool loop orchestrator, cloud heartbeat |
+| **[ClawbotCore](https://github.com/Yumi-Lab/clawbot-core)** | 8090 | AI orchestrator, module registry, tool loop, cloud heartbeat |
 | **[ClawbotCore WebUI](https://github.com/Yumi-Lab/ClawbotCore-WebUI)** | 80 | Static web dashboard (chat, monitoring, module management) |
 | **nginx** | 80 | Reverse proxy + static file server |
 | **System Status API** | 8089 | Service health, metrics |
@@ -43,7 +42,6 @@ Insert the SD card and power on. The first-boot wizard will:
 
 Open your browser and go to:
 - **http://clawbot.local** — ClawbotOS Dashboard (chat, monitoring, modules)
-- **http://clawbot.local/api/picoclaw/** — PicoClaw API (direct)
 - **http://clawbot.local/api/core/** — ClawbotCore API
 
 ### 4. SSH Access
@@ -60,16 +58,13 @@ User Browser (port 80)
        |
     [nginx]
        |—————————> /                    Static Dashboard (HTML/CSS/JS)
-       |—————————> /api/picoclaw/   ——> PicoClaw      :8080
        |—————————> /api/core/       ——> ClawbotCore   :8090
        |—————————> /api/system/     ——> Status API    :8089
        |
   ClawbotCore :8090
+       |—— AI orchestrator (LLM tool loop, function calling)
        |—— Module registry (install / enable / disable)
-       |—— Tool loop orchestrator (function calling proxy)
        |—— Cloud heartbeat → openjarvis.io
-       |
-   PicoClaw :8080
        |
    LLM API (Anthropic Claude via OpenJarvis cloud, or direct key)
 ```
@@ -99,7 +94,7 @@ curl -X POST http://clawbot.local/api/core/core/modules/my-module/install \
   -d '{"repo": "https://github.com/Yumi-Lab/clawbot-module-example"}'
 ```
 
-Modules expose **OpenAI function-calling tools** that PicoClaw can invoke autonomously during conversations.
+Modules expose **OpenAI function-calling tools** that ClawbotCore can invoke autonomously during conversations.
 
 ## LLM Configuration
 
@@ -115,7 +110,7 @@ Go to **Settings** in the dashboard:
 1. Select **Anthropic (Claude) — Recommended**
 2. Enter your `sk-ant-api03-...` key
 3. Choose a model (default: `claude-sonnet-4-6`)
-4. Click **Save & Apply** — PicoClaw restarts automatically
+4. Click **Save & Apply** — ClawbotCore restarts automatically
 
 Or via SSH terminal:
 
@@ -127,7 +122,7 @@ sudo python3 - <<'EOF'
 import json, os
 cfg = {
   "gateway": {"host": "0.0.0.0", "port": 8080},
-  "agents": {"defaults": {"model": "default", "workspace": "~/.picoclaw/workspace",
+  "agents": {"defaults": {"model": "default", "workspace": "~/.clawbot/workspace",
                            "max_tokens": 4096, "temperature": 0.7}},
   "model_list": [{
     "model_name": "default",
@@ -141,13 +136,13 @@ cfg = {
   "tools": {"web": {"duckduckgo": {"enabled": True, "max_results": 5}}},
   "log_level": "info"
 }
-os.makedirs('/home/pi/.picoclaw', exist_ok=True)
-with open('/home/pi/.picoclaw/config.json', 'w') as f:
+os.makedirs('/home/pi/.clawbot', exist_ok=True)
+with open('/home/pi/.clawbot/config.json', 'w') as f:
     json.dump(cfg, f, indent=2)
 print('Config written.')
 EOF
 
-sudo systemctl restart picoclaw clawbot-core
+sudo systemctl restart clawbot-core
 ```
 
 ### Option 3 — OpenAI, DeepSeek, OpenRouter, Ollama
@@ -174,14 +169,13 @@ curl http://127.0.0.1:8090/v1/chat/completions \
 Chat request → ClawbotCore (:8090)
     → injects available module tools (function calling)
     → calls LLM API directly (for OpenAI-compatible providers)
-    → OR routes through PicoClaw (:8080) for Anthropic format translation
     → executes tool_calls returned by the LLM
     → loops until final answer
     → returns OpenAI-compatible response
 ```
 
-ClawbotCore reads the LLM config from `/home/pi/.picoclaw/config.json` — the same file
-used by PicoClaw. Changing it in Settings updates both services.
+ClawbotCore reads the LLM config from `/home/pi/.clawbot/config.json`.
+Changing it in Settings restarts the service automatically.
 
 ## WiFi Configuration
 
@@ -212,7 +206,6 @@ base(
     armbian_net,      # Network configuration
     clawbot,          # Branding, hostname, mDNS (clawbot.local)
     swap_setup,       # 2 GB swap + sysctl tuning
-    picoclaw,         # PicoClaw v0.2.0 binary + systemd service
     nginx_proxy,      # Reverse proxy + static dashboard
     [smartpad],       # SmartPad only: touchscreen support, Plymouth theme
     clawbot_core,     # ClawbotCore middleware + cloud heartbeat
@@ -235,8 +228,7 @@ develop branch push → resolve base image → build chroot → compress → upl
 
 - [YumiOS](https://github.com/Yumi-Lab/YumiOS) — Original OS architecture
 - [CustomPiOS](https://github.com/Maxime3d77/CustomPiOS-Yumi) — Build framework
-- [PicoClaw](https://github.com/sipeed/picoclaw) — Lightweight AI agent by Sipeed
-- [ClawbotCore](https://github.com/Yumi-Lab/clawbot-core) — Module registry & orchestrator
+- [ClawbotCore](https://github.com/Yumi-Lab/clawbot-core) — AI orchestrator & module registry
 - [ClawbotCore WebUI](https://github.com/Yumi-Lab/ClawbotCore-WebUI) — Web dashboard
 
 ## License

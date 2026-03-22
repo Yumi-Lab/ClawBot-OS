@@ -410,7 +410,6 @@ ClawBot-OS/
 │   ├── armbian_net/               ← WiFi, reseau, wifi-watchdog
 │   ├── clawbot/                   ← Installation ClawbotCore + WebUI
 │   ├── swap_setup/
-│   ├── picoclaw/
 │   ├── nginx_proxy/
 │   ├── smartpad/                  ← SmartPad (rotation, cage, display)
 │   ├── clawbot_core/

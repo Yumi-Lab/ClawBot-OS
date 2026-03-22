@@ -35,7 +35,6 @@ L'utilisateur ne voit RIEN de la technique. Zero.
 
 - **Pas de modes de chat** (Core/Agent/Core-Agent) — UNE seule zone de texte. Tu parles, ca marche.
 - **Pas de selection de modele** (Haiku/Sonnet/Opus) — routing invisible. On agrege, on route, l'utilisateur ne sait pas et ne veut pas savoir.
-- **PicoClaw sera retire** — ClawbotCore prend tout en charge. Le user n'a jamais vu PicoClaw et ne le verra jamais.
 - **Pas de jargon technique** — pas de "tokens", pas de "LLM", pas de "agent". L'utilisateur voit : "ton assistant", "tes taches", "tes fichiers".
 - **Plus puissant que ChatGPT** — pas juste du chat, le systeme EXECUTE : genere des documents telechargeables, cree des outils locaux, debugue des logiciels, convertit des videos, code des sites web. Il propose et il fait.
 

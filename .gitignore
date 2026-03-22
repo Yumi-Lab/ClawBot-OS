@@ -19,6 +19,10 @@ src/custompios_path
 # macOS
 .DS_Store
 
+# Claude Code
+.claude/
+.mcp.json
+
 # Secrets (never commit API keys)
 *.env
 config.json

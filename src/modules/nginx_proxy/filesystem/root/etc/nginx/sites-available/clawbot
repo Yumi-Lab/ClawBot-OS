@@ -1,10 +1,6 @@
 # ClawbotOS nginx reverse proxy configuration
 # Serves the static dashboard on port 80 and provides API endpoint proxying
 
-upstream picoclaw_backend {
-    server 127.0.0.1:8080;
-}
-
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
@@ -17,20 +13,6 @@ server {
         root /home/pi/clawbot-dashboard;
         index index.html;
         try_files $uri $uri/ /index.html;
-    }
-
-    # PicoClaw API proxy
-    location /api/picoclaw/ {
-        proxy_pass http://picoclaw_backend/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-        # SSE/streaming support for chat
-        proxy_read_timeout 300s;
-        proxy_send_timeout 300s;
-        proxy_buffering off;
     }
 
     # System status API (CPU, RAM, disk, temp, uptime, services)

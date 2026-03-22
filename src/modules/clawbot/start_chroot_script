@@ -67,7 +67,7 @@ cat > /usr/local/bin/clawbot-status << 'STATUS_EOF'
 #!/usr/bin/env bash
 # ClawbotOS - Show service status
 echo "=== ClawbotOS Service Status ==="
-echo "PicoClaw:  $(systemctl is-active picoclaw.service 2>/dev/null || echo 'not installed')"
+echo "Core:      $(systemctl is-active clawbot-core.service 2>/dev/null || echo 'not installed')"
 echo "nginx:     $(systemctl is-active nginx.service 2>/dev/null || echo 'not installed')"
 echo "Telegram:  $(systemctl is-active clawbot-telegram.service 2>/dev/null || echo 'not installed')"
 STATUS_EOF

@@ -37,7 +37,7 @@ So that **le device soit identifie et pret a etre lie a un compte utilisateur**.
 
 ### DB schema (cloud)
 ```sql
-Device: id, device_id, mac, id_long, user_id, board, firmware, last_ip, last_seen_at, provisioned, picoclaw_status, core_status
+Device: id, device_id, mac, id_long, user_id, board, firmware, last_ip, last_seen_at, provisioned, core_status
 ActivationToken: id, device_id, token, expires_at, used (TTL 30min)
 ```
 
@@ -48,7 +48,7 @@ ActivationToken: id, device_id, token, expires_at, used (TTL 30min)
 
 ### clawbot-cloud service (device-side)
 - Script `/usr/local/bin/clawbot-cloud`
-- A chaque reconnect WebSocket → cloud ecrase `~/.picoclaw/config.json` → redemarre picoclaw
+- A chaque reconnect WebSocket → cloud push la config au device
 - MAC normalise : uppercase, sans colons
 - SSH paramiko pour deploiement : `look_for_keys=False, allow_agent=False`
 

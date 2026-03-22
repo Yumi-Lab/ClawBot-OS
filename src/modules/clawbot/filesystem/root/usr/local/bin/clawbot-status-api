@@ -13,21 +13,20 @@ import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 PORT = 8089
-PICOCLAW_CONFIG = "/home/pi/.picoclaw/config.json"
+OPENJARVIS_CONFIG = "/home/pi/.openjarvis/config.json"
 
 # Whitelist of files that can be read/written via the API
 ALLOWED_FILES = {
-    "/home/pi/.picoclaw/config.json",
-    "/home/pi/.clawbot-telegram.env",
+    "/home/pi/.openjarvis/config.json",
+    "/home/pi/.openjarvis-telegram.env",
     "/etc/nginx/sites-available/clawbot",
     "/etc/nginx/nginx.conf",
-    "/etc/systemd/system/picoclaw.service",
     "/etc/systemd/system/clawbot-telegram.service",
 }
 
 # Whitelist of services for log streaming
 ALLOWED_LOG_SERVICES = {
-    "picoclaw", "nginx", "clawbot-telegram",
+    "nginx", "clawbot-telegram", "whatsapp-bridge", "wecom-bridge",
     "clawbot-status-api", "clawbot-swap",
     "clawbot-core", "clawbot-cloud", "clawbot-firstboot",
 }
@@ -163,7 +162,7 @@ def get_network():
 
 def get_services():
     services = {}
-    for svc in ["picoclaw", "nginx", "clawbot-telegram"]:
+    for svc in ["nginx", "clawbot-telegram", "clawbot-core", "whatsapp-bridge", "wecom-bridge"]:
         try:
             r = subprocess.run(
                 ["systemctl", "is-active", f"{svc}.service"],
@@ -232,15 +231,15 @@ def _compute_ids(mac_clean: str) -> tuple:
 
 
 def get_current_config() -> dict:
-    """Read current LLM config from picoclaw config.json."""
+    """Read current LLM config from openjarvis config.json."""
     mac = get_mac()
     mac_clean = mac.replace(":", "") if mac != "unknown" else ""
     device_code, id_long = _compute_ids(mac_clean)
     activate_url = f"https://openjarvis.io/activate?mac={mac_clean}" if mac_clean else "https://openjarvis.io"
     try:
-        with open(PICOCLAW_CONFIG) as f:
+        with open(OPENJARVIS_CONFIG) as f:
             cfg = json.load(f)
-        # Find the 'default' model_list entry (picoclaw v0.2.0 may have multiple entries)
+        # Find the 'default' model_list entry
         entry = {}
         for item in cfg.get("model_list", []):
             if item.get("model_name") == "default":
@@ -271,12 +270,10 @@ def get_current_config() -> dict:
                 "mac": mac, "device_code": device_code, "id_long": id_long, "activate_url": activate_url}
 
 
-def update_picoclaw_config(provider, model, api_key, base_url):
-    """Update PicoClaw config.json (merge into existing) and restart the service.
+def update_llm_config(provider, model, api_key, base_url):
+    """Update OpenJarvis config.json (merge into existing) and restart ClawbotCore.
 
-    Reads the current config and updates only the 'default' model_list entry so
-    that picoclaw auth entries and channel config created by 'picoclaw auth login'
-    are preserved.
+    Reads the current config and updates only the 'default' model_list entry.
     """
     PROVIDER_BASE_URLS = {
         "openai":     "https://api.openai.com/v1",
@@ -288,17 +285,16 @@ def update_picoclaw_config(provider, model, api_key, base_url):
     if not base_url and provider in PROVIDER_BASE_URLS:
         base_url = PROVIDER_BASE_URLS[provider]
 
-    # Load existing config to preserve picoclaw auth entries and channel settings
-    config_dir = os.path.dirname(PICOCLAW_CONFIG)
+    config_dir = os.path.dirname(OPENJARVIS_CONFIG)
     os.makedirs(config_dir, exist_ok=True)
     try:
-        with open(PICOCLAW_CONFIG) as f:
+        with open(OPENJARVIS_CONFIG) as f:
             config = json.load(f)
     except Exception:
         # Bootstrap minimal config if none exists
         config = {
             "gateway": {"host": "0.0.0.0", "port": 8080},
-            "agents": {"defaults": {"model": "default", "workspace": "~/.picoclaw/workspace",
+            "agents": {"defaults": {"model": "default", "workspace": "~/.openjarvis/workspace",
                                     "max_tokens": 4096, "temperature": 0.7}},
             "model_list": [],
             "channels": {"maixcam": {"enabled": True, "host": "127.0.0.1", "port": 18790,
@@ -322,14 +318,12 @@ def update_picoclaw_config(provider, model, api_key, base_url):
     default_entry["request_timeout"] = default_entry.get("request_timeout", 120)
     config["model_list"] = model_list
 
-    with open(PICOCLAW_CONFIG, "w") as f:
+    with open(OPENJARVIS_CONFIG, "w") as f:
         json.dump(config, f, indent=2)
 
-    os.chmod(PICOCLAW_CONFIG, 0o600)
+    os.chmod(OPENJARVIS_CONFIG, 0o600)
 
-    # For native picoclaw providers (anthropic/openai), also update auth.json so
-    # picoclaw's own agent loop can authenticate (it reads auth.json, not config.json).
-    AUTH_FILE = os.path.join(os.path.dirname(PICOCLAW_CONFIG), "auth.json")
+    AUTH_FILE = os.path.join(os.path.dirname(OPENJARVIS_CONFIG), "auth.json")
     NATIVE_PROVIDERS = {"anthropic", "openai"}
     if provider in NATIVE_PROVIDERS and api_key:
         try:
@@ -351,9 +345,9 @@ def update_picoclaw_config(provider, model, api_key, base_url):
             pass
 
     try:
-        subprocess.run(["chown", "-R", "pi:pi", os.path.dirname(PICOCLAW_CONFIG)], timeout=3)
+        subprocess.run(["chown", "-R", "pi:pi", os.path.dirname(OPENJARVIS_CONFIG)], timeout=3)
         subprocess.run(
-            ["systemctl", "restart", "picoclaw.service"],
+            ["systemctl", "restart", "clawbot-core.service"],
             timeout=10
         )
     except Exception:
@@ -363,7 +357,7 @@ def update_picoclaw_config(provider, model, api_key, base_url):
 def service_action(service, action):
     if action not in ("start", "stop", "restart"):
         return False
-    if service not in ("picoclaw", "nginx", "clawbot-telegram"):
+    if service not in ("nginx", "clawbot-telegram", "clawbot-core", "whatsapp-bridge", "wecom-bridge"):
         return False
     try:
         subprocess.run(
@@ -594,7 +588,7 @@ class Handler(BaseHTTPRequestHandler):
 
         elif path == "/config":
             try:
-                update_picoclaw_config(
+                update_llm_config(
                     provider=data.get("provider", "openai"),
                     model=data.get("model", "gpt-4o"),
                     api_key=data.get("api_key", ""),

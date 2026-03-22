@@ -55,7 +55,7 @@ So that **j'obtienne des resultats tangibles, pas juste du texte**.
 
 ### Services proteges (blocage systemctl)
 ```python
-PROTECTED_SERVICES = ['clawbot-core', 'picoclaw', 'nginx', 'clawbot-cloud', 'clawbot-status-api']
+PROTECTED_SERVICES = ['clawbot-core', 'nginx', 'clawbot-cloud', 'clawbot-status-api']
 DANGEROUS_COMMANDS = ['stop', 'restart', 'kill', 'disable', 'mask']
 ```
 

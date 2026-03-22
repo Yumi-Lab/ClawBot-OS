@@ -31,18 +31,18 @@ chmod +x /usr/local/bin/clawbot-telegram
 ## Step 3: Create default env file (disabled until configured)
 # The service will not start without TELEGRAM_TOKEN set.
 # Users configure this via the dashboard Settings > Telegram panel.
-if [[ ! -f /home/pi/.clawbot-telegram.env ]]; then
-    cat > /home/pi/.clawbot-telegram.env << 'ENVEOF'
+if [[ ! -f /home/pi/.openjarvis-telegram.env ]]; then
+    cat > /home/pi/.openjarvis-telegram.env << 'ENVEOF'
 # ClawbotOS Telegram Bot configuration
 # Configure via http://clawbot.local (Settings > Telegram Bot)
 # or edit this file directly and restart: sudo systemctl restart clawbot-telegram
 
 TELEGRAM_TOKEN=
 ALLOWED_USERS=
-AGENT=picoclaw
+AGENT=core
 ENVEOF
-    chown pi:pi /home/pi/.clawbot-telegram.env
-    chmod 600 /home/pi/.clawbot-telegram.env
+    chown pi:pi /home/pi/.openjarvis-telegram.env
+    chmod 600 /home/pi/.openjarvis-telegram.env
 fi
 
 ## Step 4: Install service but do NOT enable it (requires token)

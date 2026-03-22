@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit — Providers AI Agentic pour ClawBot</title>
+<style>
+  :root {
+    --cyan: #00ffe0;
+    --bg: #0a0e14;
+    --card: #111820;
+    --border: #1a2530;
+    --text: #c8d6e5;
+    --muted: #6b7f95;
+    --accent: #ff6b6b;
+    --green: #2ecc71;
+    --orange: #f39c12;
+    --purple: #a29bfe;
+    --blue: #74b9ff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    display: flex;
+  }
+  nav {
+    position: fixed; top:0; left:0;
+    width: 260px; height:100vh;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  nav h2 {
+    color: var(--cyan);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 0 20px 15px;
+    border-bottom: 1px solid var(--border);
+  }
+  nav a {
+    display: block;
+    padding: 8px 20px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    border-left: 3px solid transparent;
+    transition: all .2s;
+  }
+  nav a:hover, nav a.active {
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    background: rgba(0,255,224,.03);
+  }
+  nav .nav-section {
+    color: var(--cyan);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 15px 20px 5px;
+    opacity: .6;
+  }
+  main {
+    margin-left: 260px;
+    max-width: 960px;
+    padding: 40px 50px 100px;
+  }
+  h1 { font-size: 32px; color: #fff; margin-bottom: 8px; }
+  h1 span { color: var(--cyan); }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 {
+    font-size: 22px; color: #fff;
+    margin: 50px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 .num { color: var(--cyan); font-weight: 400; margin-right: 8px; }
+  h3 { color: var(--cyan); font-size: 16px; margin: 25px 0 10px; }
+  h4 { color: #fff; font-size: 14px; margin: 18px 0 8px; }
+  p { margin-bottom: 14px; }
+  strong { color: #fff; }
+  em { color: var(--orange); font-style: normal; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+  }
+  .card-title { color: var(--cyan); font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .card-label { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-right: 6px; margin-bottom: 4px; }
+  .label-green { background: rgba(46,204,113,.15); color: var(--green); }
+  .label-orange { background: rgba(243,156,18,.15); color: var(--orange); }
+  .label-red { background: rgba(255,107,107,.15); color: var(--accent); }
+  .label-purple { background: rgba(162,155,254,.15); color: var(--purple); }
+  .label-cyan { background: rgba(0,255,224,.1); color: var(--cyan); }
+  .label-blue { background: rgba(116,185,255,.15); color: var(--blue); }
+  .verdict {
+    background: linear-gradient(135deg, rgba(0,255,224,.08), rgba(0,255,224,.02));
+    border: 1px solid rgba(0,255,224,.25);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .verdict h4 { color: var(--cyan); margin-bottom: 8px; }
+  .warning {
+    background: linear-gradient(135deg, rgba(255,107,107,.08), rgba(255,107,107,.02));
+    border: 1px solid rgba(255,107,107,.25);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .warning h4 { color: var(--accent); margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 14px; }
+  th { background: var(--card); color: var(--cyan); text-align: left; padding: 10px 14px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: rgba(0,255,224,.02); }
+  .score { font-weight: 700; }
+  .score-high { color: var(--green); }
+  .score-mid { color: var(--orange); }
+  .score-low { color: var(--accent); }
+  .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 15px 0; font-size: 13px; }
+  .flow-box { background: var(--card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; }
+  .flow-arrow { color: var(--cyan); font-weight: bold; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 20px 0; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; color: var(--cyan); }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  ul, ol { margin: 10px 0 14px 20px; }
+  li { margin-bottom: 6px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+  .pro { color: var(--green); }
+  .con { color: var(--accent); }
+  .provider-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; padding: 4px 12px;
+    border-radius: 6px; margin-right: 8px;
+  }
+  .badge-claude { background: rgba(162,155,254,.15); color: var(--purple); }
+  .badge-kimi { background: rgba(0,255,224,.1); color: var(--cyan); }
+  .badge-qwen { background: rgba(116,185,255,.15); color: var(--blue); }
+  .badge-deepseek { background: rgba(46,204,113,.15); color: var(--green); }
+  .radar-container { display: flex; justify-content: center; margin: 20px 0; }
+  .integration-score {
+    font-size: 48px; font-weight: 800;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-align: center; margin: 10px 0;
+  }
+  @media (max-width: 900px) {
+    nav { display: none; }
+    main { margin-left: 0; padding: 20px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <h2>Sommaire</h2>
+  <a href="#contexte">1. Contexte & Objectif</a>
+  <a href="#criteres">2. Criteres d'Evaluation</a>
+  <div class="nav-section">Providers</div>
+  <a href="#claude">3. Claude (Anthropic)</a>
+  <a href="#kimi">4. Kimi (Moonshot)</a>
+  <a href="#qwen">5. Qwen (Alibaba)</a>
+  <a href="#deepseek">6. DeepSeek</a>
+  <div class="nav-section">Comparatifs</div>
+  <a href="#matrice">7. Matrice Comparative</a>
+  <a href="#pricing">8. Pricing & Couts</a>
+  <a href="#integration">9. Integration ClawBot</a>
+  <a href="#verdict">10. Verdict & Recommandations</a>
+</nav>
+
+<main>
+
+<h1>Audit — <span>Providers AI Agentic</span></h1>
+<p class="subtitle">Comparatif complet Claude vs Kimi vs Qwen vs DeepSeek pour integration ClawBot &mdash; Mars 2026</p>
+
+<!-- ============================================ -->
+<h2 id="contexte"><span class="num">01</span>Contexte & Objectif</h2>
+
+<p>ClawBot utilise actuellement <strong>deux providers AI</strong> en production :</p>
+<ul>
+  <li><span class="provider-badge badge-claude">Claude</span> Anthropic — provider principal (Haiku/Sonnet/Opus) pour tous les plans payants</li>
+  <li><span class="provider-badge badge-kimi">Kimi</span> Moonshot — fallback gratuit et web search natif</li>
+</ul>
+
+<p>Cet audit evalue l'ajout de <strong>Qwen</strong> (Alibaba) et <strong>DeepSeek</strong> comme providers alternatifs pour :</p>
+<ul>
+  <li>Reduire les couts sur les plans Free/Starter (modeles open-source moins chers)</li>
+  <li>Ajouter de la redundance (failover si Anthropic rate-limit 429)</li>
+  <li>Exploiter des capacites specifiques (coding agentic, reasoning, vision)</li>
+  <li>Proposer des modeles chinois pour le marche asiatique (serveur Chine prevu)</li>
+</ul>
+
+<div class="card">
+  <div class="card-title">Architecture actuelle — Cloud Proxy</div>
+  <div class="flow">
+    <div class="flow-box">Device (Pi)</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">clawbot-cloud</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">PLAN_ROUTING</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Anthropic / Moonshot / DeepSeek / OpenAI</div>
+  </div>
+  <p style="font-size:13px;color:var(--muted)">Le cloud proxy accepte deja les endpoints DeepSeek et OpenAI dans <code>PROVIDER_URLS</code>. L'ajout de Qwen necessite uniquement une nouvelle entree DashScope.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">4</div><div class="stat-label">Providers audites</div></div>
+  <div class="stat"><div class="stat-num">15+</div><div class="stat-label">Modeles evalues</div></div>
+  <div class="stat"><div class="stat-num">8</div><div class="stat-label">Criteres agentic</div></div>
+  <div class="stat"><div class="stat-num">1</div><div class="stat-label">Format commun (OpenAI)</div></div>
+</div>
+
+<!-- ============================================ -->
+<h2 id="criteres"><span class="num">02</span>Criteres d'Evaluation Agentic</h2>
+
+<p>Seuls les criteres pertinents pour ClawBot sont evalues — un modele doit pouvoir <strong>etre un agent autonome</strong> qui utilise des tools, raisonne sur les resultats, et boucle jusqu'a completion.</p>
+
+<table>
+  <tr><th>Critere</th><th>Description</th><th>Poids</th></tr>
+  <tr><td><strong>Tool Calling natif</strong></td><td>Support function/tool calling dans l'API, format JSON fiable</td><td class="score score-high">Critique</td></tr>
+  <tr><td><strong>Multi-turn tool loop</strong></td><td>Capacite a enchainer N rounds tool_call → result → tool_call</td><td class="score score-high">Critique</td></tr>
+  <tr><td><strong>Streaming SSE</strong></td><td>Stream token-by-token compatible avec l'orchestrateur ClawBot</td><td class="score score-high">Critique</td></tr>
+  <tr><td><strong>OpenAI-compatible API</strong></td><td>Endpoint <code>/v1/chat/completions</code> format standard</td><td class="score score-high">Critique</td></tr>
+  <tr><td><strong>Context window</strong></td><td>Taille de contexte pour les sessions longues avec tool history</td><td class="score score-mid">Important</td></tr>
+  <tr><td><strong>Reasoning / CoT</strong></td><td>Capacite de raisonnement profond (thinking mode)</td><td class="score score-mid">Important</td></tr>
+  <tr><td><strong>Code generation</strong></td><td>Qualite du code genere (SWE-bench, HumanEval)</td><td class="score score-mid">Important</td></tr>
+  <tr><td><strong>Cout / 1M tokens</strong></td><td>Prix input+output pour budget plans Free/Starter</td><td class="score score-mid">Important</td></tr>
+</table>
+
+<!-- ============================================ -->
+<h2 id="claude"><span class="num">03</span>Claude (Anthropic) — Provider Principal</h2>
+
+<div class="card">
+  <div class="card-title">
+    <span class="provider-badge badge-claude">Claude</span>
+    Status : EN PRODUCTION
+  </div>
+  <span class="card-label label-green">Tool Calling</span>
+  <span class="card-label label-green">Streaming</span>
+  <span class="card-label label-green">200K context</span>
+  <span class="card-label label-purple">Extended Thinking</span>
+  <span class="card-label label-cyan">Web Search natif</span>
+</div>
+
+<h3>Modeles pertinents pour ClawBot</h3>
+<table>
+  <tr><th>Modele</th><th>Contexte</th><th>Tool Calling</th><th>Prix In/Out (/1M)</th><th>Usage ClawBot</th></tr>
+  <tr>
+    <td><strong>claude-haiku-4-5</strong></td>
+    <td>200K</td>
+    <td class="score score-high">Excellent</td>
+    <td>$0.80 / $4.00</td>
+    <td>Free, routing, compaction</td>
+  </tr>
+  <tr>
+    <td><strong>claude-sonnet-4-6</strong></td>
+    <td>200K</td>
+    <td class="score score-high">Excellent</td>
+    <td>$3.00 / $15.00</td>
+    <td>Starter, Plus</td>
+  </tr>
+  <tr>
+    <td><strong>claude-opus-4-6</strong></td>
+    <td>200K (1M dispo)</td>
+    <td class="score score-high">Excellent</td>
+    <td>$15.00 / $75.00</td>
+    <td>Geek, Pro</td>
+  </tr>
+</table>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title pro">Avantages</div>
+    <ul>
+      <li>Tool calling le plus fiable du marche — JSON strictement formate</li>
+      <li>Extended Thinking (CoT visible) pour raisonnement complexe</li>
+      <li>Web Search natif (<code>web_search_tool</code>) — deja integre ClawBot</li>
+      <li>Streaming SSE robuste, content_block_delta granulaire</li>
+      <li>System prompt riche, instructions suivies fidelement</li>
+      <li>200K contexte standard, 1M pour Opus</li>
+      <li>API mature, SLA enterprise, documentation exhaustive</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title con">Inconvenients</div>
+    <ul>
+      <li><strong>Prix eleve</strong> — Opus a $15/$75 limite l'usage sur plans budget</li>
+      <li>Pas de modele open-source / self-hostable</li>
+      <li>Rate limits stricts sur Free tier (TPM)</li>
+      <li>Pas de vision video (images only)</li>
+      <li>Latence premiere token plus haute que modeles MoE</li>
+      <li>Pas de modele specialise coding (Sonnet/Opus sont generalistes)</li>
+      <li>Dependance unique provider US — risque geopolitique marche Chine</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<h2 id="kimi"><span class="num">04</span>Kimi (Moonshot AI) — Fallback & Web Search</h2>
+
+<div class="card">
+  <div class="card-title">
+    <span class="provider-badge badge-kimi">Kimi</span>
+    Status : EN PRODUCTION
+  </div>
+  <span class="card-label label-green">OpenAI-compat</span>
+  <span class="card-label label-green">Web Search natif</span>
+  <span class="card-label label-orange">Tool Calling</span>
+  <span class="card-label label-green">128K context</span>
+  <span class="card-label label-cyan">Gratuit coding</span>
+</div>
+
+<h3>Modeles pertinents pour ClawBot</h3>
+<table>
+  <tr><th>Modele</th><th>Contexte</th><th>Tool Calling</th><th>Prix In/Out (/1M)</th><th>Usage ClawBot</th></tr>
+  <tr>
+    <td><strong>kimi-for-coding</strong></td>
+    <td>128K</td>
+    <td class="score score-mid">Correct</td>
+    <td>Gratuit (beta)</td>
+    <td>Free tier fallback</td>
+  </tr>
+  <tr>
+    <td><strong>kimi-1.5</strong></td>
+    <td>128K</td>
+    <td class="score score-mid">Correct</td>
+    <td>~$0.50 / $2.00</td>
+    <td>Prevu pour vision (OpenJarvis)</td>
+  </tr>
+  <tr>
+    <td><strong>kimi-vl-a3b</strong></td>
+    <td>128K</td>
+    <td class="score score-low">Limite</td>
+    <td>~$0.20 / $0.80</td>
+    <td>Vision legere</td>
+  </tr>
+</table>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title pro">Avantages</div>
+    <ul>
+      <li><code>$web_search</code> builtin — search sans outil externe, 2 rounds</li>
+      <li>kimi-for-coding gratuit en beta — ideal plan Free</li>
+      <li>API OpenAI-compatible (<code>api.kimi.com/coding/v1</code>)</li>
+      <li>Vision multimodale (kimi-1.5, kimi-vl)</li>
+      <li>Bon en chinois — pertinent pour serveur Chine</li>
+      <li>User-Agent gotcha documente et resolu dans ClawBot</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title con">Inconvenients</div>
+    <ul>
+      <li>Tool calling moins fiable — JSON parfois mal formate</li>
+      <li>Pas de thinking mode / CoT visible</li>
+      <li>Beta gratuite peut disparaitre a tout moment</li>
+      <li>Contexte limite a 128K (vs 200K Claude, 1M Qwen)</li>
+      <li>Benchmarks agentic inferieurs a Claude et Qwen3</li>
+      <li>Documentation API limitee, communaute plus petite</li>
+      <li>Pas de modele specialise coding (kimi-for-coding est un repackage)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<h2 id="qwen"><span class="num">05</span>Qwen (Alibaba Cloud) — Nouveau Candidat</h2>
+
+<div class="card">
+  <div class="card-title">
+    <span class="provider-badge badge-qwen">Qwen</span>
+    Status : A INTEGRER
+  </div>
+  <span class="card-label label-green">OpenAI-compat</span>
+  <span class="card-label label-green">Tool Calling</span>
+  <span class="card-label label-green">Streaming</span>
+  <span class="card-label label-green">1M context</span>
+  <span class="card-label label-purple">Thinking Mode</span>
+  <span class="card-label label-cyan">Open Source</span>
+  <span class="card-label label-blue">Coder specialise</span>
+</div>
+
+<h3>Endpoints API</h3>
+<div class="card">
+  <div class="card-title">DashScope — OpenAI-Compatible Mode</div>
+  <table>
+    <tr><th>Region</th><th>Endpoint</th></tr>
+    <tr><td>International (Singapore)</td><td><code>https://dashscope-intl.aliyuncs.com/compatible-mode/v1</code></td></tr>
+    <tr><td>USA (Virginia)</td><td><code>https://dashscope-us.aliyuncs.com/compatible-mode/v1</code></td></tr>
+    <tr><td>Chine (Beijing)</td><td><code>https://dashscope.aliyuncs.com/compatible-mode/v1</code></td></tr>
+    <tr><td>Hong Kong</td><td><code>https://cn-hongkong.dashscope.aliyuncs.com/compatible-mode/v1</code></td></tr>
+  </table>
+  <p style="font-size:13px;color:var(--muted)"><strong>Auth :</strong> <code>Authorization: Bearer $DASHSCOPE_API_KEY</code> — format standard OpenAI. Compatible direct avec le proxy ClawBot.</p>
+</div>
+
+<h3>Modeles pertinents pour ClawBot</h3>
+<table>
+  <tr><th>Modele</th><th>Params</th><th>Contexte</th><th>Tool Calling</th><th>Prix In/Out (/1M)</th><th>Usage ClawBot</th></tr>
+  <tr>
+    <td><strong>qwen3-max</strong></td>
+    <td>Non divulgue</td>
+    <td>262K</td>
+    <td class="score score-high">Excellent</td>
+    <td>$1.20 / $6.00</td>
+    <td>Alternative Sonnet (Plus/Geek)</td>
+  </tr>
+  <tr>
+    <td><strong>qwen3.5-plus</strong></td>
+    <td>Non divulgue</td>
+    <td>1M</td>
+    <td class="score score-high">Excellent</td>
+    <td>$0.40 / $1.20</td>
+    <td>Starter, sessions longues</td>
+  </tr>
+  <tr>
+    <td><strong>qwen3.5-flash</strong></td>
+    <td>Non divulgue</td>
+    <td>1M</td>
+    <td class="score score-mid">Bon</td>
+    <td>$0.05 / $0.40</td>
+    <td>Free tier, compaction, routing</td>
+  </tr>
+  <tr>
+    <td><strong>qwen-turbo</strong></td>
+    <td>Non divulgue</td>
+    <td>1M</td>
+    <td class="score score-mid">Bon</td>
+    <td>$0.05 / $0.20</td>
+    <td>Ultra-budget Free tier</td>
+  </tr>
+  <tr>
+    <td><strong>qwen3-coder-plus</strong></td>
+    <td>480B MoE (35B actifs)</td>
+    <td>1M</td>
+    <td class="score score-high">Excellent</td>
+    <td>$1.14 / $2.28</td>
+    <td>Agent coding specialise</td>
+  </tr>
+  <tr>
+    <td><strong>qwen3-coder-flash</strong></td>
+    <td>MoE</td>
+    <td>1M</td>
+    <td class="score score-high">Bon</td>
+    <td>~$0.10 / $0.50</td>
+    <td>Coding budget</td>
+  </tr>
+  <tr>
+    <td><strong>qwq-plus</strong></td>
+    <td>32B</td>
+    <td>131K</td>
+    <td class="score score-mid">Correct</td>
+    <td>$0.80 / $2.40</td>
+    <td>Reasoning (alt. Extended Thinking)</td>
+  </tr>
+  <tr>
+    <td><strong>qwen3-vl-plus</strong></td>
+    <td>Non divulgue</td>
+    <td>262K</td>
+    <td class="score score-mid">Correct</td>
+    <td>~$0.60 / $2.00</td>
+    <td>Vision (OpenJarvis camera)</td>
+  </tr>
+</table>
+
+<h3>Capacites Agentic — Detail</h3>
+
+<div class="card">
+  <div class="card-title">Qwen3-Coder — Modele Agentic de Reference</div>
+  <p><strong>Architecture :</strong> MoE 480B params totaux, 35B actifs — inference rapide malgre la taille.</p>
+  <p><strong>Entrainement agentic :</strong> Long-horizon RL avec 20 000 environnements paralleles. Le modele apprend a planifier, utiliser des tools, recevoir du feedback, et prendre des decisions sur plusieurs tours.</p>
+  <p><strong>SWE-Bench Verified :</strong> 70.6% (Qwen3-Coder-Next) — comparable a Claude Sonnet 4 sur les benchmarks agentic coding.</p>
+  <p><strong>BFCL-V4 :</strong> Qwen 3.5 122B score 72.2 — superior a GPT-5 mini de 30% sur tool use.</p>
+  <p><strong>MCP :</strong> Support MCP renforce dans Qwen3, compatible Qwen-Agent framework.</p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title pro">Avantages</div>
+    <ul>
+      <li><strong>Prix imbattable</strong> — Flash a $0.05/$0.40, 60x moins cher que Opus</li>
+      <li>Contexte 1M tokens sur Plus/Flash — sessions agentic longues</li>
+      <li>Qwen3-Coder specialise coding agentic (SWE-bench 70.6%)</li>
+      <li>Thinking mode integre (reasoning CoT natif)</li>
+      <li>API 100% OpenAI-compatible — zero adaptation dans ClawBot</li>
+      <li>4 endpoints regionaux dont <strong>Chine (Beijing)</strong> — ideal serveur Chine prevu</li>
+      <li>Modeles open-source — self-hostable sur Pi si modeles compacts</li>
+      <li>Free tier 1M tokens (90 jours) pour demarrer</li>
+      <li>Vision multimodale (VL-Plus/Flash) pour OpenJarvis camera</li>
+      <li>Gamme complete : chat, coding, reasoning, vision, omni, OCR</li>
+      <li>Batch pricing a 50% — economies supplementaires pour taches differees</li>
+      <li>Qwen-Long : 10M tokens contexte pour analyse documents massifs</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title con">Inconvenients</div>
+    <ul>
+      <li><strong>tools + stream=True non supporte simultanement</strong> — limitation critique pour ClawBot</li>
+      <li>Tool calling legerement moins fiable que Claude (JSON edge cases)</li>
+      <li>API Alibaba Cloud — KYC/verification necessaire pour activer DashScope</li>
+      <li>Latence plus elevee depuis Europe (serveurs Asie principalement)</li>
+      <li>Documentation en chinois majoritairement, anglais partiel</li>
+      <li>Moins de recul en production (vs Anthropic 3+ ans)</li>
+      <li>Support enterprise limite hors Chine</li>
+      <li>QwQ reasoning limiter a 131K contexte (vs 200K Claude)</li>
+      <li>System message uniquement en <code>messages[0]</code> (contrainte mineure)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="warning">
+  <h4>Limitation critique : tools + streaming</h4>
+  <p>La doc DashScope indique que <strong>"tools parameter cannot be used with stream=True simultaneously"</strong>. Cela signifie que le mode agentic de ClawBot (qui stream les tokens pendant le tool loop) ne fonctionnerait pas directement. Solutions possibles :</p>
+  <ul>
+    <li><strong>Mode non-streaming</strong> pour les requetes avec tools (acceptable si latence premiere reponse < 5s)</li>
+    <li><strong>Verifier si cette limitation a ete levee</strong> dans les modeles Qwen3/3.5 recents (doc potentiellement obsolete)</li>
+    <li>Utiliser le <strong>DashScope native API</strong> au lieu du mode OpenAI-compatible (plus de features)</li>
+  </ul>
+</div>
+
+<!-- ============================================ -->
+<h2 id="deepseek"><span class="num">06</span>DeepSeek — Reasoning & Budget</h2>
+
+<div class="card">
+  <div class="card-title">
+    <span class="provider-badge badge-deepseek">DeepSeek</span>
+    Status : PREVU (endpoint deja dans PROVIDER_URLS)
+  </div>
+  <span class="card-label label-green">OpenAI-compat</span>
+  <span class="card-label label-green">Tool Calling</span>
+  <span class="card-label label-green">Streaming</span>
+  <span class="card-label label-purple">Thinking + Tools</span>
+  <span class="card-label label-cyan">Open Source</span>
+  <span class="card-label label-orange">128K context</span>
+</div>
+
+<h3>Modeles pertinents pour ClawBot</h3>
+<table>
+  <tr><th>Modele</th><th>Params</th><th>Contexte</th><th>Tool Calling</th><th>Prix In/Out (/1M)</th><th>Usage ClawBot</th></tr>
+  <tr>
+    <td><strong>deepseek-chat (V3.2)</strong></td>
+    <td>671B MoE</td>
+    <td>128K</td>
+    <td class="score score-high">Excellent</td>
+    <td>$0.27 / $1.10</td>
+    <td>Alternative Sonnet budget</td>
+  </tr>
+  <tr>
+    <td><strong>deepseek-reasoner (R1)</strong></td>
+    <td>671B MoE</td>
+    <td>128K</td>
+    <td class="score score-mid">Correct (V3.2+)</td>
+    <td>$0.55 / $2.19</td>
+    <td>Reasoning profond</td>
+  </tr>
+</table>
+
+<h3>Capacites Agentic — Detail</h3>
+<div class="card">
+  <div class="card-title">DeepSeek V3.2 — Thinking with Tools</div>
+  <p><strong>Innovation majeure :</strong> V3.2 est le premier modele a integrer le <strong>thinking directement dans le tool-use</strong> — le modele raisonne pendant qu'il utilise des outils, pas avant.</p>
+  <p><strong>Agent training :</strong> Methode de synthese massive couvrant 1 800+ environnements et 85K+ instructions complexes.</p>
+  <p><strong>Strict Function Calling :</strong> Mode beta qui enforce le schema JSON strict — fiabilite comparable a Claude.</p>
+  <p><strong>Format Anthropic :</strong> V3.1+ supporte aussi le format API Anthropic en plus d'OpenAI.</p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title pro">Avantages</div>
+    <ul>
+      <li><strong>Thinking with Tools</strong> — raisonnement integre au tool loop (unique)</li>
+      <li>Prix tres competitif — $0.27/$1.10 pour V3.2</li>
+      <li>Endpoint deja configure dans ClawBot (<code>api.deepseek.com/v1</code>)</li>
+      <li>Strict Function Calling — JSON fiable</li>
+      <li>Open source (R1, V3) — self-hostable</li>
+      <li>Tool calling + streaming simultane (pas de limitation Qwen)</li>
+      <li>Performance agentic superieure a R1 et V3 precedents</li>
+      <li>Agent autonome annonce fin 2026</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title con">Inconvenients</div>
+    <ul>
+      <li>Contexte limite a 128K (vs 1M Qwen, 200K Claude)</li>
+      <li>API parfois instable — downtime plus frequent qu'Anthropic</li>
+      <li>Pas de vision multimodale dans l'API publique</li>
+      <li>Pas de web search natif (contrairement a Claude/Kimi)</li>
+      <li>Documentation en chinois principalement</li>
+      <li>Entreprise chinoise — memes risques geopolitiques que Qwen</li>
+      <li>Rate limits agressifs sur API gratuite</li>
+      <li>Pas de modele specialise coding (V3 est generaliste)</li>
+      <li>1 seul endpoint (pas de region US/EU dedier)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<h2 id="matrice"><span class="num">07</span>Matrice Comparative</h2>
+
+<h3>Capacites Agentic</h3>
+<table>
+  <tr>
+    <th>Critere</th>
+    <th><span class="provider-badge badge-claude">Claude</span></th>
+    <th><span class="provider-badge badge-kimi">Kimi</span></th>
+    <th><span class="provider-badge badge-qwen">Qwen</span></th>
+    <th><span class="provider-badge badge-deepseek">DeepSeek</span></th>
+  </tr>
+  <tr>
+    <td><strong>Tool Calling fiabilite</strong></td>
+    <td class="score score-high">9.5/10</td>
+    <td class="score score-mid">6/10</td>
+    <td class="score score-high">8.5/10</td>
+    <td class="score score-high">8/10</td>
+  </tr>
+  <tr>
+    <td><strong>Multi-turn tool loop</strong></td>
+    <td class="score score-high">Excellent</td>
+    <td class="score score-mid">Correct</td>
+    <td class="score score-high">Excellent</td>
+    <td class="score score-high">Excellent</td>
+  </tr>
+  <tr>
+    <td><strong>Streaming + Tools</strong></td>
+    <td class="score score-high">Oui</td>
+    <td class="score score-high">Oui</td>
+    <td class="score score-low">Non (limitation)</td>
+    <td class="score score-high">Oui</td>
+  </tr>
+  <tr>
+    <td><strong>OpenAI-compat API</strong></td>
+    <td class="score score-mid">Non (format propre)</td>
+    <td class="score score-high">Oui</td>
+    <td class="score score-high">Oui</td>
+    <td class="score score-high">Oui</td>
+  </tr>
+  <tr>
+    <td><strong>Contexte max</strong></td>
+    <td>200K (1M Opus)</td>
+    <td>128K</td>
+    <td class="score score-high">1M (Flash/Plus)</td>
+    <td>128K</td>
+  </tr>
+  <tr>
+    <td><strong>Thinking / CoT</strong></td>
+    <td class="score score-high">Extended Thinking</td>
+    <td class="score score-low">Non</td>
+    <td class="score score-high">Thinking Mode</td>
+    <td class="score score-high">Thinking + Tools</td>
+  </tr>
+  <tr>
+    <td><strong>SWE-Bench Verified</strong></td>
+    <td>~72% (Sonnet 4)</td>
+    <td>N/A</td>
+    <td>70.6% (Coder-Next)</td>
+    <td>~65% (V3.2)</td>
+  </tr>
+  <tr>
+    <td><strong>Web Search natif</strong></td>
+    <td class="score score-high">Oui (tool)</td>
+    <td class="score score-high">Oui ($web_search)</td>
+    <td class="score score-low">Non</td>
+    <td class="score score-low">Non</td>
+  </tr>
+  <tr>
+    <td><strong>Vision</strong></td>
+    <td class="score score-mid">Images only</td>
+    <td class="score score-high">Images + Video</td>
+    <td class="score score-high">Images + Video</td>
+    <td class="score score-low">Non (API)</td>
+  </tr>
+  <tr>
+    <td><strong>Modele coding dedie</strong></td>
+    <td class="score score-low">Non</td>
+    <td class="score score-low">Non</td>
+    <td class="score score-high">Qwen3-Coder</td>
+    <td class="score score-low">Non</td>
+  </tr>
+  <tr>
+    <td><strong>Open Source</strong></td>
+    <td class="score score-low">Non</td>
+    <td class="score score-low">Non</td>
+    <td class="score score-high">Oui (Apache 2.0)</td>
+    <td class="score score-high">Oui (MIT)</td>
+  </tr>
+  <tr>
+    <td><strong>Endpoint Chine</strong></td>
+    <td class="score score-low">Non</td>
+    <td class="score score-high">Oui</td>
+    <td class="score score-high">Oui (Beijing)</td>
+    <td class="score score-high">Oui</td>
+  </tr>
+</table>
+
+<h3>Scores Globaux</h3>
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num" style="color:var(--purple)">9.2</div>
+    <div class="stat-label">Claude — Leader qualite</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" style="color:var(--cyan)">5.8</div>
+    <div class="stat-label">Kimi — Budget + Search</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" style="color:var(--blue)">8.4</div>
+    <div class="stat-label">Qwen — Best value</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" style="color:var(--green)">7.6</div>
+    <div class="stat-label">DeepSeek — Reasoning</div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<h2 id="pricing"><span class="num">08</span>Pricing & Analyse Couts</h2>
+
+<h3>Cout par 1M tokens (USD) — Modeles comparables</h3>
+<table>
+  <tr><th>Tier</th><th>Claude</th><th>Kimi</th><th>Qwen</th><th>DeepSeek</th></tr>
+  <tr>
+    <td><strong>Budget / Free</strong></td>
+    <td>Haiku: $0.80/$4.00</td>
+    <td>kimi-coding: Gratuit</td>
+    <td>Flash: $0.05/$0.40</td>
+    <td>V3.2: $0.27/$1.10</td>
+  </tr>
+  <tr>
+    <td><strong>Mid-range</strong></td>
+    <td>Sonnet: $3/$15</td>
+    <td>kimi-1.5: ~$0.50/$2</td>
+    <td>Plus: $0.40/$1.20</td>
+    <td>V3.2: $0.27/$1.10</td>
+  </tr>
+  <tr>
+    <td><strong>Premium</strong></td>
+    <td>Opus: $15/$75</td>
+    <td>N/A</td>
+    <td>Max: $1.20/$6.00</td>
+    <td>R1: $0.55/$2.19</td>
+  </tr>
+  <tr>
+    <td><strong>Coding</strong></td>
+    <td>Sonnet: $3/$15</td>
+    <td>N/A</td>
+    <td>Coder-Plus: $1.14/$2.28</td>
+    <td>V3.2: $0.27/$1.10</td>
+  </tr>
+</table>
+
+<div class="card">
+  <div class="card-title">Simulation — 100K tokens/jour (plan Starter)</div>
+  <table>
+    <tr><th>Provider</th><th>Modele</th><th>Cout/jour</th><th>Cout/mois (30j)</th><th>Economie vs Claude</th></tr>
+    <tr>
+      <td>Claude</td><td>Sonnet</td>
+      <td>$0.90</td><td>$27.00</td><td>—</td>
+    </tr>
+    <tr>
+      <td>Qwen</td><td>Plus</td>
+      <td>$0.08</td><td>$2.40</td>
+      <td class="score score-high">-91%</td>
+    </tr>
+    <tr>
+      <td>DeepSeek</td><td>V3.2</td>
+      <td>$0.07</td><td>$2.06</td>
+      <td class="score score-high">-92%</td>
+    </tr>
+    <tr>
+      <td>Qwen</td><td>Flash</td>
+      <td>$0.02</td><td>$0.68</td>
+      <td class="score score-high">-97%</td>
+    </tr>
+  </table>
+  <p style="font-size:13px;color:var(--muted)">Hypothese : 50% input, 50% output sur 100K tokens. Le cout reel depend du ratio in/out.</p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="integration"><span class="num">09</span>Integration ClawBot — Plan Technique</h2>
+
+<h3>9.1 — Ajout Qwen dans le Cloud Proxy</h3>
+
+<div class="card">
+  <div class="card-title">Modifications necessaires (estimees : 30 min)</div>
+  <h4>config.py</h4>
+  <ul>
+    <li>Ajouter <code>"dashscope"</code> dans <code>PROVIDER_URLS</code> avec endpoint regional</li>
+    <li>Ajouter modeles Qwen dans <code>PLAN_ROUTING</code> pour Free/Starter</li>
+    <li>Definir <code>model_ceiling</code> mapping pour modeles Qwen</li>
+  </ul>
+  <h4>llm_proxy.py</h4>
+  <ul>
+    <li>Qwen est OpenAI-compatible → <strong>pas de nouveau convertisseur</strong> necessaire</li>
+    <li>Ajouter detection provider <code>"dashscope"</code> dans le routing</li>
+    <li>Gerer la limitation tools+streaming : mode batch pour tool calls Qwen</li>
+  </ul>
+  <h4>orchestrator.py (device)</h4>
+  <ul>
+    <li>Ajouter detection <code>dashscope</code> dans <code>_load_config</code></li>
+    <li>Implementer fallback non-streaming pour tool rounds si provider Qwen</li>
+  </ul>
+</div>
+
+<h3>9.2 — Routing par Plan recommande</h3>
+
+<table>
+  <tr><th>Plan</th><th>Provider principal</th><th>Fallback</th><th>Modele</th></tr>
+  <tr>
+    <td><strong>Free</strong></td>
+    <td>Qwen (DashScope)</td>
+    <td>Kimi</td>
+    <td>qwen3.5-flash / kimi-for-coding</td>
+  </tr>
+  <tr>
+    <td><strong>Starter</strong></td>
+    <td>Qwen (DashScope)</td>
+    <td>Claude Haiku</td>
+    <td>qwen3.5-plus / claude-haiku</td>
+  </tr>
+  <tr>
+    <td><strong>Plus</strong></td>
+    <td>Claude (Anthropic)</td>
+    <td>Qwen Max</td>
+    <td>claude-sonnet / qwen3-max</td>
+  </tr>
+  <tr>
+    <td><strong>Geek</strong></td>
+    <td>Claude (Anthropic)</td>
+    <td>Qwen Coder</td>
+    <td>claude-opus / qwen3-coder-plus</td>
+  </tr>
+  <tr>
+    <td><strong>Pro</strong></td>
+    <td>Claude (Anthropic)</td>
+    <td>DeepSeek</td>
+    <td>claude-opus / deepseek-chat</td>
+  </tr>
+</table>
+
+<h3>9.3 — Marche Chine</h3>
+<div class="card">
+  <div class="card-title">Strategie serveur Chine (prevu)</div>
+  <p>Le serveur Chine pourra utiliser <strong>exclusivement Qwen + DeepSeek</strong> via les endpoints Beijing :</p>
+  <ul>
+    <li><code>dashscope.aliyuncs.com/compatible-mode/v1</code> — Qwen (latence minimale depuis Chine)</li>
+    <li><code>api.deepseek.com/v1</code> — DeepSeek (serveurs Chine)</li>
+    <li>Pas de dependance Anthropic — conformite reglementaire chinoise</li>
+    <li>Qwen excelle en chinois — experience utilisateur native</li>
+  </ul>
+</div>
+
+<!-- ============================================ -->
+<h2 id="verdict"><span class="num">10</span>Verdict & Recommandations</h2>
+
+<div class="verdict">
+  <h4>Recommandation #1 — Integrer Qwen comme provider budget</h4>
+  <p><strong>Impact :</strong> Reduction des couts de 90%+ sur les plans Free et Starter en passant de Claude Haiku ($0.80/$4.00) a Qwen Flash ($0.05/$0.40). La compatibilite OpenAI rend l'integration triviale — une entry dans <code>PROVIDER_URLS</code> et un routing dans <code>PLAN_ROUTING</code>.</p>
+  <p><strong>Risque :</strong> La limitation <code>tools + stream</code> necessite un fallback non-streaming pour les tool rounds, ou une verification que les modeles Qwen3.5 ont leve cette restriction.</p>
+</div>
+
+<div class="verdict">
+  <h4>Recommandation #2 — Qwen3-Coder comme agent coding specialise</h4>
+  <p><strong>Impact :</strong> Avec 70.6% sur SWE-Bench et un entrainement agentic long-horizon, Qwen3-Coder est le meilleur modele open-source pour les taches coding. Pertinent pour un mode "code agent" dans ClawBot ou pour remplacer Claude sur les taches de code pures (rapport qualite/prix 10x meilleur).</p>
+</div>
+
+<div class="verdict">
+  <h4>Recommandation #3 — DeepSeek V3.2 comme fallback intelligent</h4>
+  <p><strong>Impact :</strong> Deja configure dans <code>PROVIDER_URLS</code>. Le "Thinking with Tools" est unique — permet un raisonnement plus profond pendant l'utilisation d'outils. Ideal comme fallback quand Anthropic renvoie 429 (rate limit).</p>
+  <p><strong>Action :</strong> Activer le routing DeepSeek dans <code>PLAN_ROUTING</code> pour les plans Pro (failover).</p>
+</div>
+
+<div class="warning">
+  <h4>Non recommande — Remplacer Claude comme provider principal</h4>
+  <p>Claude reste superieur en <strong>fiabilite tool calling</strong> (9.5/10 vs 8.5/10 Qwen), <strong>suivi d'instructions complexes</strong>, et <strong>stabilite API</strong>. Les plans payants (Plus, Geek, Pro) doivent conserver Claude comme provider principal pour garantir la qualite de l'experience.</p>
+</div>
+
+<h3>Priorite d'implementation</h3>
+<table>
+  <tr><th>Priorite</th><th>Action</th><th>Effort</th><th>Impact</th></tr>
+  <tr>
+    <td><span class="card-label label-green">P0</span></td>
+    <td>Ajouter Qwen DashScope dans PROVIDER_URLS + routing Free/Starter</td>
+    <td>30 min</td>
+    <td class="score score-high">Couts -90%</td>
+  </tr>
+  <tr>
+    <td><span class="card-label label-green">P0</span></td>
+    <td>Tester limitation tools+streaming sur Qwen3.5 (verifier si levee)</td>
+    <td>1h</td>
+    <td class="score score-high">Bloquant</td>
+  </tr>
+  <tr>
+    <td><span class="card-label label-orange">P1</span></td>
+    <td>Activer DeepSeek V3.2 comme failover 429 dans PLAN_ROUTING</td>
+    <td>15 min</td>
+    <td class="score score-mid">Resilience</td>
+  </tr>
+  <tr>
+    <td><span class="card-label label-orange">P1</span></td>
+    <td>Ajouter modeles Qwen dans /v1/models et dashboard model bar</td>
+    <td>30 min</td>
+    <td class="score score-mid">UX</td>
+  </tr>
+  <tr>
+    <td><span class="card-label label-purple">P2</span></td>
+    <td>Mode agent coding avec Qwen3-Coder-Plus</td>
+    <td>2h</td>
+    <td class="score score-mid">Feature</td>
+  </tr>
+  <tr>
+    <td><span class="card-label label-purple">P2</span></td>
+    <td>Qwen VL pour vision OpenJarvis (camera/screen)</td>
+    <td>3h</td>
+    <td class="score score-mid">Feature</td>
+  </tr>
+  <tr>
+    <td><span class="card-label label-purple">P3</span></td>
+    <td>Serveur Chine — routing exclusif Qwen/DeepSeek</td>
+    <td>1 jour</td>
+    <td class="score score-mid">Marche Chine</td>
+  </tr>
+</table>
+
+<div class="card" style="margin-top:40px;border-color:var(--cyan)">
+  <div class="card-title">Resume executif</div>
+  <p><strong>Qwen est le candidat ideal</strong> pour completer l'ecosysteme ClawBot : prix 10-60x inferieurs a Claude, API OpenAI-compatible, modele coding specialise, endpoints Chine natifs, et modeles open-source. La seule limitation serieuse (tools+streaming) doit etre testee sur les modeles recents avant mise en production.</p>
+  <p><strong>DeepSeek</strong> est un excellent fallback deja pre-configure, avec l'innovation unique "Thinking with Tools".</p>
+  <p><strong>Kimi</strong> reste utile pour le web search gratuit mais est surclasse par Qwen sur tous les autres criteres agentic.</p>
+  <p><strong>Claude</strong> reste le provider premium indispensable pour la qualite maximale sur les plans payants.</p>
+</div>
+
+</main>
+
+<script>
+// Active nav link on scroll
+const sections = document.querySelectorAll('h2[id]');
+const navLinks = document.querySelectorAll('nav a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+  navLinks.forEach(a => {
+    a.classList.remove('active');
+    if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

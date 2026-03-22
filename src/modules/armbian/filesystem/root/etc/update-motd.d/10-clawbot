@@ -32,5 +32,5 @@ if [[ -f /etc/clawbotos-release ]]; then
 fi
 echo -e "Running on \e[34m${BOARD_NAME}\e[0m with \e[34mLinux ${KERNELID}\e[0m\n"
 echo -e "  Web Dashboard:  \e[32mhttp://clawbot.local\e[0m"
-echo -e "  PicoClaw API:   \e[32mhttp://clawbot.local:8080\e[0m"
+echo -e "  ClawbotCore API: \e[32mhttp://clawbot.local/api/core/\e[0m"
 echo -e ""
