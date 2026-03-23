@@ -146,6 +146,7 @@
   .badge-kimi { background: rgba(0,255,224,.1); color: var(--cyan); }
   .badge-qwen { background: rgba(116,185,255,.15); color: var(--blue); }
   .badge-deepseek { background: rgba(46,204,113,.15); color: var(--green); }
+  .badge-mistral { background: rgba(255,100,70,.15); color: #ff6446; }
   .radar-container { display: flex; justify-content: center; margin: 20px 0; }
   .integration-score {
     font-size: 48px; font-weight: 800;
@@ -171,17 +172,18 @@
   <a href="#kimi">4. Kimi (Moonshot)</a>
   <a href="#qwen">5. Qwen (Alibaba)</a>
   <a href="#deepseek">6. DeepSeek</a>
+  <a href="#mistral">7. Mistral (Mistral AI)</a>
   <div class="nav-section">Comparatifs</div>
-  <a href="#matrice">7. Matrice Comparative</a>
-  <a href="#pricing">8. Pricing & Couts</a>
-  <a href="#integration">9. Integration ClawBot</a>
-  <a href="#verdict">10. Verdict & Recommandations</a>
+  <a href="#matrice">8. Matrice Comparative</a>
+  <a href="#pricing">9. Pricing & Couts</a>
+  <a href="#integration">10. Integration ClawBot</a>
+  <a href="#verdict">11. Verdict & Recommandations</a>
 </nav>
 
 <main>
 
 <h1>Audit — <span>Providers AI Agentic</span></h1>
-<p class="subtitle">Comparatif complet Claude vs Kimi vs Qwen vs DeepSeek pour integration ClawBot &mdash; Mars 2026</p>
+<p class="subtitle">Comparatif complet Claude vs Kimi vs Qwen vs DeepSeek vs Mistral pour integration ClawBot &mdash; Mars 2026</p>
 
 <!-- ============================================ -->
 <h2 id="contexte"><span class="num">01</span>Contexte & Objectif</h2>
@@ -192,7 +194,7 @@
   <li><span class="provider-badge badge-kimi">Kimi</span> Moonshot — fallback gratuit et web search natif</li>
 </ul>
 
-<p>Cet audit evalue l'ajout de <strong>Qwen</strong> (Alibaba) et <strong>DeepSeek</strong> comme providers alternatifs pour :</p>
+<p>Cet audit evalue l'ajout de <strong>Qwen</strong> (Alibaba), <strong>DeepSeek</strong> et <strong>Mistral</strong> (Mistral AI) comme providers alternatifs pour :</p>
 <ul>
   <li>Reduire les couts sur les plans Free/Starter (modeles open-source moins chers)</li>
   <li>Ajouter de la redundance (failover si Anthropic rate-limit 429)</li>
@@ -209,14 +211,14 @@
     <div class="flow-arrow">&rarr;</div>
     <div class="flow-box">PLAN_ROUTING</div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-box">Anthropic / Moonshot / DeepSeek / OpenAI</div>
+    <div class="flow-box">Anthropic / Moonshot / DashScope / DeepSeek / Mistral</div>
   </div>
-  <p style="font-size:13px;color:var(--muted)">Le cloud proxy accepte deja les endpoints DeepSeek et OpenAI dans <code>PROVIDER_URLS</code>. L'ajout de Qwen necessite uniquement une nouvelle entree DashScope.</p>
+  <p style="font-size:13px;color:var(--muted)">Le cloud proxy accepte deja les endpoints DeepSeek et OpenAI dans <code>PROVIDER_URLS</code>. L'ajout de Qwen (DashScope) et Mistral necessite uniquement une nouvelle entree par provider — tous sont OpenAI-compatible.</p>
 </div>
 
 <div class="stats">
-  <div class="stat"><div class="stat-num">4</div><div class="stat-label">Providers audites</div></div>
-  <div class="stat"><div class="stat-num">15+</div><div class="stat-label">Modeles evalues</div></div>
+  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Providers audites</div></div>
+  <div class="stat"><div class="stat-num">20+</div><div class="stat-label">Modeles evalues</div></div>
   <div class="stat"><div class="stat-num">8</div><div class="stat-label">Criteres agentic</div></div>
   <div class="stat"><div class="stat-num">1</div><div class="stat-label">Format commun (OpenAI)</div></div>
 </div>
@@ -604,7 +606,123 @@
 </div>
 
 <!-- ============================================ -->
-<h2 id="matrice"><span class="num">07</span>Matrice Comparative</h2>
+<h2 id="mistral"><span class="num">07</span>Mistral Small 4 — Le modele unifie francais open-weight</h2>
+
+<div class="card">
+  <span class="provider-badge badge-mistral">Mistral AI</span>
+  <span class="card-label label-green">Open Source (Apache 2.0)</span>
+  <span class="card-label label-green">OpenAI-compatible</span>
+  <span class="card-label label-green">Vision native</span>
+  <span class="card-label label-green">Tool Calling</span>
+  <span class="card-label label-purple">Reasoning configurable</span>
+  <span class="card-label label-cyan">119B MoE (6B actifs)</span>
+  <p style="margin-top:12px"><strong>Mistral Small 4</strong> (16 mars 2026) est un modele <strong>MoE de 119 milliards de parametres</strong> (128 experts, 4 actifs par token = ~6B actifs) avec 256K de contexte. Il unifie en un seul modele les capacites de 3 anciens modeles Mistral : <strong>Magistral</strong> (reasoning), <strong>Pixtral</strong> (vision) et <strong>Devstral</strong> (coding agentic). Licence Apache 2.0.</p>
+</div>
+
+<h3>Modeles disponibles</h3>
+<table>
+  <tr><th>Modele</th><th>Params</th><th>Contexte</th><th>Tool calling</th><th>Prix (in/out par 1M)</th><th>Notes</th></tr>
+  <tr>
+    <td><strong>mistral-small-latest</strong><br><code>mistral-small-2603</code></td>
+    <td>119B MoE (6B actifs)</td>
+    <td>256K</td>
+    <td class="score score-high">Oui</td>
+    <td>$0.15 / $0.60</td>
+    <td>Modele unifie : chat + reasoning + vision + coding. Phare "small"</td>
+  </tr>
+  <tr>
+    <td><strong>mistral-large-latest</strong></td>
+    <td>~123B (MoE)</td>
+    <td>128K</td>
+    <td class="score score-high">Oui</td>
+    <td>$2.00 / $6.00</td>
+    <td>Flagship, raisonnement avance</td>
+  </tr>
+  <tr>
+    <td><strong>codestral-latest</strong></td>
+    <td>22B</td>
+    <td>256K</td>
+    <td class="score score-mid">Basique</td>
+    <td>$0.30 / $0.90</td>
+    <td>Specialise code, 80+ langages</td>
+  </tr>
+  <tr>
+    <td><strong>pixtral-large-latest</strong></td>
+    <td>~124B (MoE)</td>
+    <td>128K</td>
+    <td class="score score-high">Oui</td>
+    <td>$2.00 / $6.00</td>
+    <td>Vision avancee (heritage dans Small 4)</td>
+  </tr>
+</table>
+
+<h3>API & Integration</h3>
+<div class="card">
+  <div class="card-title">Endpoint unique — OpenAI-compatible</div>
+  <table>
+    <tr><th>Region</th><th>Endpoint</th><th>Auth</th></tr>
+    <tr>
+      <td><strong>Global (EU-hosted)</strong></td>
+      <td><code>https://api.mistral.ai/v1</code></td>
+      <td><code>Authorization: Bearer $MISTRAL_API_KEY</code></td>
+    </tr>
+  </table>
+  <p style="margin-top:10px"><strong>Drop-in replacement :</strong> L'API Mistral utilise le format OpenAI (<code>/v1/chat/completions</code>) — integration dans <code>llm_proxy.py</code> identique a Qwen/DeepSeek, une entry dans <code>PROVIDER_URLS</code> suffit.</p>
+  <p><strong>Reasoning configurable :</strong> Parametre <code>reasoning_effort</code> dans la requete : <code>"none"</code> (chat rapide, equiv. Small 3.2) ou <code>"high"</code> (raisonnement profond, equiv. Magistral).</p>
+  <p><strong>Self-hosting :</strong> Poids open-source sur HuggingFace (<code>Mistral-Small-4-119B-2603</code>). Tourne sur vLLM, llama.cpp, SGLang. Minimum : 4x H100 ou 2x H200. <em>Non faisable sur Pi H3</em> — cloud API obligatoire pour ClawBot.</p>
+</div>
+
+<h3>Capacites Agentic — Detail</h3>
+<div class="card">
+  <div class="card-title">Mistral Small 4 — Modele unifie (Reasoning + Vision + Coding + Tools)</div>
+  <p><strong>Reasoning configurable :</strong> <code>reasoning_effort="high"</code> active un mode thinking step-by-step (heritage Magistral). Comparable a l'Extended Thinking de Claude mais switchable per-request — ideal pour alterner entre reponses rapides et raisonnement profond dans ClawBot.</p>
+  <p><strong>Tool calling natif :</strong> Heritage Devstral — tool use et structured outputs natifs, JSON Schema enforce. Support multi-tool parallel.</p>
+  <p><strong>Vision multimodale :</strong> Heritage Pixtral — analyse d'images en entree, directement dans le chat. Pertinent pour le module camera OpenJarvis.</p>
+  <p><strong>Agentic coding :</strong> Heritage Devstral — entraine specifiquement pour les taches de code agentic (tool loops, file manipulation, debugging).</p>
+  <p><strong>Performance :</strong> 40% reduction de latence end-to-end et 3x le throughput vs Small 3 (MoE = seulement 6B actifs malgre 119B totaux).</p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title pro">Avantages</div>
+    <ul>
+      <li><strong>Prix tres competitif</strong> — $0.15/$0.60 par 1M tokens pour un modele 119B</li>
+      <li><strong>Reasoning configurable</strong> — <code>reasoning_effort</code> per-request (comme Extended Thinking)</li>
+      <li><strong>Modele unifie</strong> — remplace 3 modeles (Magistral + Pixtral + Devstral) = un seul endpoint</li>
+      <li><strong>Francais natif</strong> — Mistral AI (Paris), francais premiere classe</li>
+      <li>API OpenAI-compatible — zero effort d'integration</li>
+      <li>Apache 2.0 — aucune restriction commerciale, meme licence cible ClawBot</li>
+      <li>Vision multimodale native (camera OpenJarvis)</li>
+      <li>256K contexte — superieur a Claude (200K) et DeepSeek (128K)</li>
+      <li>MoE efficient : 6B actifs = latence faible malgre 119B totaux</li>
+      <li>Streaming + Tools simultane (pas de limitation Qwen)</li>
+      <li>Heberge en Europe (EU data sovereignty) — avantage RGPD</li>
+      <li>3x throughput vs Small 3 — efficacite operationnelle</li>
+      <li>Benchmarks : surpasse GPT-OSS 120B sur LCR, LiveCodeBench, AIME 2025</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title con">Inconvenients</div>
+    <ul>
+      <li>Pas de web search natif (contrairement a Claude/Kimi)</li>
+      <li>Pas d'endpoint Chine — inutilisable pour le serveur Beijing</li>
+      <li>119B = self-host necessaire 4x H100 (cloud API obligatoire pour ClawBot)</li>
+      <li>Communaute plus petite que Llama/Qwen — moins de fine-tunes disponibles</li>
+      <li>Un seul endpoint global (pas de region USA/Asie dediee)</li>
+      <li>Rate limits sur tier gratuit assez stricts</li>
+      <li>Modele tres recent (mars 2026) — maturite API a confirmer en production</li>
+      <li><code>reasoning_effort</code> seulement 2 niveaux (none/high) — pas de granularite intermediaire</li>
+    </ul>
+  </div>
+</div>
+
+<div class="verdict">
+  <h4>Verdict Mistral Small 4 pour ClawBot</h4>
+  <p><strong>Candidat serieux comme provider mid-range europeen.</strong> Mistral Small 4 combine reasoning, vision et coding dans un seul modele a $0.15/$0.60 — moins cher que Claude Haiku ($0.80/$4.00) avec des capacites proches. L'avantage unique d'etre heberge en Europe (RGPD natif) et d'exceller en francais en fait un choix ideal pour les plans Free/Starter en Europe. Le <code>reasoning_effort</code> configurable permet d'adapter la qualite au contexte — rapide pour le chat, profond pour les taches complexes.</p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="matrice"><span class="num">08</span>Matrice Comparative</h2>
 
 <h3>Capacites Agentic</h3>
 <table>
@@ -614,12 +732,14 @@
     <th><span class="provider-badge badge-kimi">Kimi</span></th>
     <th><span class="provider-badge badge-qwen">Qwen</span></th>
     <th><span class="provider-badge badge-deepseek">DeepSeek</span></th>
+    <th><span class="provider-badge badge-mistral">Mistral</span></th>
   </tr>
   <tr>
     <td><strong>Tool Calling fiabilite</strong></td>
     <td class="score score-high">9.5/10</td>
     <td class="score score-mid">6/10</td>
     <td class="score score-high">8.5/10</td>
+    <td class="score score-high">8/10</td>
     <td class="score score-high">8/10</td>
   </tr>
   <tr>
@@ -628,6 +748,7 @@
     <td class="score score-mid">Correct</td>
     <td class="score score-high">Excellent</td>
     <td class="score score-high">Excellent</td>
+    <td class="score score-high">Bon (Devstral heritage)</td>
   </tr>
   <tr>
     <td><strong>Streaming + Tools</strong></td>
@@ -635,10 +756,12 @@
     <td class="score score-high">Oui</td>
     <td class="score score-low">Non (limitation)</td>
     <td class="score score-high">Oui</td>
+    <td class="score score-high">Oui</td>
   </tr>
   <tr>
     <td><strong>OpenAI-compat API</strong></td>
     <td class="score score-mid">Non (format propre)</td>
+    <td class="score score-high">Oui</td>
     <td class="score score-high">Oui</td>
     <td class="score score-high">Oui</td>
     <td class="score score-high">Oui</td>
@@ -649,6 +772,7 @@
     <td>128K</td>
     <td class="score score-high">1M (Flash/Plus)</td>
     <td>128K</td>
+    <td class="score score-high">256K</td>
   </tr>
   <tr>
     <td><strong>Thinking / CoT</strong></td>
@@ -656,6 +780,7 @@
     <td class="score score-low">Non</td>
     <td class="score score-high">Thinking Mode</td>
     <td class="score score-high">Thinking + Tools</td>
+    <td class="score score-high">reasoning_effort (none/high)</td>
   </tr>
   <tr>
     <td><strong>SWE-Bench Verified</strong></td>
@@ -663,11 +788,13 @@
     <td>N/A</td>
     <td>70.6% (Coder-Next)</td>
     <td>~65% (V3.2)</td>
+    <td>~68% (Devstral heritage)</td>
   </tr>
   <tr>
     <td><strong>Web Search natif</strong></td>
     <td class="score score-high">Oui (tool)</td>
     <td class="score score-high">Oui ($web_search)</td>
+    <td class="score score-low">Non</td>
     <td class="score score-low">Non</td>
     <td class="score score-low">Non</td>
   </tr>
@@ -677,6 +804,7 @@
     <td class="score score-high">Images + Video</td>
     <td class="score score-high">Images + Video</td>
     <td class="score score-low">Non (API)</td>
+    <td class="score score-high">Images (Pixtral natif)</td>
   </tr>
   <tr>
     <td><strong>Modele coding dedie</strong></td>
@@ -684,6 +812,7 @@
     <td class="score score-low">Non</td>
     <td class="score score-high">Qwen3-Coder</td>
     <td class="score score-low">Non</td>
+    <td class="score score-high">Codestral</td>
   </tr>
   <tr>
     <td><strong>Open Source</strong></td>
@@ -691,6 +820,7 @@
     <td class="score score-low">Non</td>
     <td class="score score-high">Oui (Apache 2.0)</td>
     <td class="score score-high">Oui (MIT)</td>
+    <td class="score score-high">Oui (Apache 2.0)</td>
   </tr>
   <tr>
     <td><strong>Endpoint Chine</strong></td>
@@ -698,6 +828,15 @@
     <td class="score score-high">Oui</td>
     <td class="score score-high">Oui (Beijing)</td>
     <td class="score score-high">Oui</td>
+    <td class="score score-low">Non</td>
+  </tr>
+  <tr>
+    <td><strong>Heberge en Europe</strong></td>
+    <td class="score score-low">Non (USA)</td>
+    <td class="score score-low">Non (Chine)</td>
+    <td class="score score-low">Non (Chine/Singapour)</td>
+    <td class="score score-low">Non (Chine)</td>
+    <td class="score score-high">Oui (France/EU)</td>
   </tr>
 </table>
 
@@ -719,20 +858,25 @@
     <div class="stat-num" style="color:var(--green)">7.6</div>
     <div class="stat-label">DeepSeek — Reasoning</div>
   </div>
+  <div class="stat">
+    <div class="stat-num" style="color:#ff6446">8.0</div>
+    <div class="stat-label">Mistral — EU Unifie</div>
+  </div>
 </div>
 
 <!-- ============================================ -->
-<h2 id="pricing"><span class="num">08</span>Pricing & Analyse Couts</h2>
+<h2 id="pricing"><span class="num">09</span>Pricing & Analyse Couts</h2>
 
 <h3>Cout par 1M tokens (USD) — Modeles comparables</h3>
 <table>
-  <tr><th>Tier</th><th>Claude</th><th>Kimi</th><th>Qwen</th><th>DeepSeek</th></tr>
+  <tr><th>Tier</th><th>Claude</th><th>Kimi</th><th>Qwen</th><th>DeepSeek</th><th>Mistral</th></tr>
   <tr>
     <td><strong>Budget / Free</strong></td>
     <td>Haiku: $0.80/$4.00</td>
     <td>kimi-coding: Gratuit</td>
     <td>Flash: $0.05/$0.40</td>
     <td>V3.2: $0.27/$1.10</td>
+    <td>Small 4: $0.15/$0.60</td>
   </tr>
   <tr>
     <td><strong>Mid-range</strong></td>
@@ -740,6 +884,7 @@
     <td>kimi-1.5: ~$0.50/$2</td>
     <td>Plus: $0.40/$1.20</td>
     <td>V3.2: $0.27/$1.10</td>
+    <td>Small 4: $0.15/$0.60</td>
   </tr>
   <tr>
     <td><strong>Premium</strong></td>
@@ -747,6 +892,7 @@
     <td>N/A</td>
     <td>Max: $1.20/$6.00</td>
     <td>R1: $0.55/$2.19</td>
+    <td>Large: $2.00/$6.00</td>
   </tr>
   <tr>
     <td><strong>Coding</strong></td>
@@ -754,6 +900,7 @@
     <td>N/A</td>
     <td>Coder-Plus: $1.14/$2.28</td>
     <td>V3.2: $0.27/$1.10</td>
+    <td>Codestral: $0.30/$0.90</td>
   </tr>
 </table>
 
@@ -776,6 +923,11 @@
       <td class="score score-high">-92%</td>
     </tr>
     <tr>
+      <td>Mistral</td><td>Small 4</td>
+      <td>$0.04</td><td>$1.13</td>
+      <td class="score score-high">-96%</td>
+    </tr>
+    <tr>
       <td>Qwen</td><td>Flash</td>
       <td>$0.02</td><td>$0.68</td>
       <td class="score score-high">-97%</td>
@@ -785,9 +937,9 @@
 </div>
 
 <!-- ============================================ -->
-<h2 id="integration"><span class="num">09</span>Integration ClawBot — Plan Technique</h2>
+<h2 id="integration"><span class="num">10</span>Integration ClawBot — Plan Technique</h2>
 
-<h3>9.1 — Ajout Qwen dans le Cloud Proxy</h3>
+<h3>10.1 — Ajout Qwen dans le Cloud Proxy</h3>
 
 <div class="card">
   <div class="card-title">Modifications necessaires (estimees : 30 min)</div>
@@ -810,43 +962,92 @@
   </ul>
 </div>
 
-<h3>9.2 — Routing par Plan recommande</h3>
+<h3>10.2 — Routing par Plan recommande</h3>
+
+<div class="warning">
+  <h4>Constat business : Claude est sur-dimensionne pour 99% des usages ClawBot</h4>
+  <p>La cible ClawBot n'est pas un developpeur ou un power user — c'est un <strong>chef de TPE, un artisan, un independant, une famille</strong> qui achete un boitier a 30&euro;. Ses requetes quotidiennes : "envoie un message a Pierre", "quel temps demain", "resume ce mail", "mets un timer". Pour ces taches triviales, <strong>Qwen Flash, Mistral Small 4 ou Kimi sont indiscernables de Claude</strong>. L'utilisateur ne percevra jamais la difference.</p>
+  <p>Consequence : Claude ($0.80-$75/M tokens) en provider principal sur tous les plans payants est du <strong>sur-engineering technique sans benefice percu par l'utilisateur final</strong>. La marge s'effondre pour rien. Claude doit devenir un <strong>add-on premium ou un fallback intelligent</strong> pour les rares cas complexes, pas le defaut.</p>
+</div>
 
 <table>
-  <tr><th>Plan</th><th>Provider principal</th><th>Fallback</th><th>Modele</th></tr>
+  <tr><th>Plan</th><th>Prix</th><th>Provider principal</th><th>Fallback</th><th>Claude ?</th><th>Modeles</th></tr>
   <tr>
     <td><strong>Free</strong></td>
-    <td>Qwen (DashScope)</td>
+    <td>0&euro;</td>
+    <td>Qwen Flash</td>
     <td>Kimi</td>
+    <td class="score score-low">Non</td>
     <td>qwen3.5-flash / kimi-for-coding</td>
   </tr>
   <tr>
-    <td><strong>Starter</strong></td>
-    <td>Qwen (DashScope)</td>
-    <td>Claude Haiku</td>
-    <td>qwen3.5-plus / claude-haiku</td>
+    <td><strong>Perso 7.99</strong></td>
+    <td>7.99&euro;</td>
+    <td>Mistral Small 4</td>
+    <td>Qwen Plus</td>
+    <td class="score score-low">Non</td>
+    <td>mistral-small (none) / qwen3.5-plus</td>
   </tr>
   <tr>
-    <td><strong>Plus</strong></td>
-    <td>Claude (Anthropic)</td>
+    <td><strong>Perso 30</strong></td>
+    <td>30&euro;</td>
+    <td>Mistral Small 4 (reasoning)</td>
     <td>Qwen Max</td>
-    <td>claude-sonnet / qwen3-max</td>
+    <td class="score score-mid">Fallback uniquement</td>
+    <td>mistral-small (high) / qwen3-max / claude-haiku</td>
   </tr>
   <tr>
-    <td><strong>Geek</strong></td>
-    <td>Claude (Anthropic)</td>
+    <td><strong>Perso 80</strong></td>
+    <td>80&euro;</td>
+    <td>Mistral Small 4 (reasoning)</td>
+    <td>DeepSeek V3.2</td>
+    <td class="score score-mid">Option activable</td>
+    <td>mistral-small (high) / deepseek-chat / claude-sonnet (option)</td>
+  </tr>
+  <tr>
+    <td><strong>Pro 30</strong></td>
+    <td>30&euro;</td>
+    <td>Mistral Small 4 (reasoning)</td>
     <td>Qwen Coder</td>
-    <td>claude-opus / qwen3-coder-plus</td>
+    <td class="score score-mid">Fallback uniquement</td>
+    <td>mistral-small (high) / qwen3-coder-plus / claude-haiku</td>
   </tr>
   <tr>
-    <td><strong>Pro</strong></td>
-    <td>Claude (Anthropic)</td>
-    <td>DeepSeek</td>
-    <td>claude-opus / deepseek-chat</td>
+    <td><strong>Pro 189+</strong></td>
+    <td>189&euro;+</td>
+    <td>Claude Sonnet</td>
+    <td>DeepSeek / Mistral Large</td>
+    <td class="score score-high">Oui — principal</td>
+    <td>claude-sonnet / deepseek-chat / mistral-large-latest</td>
   </tr>
 </table>
 
-<h3>9.3 — Marche Chine</h3>
+<div class="verdict">
+  <h4>Logique du routing : Claude uniquement quand la marge le justifie</h4>
+  <p><strong>Free → Perso 30 :</strong> Aucun appel Claude. Mistral Small 4 a $0.15/$0.60 couvre 99% des taches avec reasoning configurable. Cout mensuel estime par utilisateur actif : <strong>~$1-2/mois</strong> vs $27/mois avec Claude Sonnet. La marge passe de negative a confortable.</p>
+  <p><strong>Perso 80 / Pro 30 :</strong> Claude Haiku en fallback uniquement — si Mistral/Qwen echouent ou si une tache complexe est detectee (multi-tool loop > 5 rounds, code generation). Cout additionnel marginal.</p>
+  <p><strong>Pro 189+ :</strong> Seul plan ou Claude est principal — les clients a 189&euro;/mois ont des besoins reels (agents coding, MCP, SSH, credential vault) et la marge absorbe le cout API.</p>
+</div>
+
+<h3>10.3 — Ajout Mistral dans le Cloud Proxy</h3>
+
+<div class="card">
+  <div class="card-title">Modifications necessaires (estimees : 20 min)</div>
+  <h4>config.py</h4>
+  <ul>
+    <li>Ajouter <code>"mistral"</code> dans <code>PROVIDER_URLS</code> : <code>https://api.mistral.ai/v1</code></li>
+    <li>Ajouter <code>mistral-small-latest</code> dans <code>PLAN_ROUTING</code> pour Free/Starter EU</li>
+    <li>Definir <code>model_ceiling</code> : <code>mistral-small-latest</code> (Free) / <code>mistral-large-latest</code> (Pro)</li>
+  </ul>
+  <h4>llm_proxy.py</h4>
+  <ul>
+    <li>Mistral est OpenAI-compatible → <strong>pas de nouveau convertisseur</strong> necessaire</li>
+    <li>Ajouter detection provider <code>"mistral"</code> dans le routing</li>
+    <li>Gerer le parametre <code>reasoning_effort</code> optionnel dans les headers requete</li>
+  </ul>
+</div>
+
+<h3>10.4 — Marche Chine</h3>
 <div class="card">
   <div class="card-title">Strategie serveur Chine (prevu)</div>
   <p>Le serveur Chine pourra utiliser <strong>exclusivement Qwen + DeepSeek</strong> via les endpoints Beijing :</p>
@@ -859,83 +1060,141 @@
 </div>
 
 <!-- ============================================ -->
-<h2 id="verdict"><span class="num">10</span>Verdict & Recommandations</h2>
-
-<div class="verdict">
-  <h4>Recommandation #1 — Integrer Qwen comme provider budget</h4>
-  <p><strong>Impact :</strong> Reduction des couts de 90%+ sur les plans Free et Starter en passant de Claude Haiku ($0.80/$4.00) a Qwen Flash ($0.05/$0.40). La compatibilite OpenAI rend l'integration triviale — une entry dans <code>PROVIDER_URLS</code> et un routing dans <code>PLAN_ROUTING</code>.</p>
-  <p><strong>Risque :</strong> La limitation <code>tools + stream</code> necessite un fallback non-streaming pour les tool rounds, ou une verification que les modeles Qwen3.5 ont leve cette restriction.</p>
-</div>
-
-<div class="verdict">
-  <h4>Recommandation #2 — Qwen3-Coder comme agent coding specialise</h4>
-  <p><strong>Impact :</strong> Avec 70.6% sur SWE-Bench et un entrainement agentic long-horizon, Qwen3-Coder est le meilleur modele open-source pour les taches coding. Pertinent pour un mode "code agent" dans ClawBot ou pour remplacer Claude sur les taches de code pures (rapport qualite/prix 10x meilleur).</p>
-</div>
-
-<div class="verdict">
-  <h4>Recommandation #3 — DeepSeek V3.2 comme fallback intelligent</h4>
-  <p><strong>Impact :</strong> Deja configure dans <code>PROVIDER_URLS</code>. Le "Thinking with Tools" est unique — permet un raisonnement plus profond pendant l'utilisation d'outils. Ideal comme fallback quand Anthropic renvoie 429 (rate limit).</p>
-  <p><strong>Action :</strong> Activer le routing DeepSeek dans <code>PLAN_ROUTING</code> pour les plans Pro (failover).</p>
-</div>
+<h2 id="verdict"><span class="num">11</span>Verdict & Recommandations</h2>
 
 <div class="warning">
-  <h4>Non recommande — Remplacer Claude comme provider principal</h4>
-  <p>Claude reste superieur en <strong>fiabilite tool calling</strong> (9.5/10 vs 8.5/10 Qwen), <strong>suivi d'instructions complexes</strong>, et <strong>stabilite API</strong>. Les plans payants (Plus, Geek, Pro) doivent conserver Claude comme provider principal pour garantir la qualite de l'experience.</p>
+  <h4>Changement strategique majeur : Claude n'est plus le provider par defaut</h4>
+  <p>L'utilisateur cible ClawBot — chef de TPE, artisan, independant, famille — effectue des taches simples a 99%. "Envoie un message", "quel temps demain", "resume ce mail". Pour ces usages, <strong>Qwen, Mistral ou Kimi sont indiscernables de Claude</strong>. Le cout Claude ($0.80-$75/M) n'est justifie que pour les rares cas complexes (agents multi-tool, coding, MCP). Claude devient un <strong>add-on premium</strong>, pas le defaut.</p>
 </div>
 
-<h3>Priorite d'implementation</h3>
+<div class="verdict">
+  <h4>Recommandation #1 — Mistral Small 4 comme provider principal (tous plans Perso)</h4>
+  <p><strong>Impact :</strong> A $0.15/$0.60, Mistral Small 4 couvre 99% des taches avec reasoning configurable (<code>reasoning_effort=none</code> pour le chat, <code>high</code> pour les reflexions). Heberge en Europe (RGPD), excellent en francais, Apache 2.0. Cout mensuel estime par utilisateur actif : <strong>~$1-2/mois</strong> vs $27/mois avec Claude Sonnet. La marge passe de negative a confortable sur tous les plans Perso.</p>
+  <p><strong>Action :</strong> Ajouter <code>mistral</code> dans <code>PROVIDER_URLS</code> + <code>PROVIDER_KEYS</code>. Router Perso 7.99 / 30 / 80 vers <code>mistral-small-latest</code>. Gerer <code>reasoning_effort</code> dans llm_proxy.</p>
+</div>
+
+<div class="verdict">
+  <h4>Recommandation #2 — Qwen Flash/Plus comme fallback budget et plan Free</h4>
+  <p><strong>Impact :</strong> Qwen Flash a $0.05/$0.40 est imbattable sur le Free tier. Qwen Plus a $0.40/$1.20 offre un excellent fallback si Mistral est indisponible. La compatibilite OpenAI rend le failover transparent.</p>
+  <p><strong>Risque :</strong> La limitation <code>tools + stream</code> necessite verification sur Qwen3.5 recents.</p>
+  <p><strong>Status :</strong> <span class="card-label label-green">DEPLOYE</span> Qwen deja dans PROVIDER_URLS + PLAN_ROUTING.</p>
+</div>
+
+<div class="verdict">
+  <h4>Recommandation #3 — DeepSeek V3.2 comme fallback reasoning</h4>
+  <p><strong>Impact :</strong> Le "Thinking with Tools" unique de V3.2 en fait le meilleur fallback pour les taches complexes. Deja configure dans <code>PROVIDER_URLS</code>.</p>
+  <p><strong>Status :</strong> <span class="card-label label-green">DEPLOYE</span> dans PLAN_ROUTING pour les plans Pro.</p>
+</div>
+
+<div class="verdict">
+  <h4>Recommandation #4 — Claude reserve aux plans Pro 189&euro;+</h4>
+  <p><strong>Impact :</strong> Claude reste le meilleur en fiabilite tool calling (9.5/10) et suivi d'instructions complexes. Mais ce niveau de qualite n'est perceptible que sur des taches avancees : agents coding multi-rounds, MCP, SSH, credential vault. Seuls les plans Pro a 189&euro;+ justifient le cout API et ont des utilisateurs qui percevront la difference.</p>
+  <p><strong>Consequence :</strong> Sur les plans Perso, Claude devient un fallback silencieux (si Mistral echoue) ou une option activable explicitement — jamais le provider par defaut.</p>
+</div>
+
+<div class="verdict">
+  <h4>Recommandation #5 — Kimi conserve pour le web search gratuit</h4>
+  <p><strong>Impact :</strong> Kimi reste le seul provider offrant un web search natif gratuit (<code>$web_search</code>). Utile comme outil complementaire mais surclasse par Qwen/Mistral sur tous les autres criteres agentic.</p>
+  <p><strong>Status :</strong> <span class="card-label label-green">DEPLOYE</span> — fallback + web search en production.</p>
+</div>
+
+<h3>Etat d'implementation</h3>
+<table>
+  <tr><th>Action</th><th>Status</th><th>Effort restant</th><th>Impact</th></tr>
+  <tr>
+    <td>Qwen DashScope dans PROVIDER_URLS + PLAN_ROUTING</td>
+    <td><span class="card-label label-green">FAIT</span></td>
+    <td>—</td>
+    <td class="score score-high">Couts -90%</td>
+  </tr>
+  <tr>
+    <td>DeepSeek V3.2 dans PROVIDER_URLS + PLAN_ROUTING Pro</td>
+    <td><span class="card-label label-green">FAIT</span></td>
+    <td>—</td>
+    <td class="score score-mid">Resilience</td>
+  </tr>
+  <tr>
+    <td>Qwen3-Coder-Plus dans PLAN_ROUTING Geek</td>
+    <td><span class="card-label label-green">FAIT</span></td>
+    <td>—</td>
+    <td class="score score-mid">Coding agentic</td>
+  </tr>
+  <tr>
+    <td>Kimi web search + fallback Free</td>
+    <td><span class="card-label label-green">FAIT</span></td>
+    <td>—</td>
+    <td class="score score-mid">Web search gratuit</td>
+  </tr>
+  <tr>
+    <td>Tester tools+streaming Qwen3.5</td>
+    <td><span class="card-label label-orange">A VERIFIER</span></td>
+    <td>1h</td>
+    <td class="score score-high">Bloquant streaming</td>
+  </tr>
+  <tr>
+    <td>Modeles dans /v1/models + dashboard model bar</td>
+    <td><span class="card-label label-orange">PARTIEL</span></td>
+    <td>30 min</td>
+    <td class="score score-mid">UX</td>
+  </tr>
+</table>
+
+<h3>Prochaines priorites</h3>
 <table>
   <tr><th>Priorite</th><th>Action</th><th>Effort</th><th>Impact</th></tr>
   <tr>
     <td><span class="card-label label-green">P0</span></td>
-    <td>Ajouter Qwen DashScope dans PROVIDER_URLS + routing Free/Starter</td>
+    <td><strong>Ajouter Mistral Small 4</strong> dans PROVIDER_URLS + PROVIDER_KEYS + PLAN_ROUTING comme provider principal Perso</td>
     <td>30 min</td>
-    <td class="score score-high">Couts -90%</td>
+    <td class="score score-high">Provider principal, marge x10</td>
   </tr>
   <tr>
     <td><span class="card-label label-green">P0</span></td>
-    <td>Tester limitation tools+streaming sur Qwen3.5 (verifier si levee)</td>
+    <td><strong>Implementer reasoning_effort</strong> dans llm_proxy — switch none/high selon plan ou complexite detectee</td>
     <td>1h</td>
-    <td class="score score-high">Bloquant</td>
+    <td class="score score-high">Qualite adaptative</td>
   </tr>
   <tr>
-    <td><span class="card-label label-orange">P1</span></td>
-    <td>Activer DeepSeek V3.2 comme failover 429 dans PLAN_ROUTING</td>
-    <td>15 min</td>
-    <td class="score score-mid">Resilience</td>
-  </tr>
-  <tr>
-    <td><span class="card-label label-orange">P1</span></td>
-    <td>Ajouter modeles Qwen dans /v1/models et dashboard model bar</td>
+    <td><span class="card-label label-green">P0</span></td>
+    <td><strong>Revoir PLAN_ROUTING</strong> — Claude en fallback/option (pas principal) sauf Pro 189+</td>
     <td>30 min</td>
-    <td class="score score-mid">UX</td>
+    <td class="score score-high">Marge business</td>
   </tr>
   <tr>
-    <td><span class="card-label label-purple">P2</span></td>
-    <td>Mode agent coding avec Qwen3-Coder-Plus</td>
+    <td><span class="card-label label-orange">P1</span></td>
+    <td>Detection complexite auto — si tool_loop > 5 rounds, upgrade vers Claude silencieux</td>
     <td>2h</td>
-    <td class="score score-mid">Feature</td>
+    <td class="score score-mid">Qualite percue</td>
+  </tr>
+  <tr>
+    <td><span class="card-label label-orange">P1</span></td>
+    <td>Option "Mode Claude" activable par l'utilisateur (add-on 2.90&euro;/mois)</td>
+    <td>2h</td>
+    <td class="score score-mid">Revenue add-on</td>
   </tr>
   <tr>
     <td><span class="card-label label-purple">P2</span></td>
-    <td>Qwen VL pour vision OpenJarvis (camera/screen)</td>
+    <td>Qwen VL / Mistral vision pour OpenJarvis camera</td>
     <td>3h</td>
-    <td class="score score-mid">Feature</td>
+    <td class="score score-mid">Feature vision</td>
   </tr>
   <tr>
     <td><span class="card-label label-purple">P3</span></td>
-    <td>Serveur Chine — routing exclusif Qwen/DeepSeek</td>
+    <td>Serveur Chine — routing exclusif Qwen/DeepSeek (endpoints Beijing)</td>
     <td>1 jour</td>
     <td class="score score-mid">Marche Chine</td>
   </tr>
 </table>
 
 <div class="card" style="margin-top:40px;border-color:var(--cyan)">
-  <div class="card-title">Resume executif</div>
-  <p><strong>Qwen est le candidat ideal</strong> pour completer l'ecosysteme ClawBot : prix 10-60x inferieurs a Claude, API OpenAI-compatible, modele coding specialise, endpoints Chine natifs, et modeles open-source. La seule limitation serieuse (tools+streaming) doit etre testee sur les modeles recents avant mise en production.</p>
-  <p><strong>DeepSeek</strong> est un excellent fallback deja pre-configure, avec l'innovation unique "Thinking with Tools".</p>
-  <p><strong>Kimi</strong> reste utile pour le web search gratuit mais est surclasse par Qwen sur tous les autres criteres agentic.</p>
-  <p><strong>Claude</strong> reste le provider premium indispensable pour la qualite maximale sur les plans payants.</p>
+  <div class="card-title">Resume executif — Vision business</div>
+  <p><strong>La cible ClawBot (TPE, independants, familles) n'a pas besoin de Claude pour 99% de ses taches.</strong> Qwen Flash, Mistral Small 4 et Kimi gerent parfaitement "envoie un message", "quel temps", "resume ce mail" — l'utilisateur final ne percoit aucune difference de qualite.</p>
+  <p><strong>Mistral Small 4</strong> est le nouveau provider principal recommande : $0.15/$0.60, reasoning configurable, vision, coding, hebergement EU (RGPD), excellent francais. Cout par utilisateur actif : ~$1-2/mois vs $27/mois avec Claude. La marge s'inverse completement.</p>
+  <p><strong>Qwen</strong> reste le fallback budget imbattable (Flash $0.05/$0.40) et le provider Free tier. <span class="card-label label-green">DEPLOYE</span></p>
+  <p><strong>DeepSeek</strong> est le fallback reasoning pour les taches complexes. <span class="card-label label-green">DEPLOYE</span></p>
+  <p><strong>Kimi</strong> reste utile pour le web search gratuit. <span class="card-label label-green">DEPLOYE</span></p>
+  <p><strong>Claude</strong> devient un add-on premium — provider principal uniquement sur Pro 189&euro;+, fallback silencieux ou option payante (2.90&euro;/mois) sur les autres plans. Sa qualite superieure n'est perceptible que sur les taches complexes que 1% des utilisateurs ClawBot effectuent.</p>
+  <p style="margin-top:15px;color:var(--cyan);font-weight:600">Action immediate : integrer Mistral Small 4 dans le cloud proxy et revoir le PLAN_ROUTING. Tout est OpenAI-compatible — 30 minutes de code.</p>
 </div>
 
 </main>

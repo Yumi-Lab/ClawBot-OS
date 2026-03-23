@@ -94,6 +94,83 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   .ws-list-hdr span:nth-child(3),.ws-list-hdr span:nth-child(4),.ws-list-row>span:nth-child(3),.ws-list-row>span:nth-child(4){display:none}
 }
 
+/* ── WHATSAPP PANEL ── */
+.wa-panel-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.wa-panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--br);flex-shrink:0}
+.wa-panel-hdr-left{display:flex;align-items:center;gap:10px}
+.wa-panel-hdr-right{display:flex;align-items:center;gap:12px}
+.wa-panel-mode-badge{font-family:var(--fmo);font-size:.6rem;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--ac-d);color:var(--ac);letter-spacing:.5px;text-transform:uppercase}
+.wa-panel-body{display:flex;flex:1;overflow:hidden}
+.wa-panel-col-list{width:320px;flex-shrink:0;border-right:1px solid var(--br);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.wa-panel-col-thread{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.wa-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--td);font-family:var(--fmo);font-size:.75rem}
+.wa-conv{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--br);transition:var(--tr)}
+.wa-conv:hover{background:var(--bg-ch)}
+.wa-conv.active{background:linear-gradient(135deg,#00ffe008,#00b8ff08);border-left:2px solid var(--ac)}
+.wa-conv-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.wa-conv-name{font-family:var(--fmo);font-size:.78rem;font-weight:500;color:var(--tp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.wa-conv-time{font-family:var(--fmo);font-size:.55rem;color:var(--td);flex-shrink:0}
+.wa-conv-preview{font-family:var(--fmo);font-size:.7rem;color:var(--ts);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px}
+.wa-conv-meta{display:flex;align-items:center;gap:6px;margin-top:4px;font-family:var(--fmo);font-size:.6rem;color:var(--td)}
+.wa-conv-meta .wa-proc{color:var(--ac);display:inline-flex;align-items:center;gap:4px}
+.wa-conv-meta .wa-proc-dots{display:inline-flex;gap:2px}
+.wa-conv-meta .wa-proc-dots span{width:4px;height:4px;border-radius:50%;background:var(--ac);animation:wa-blink 1.4s infinite both}
+.wa-conv-meta .wa-proc-dots span:nth-child(2){animation-delay:.2s}
+.wa-conv-meta .wa-proc-dots span:nth-child(3){animation-delay:.4s}
+@keyframes wa-blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.wa-role-tag{display:inline-block;font-size:.5rem;font-weight:600;padding:1px 6px;border-radius:8px;text-transform:uppercase;letter-spacing:.3px}
+.wa-role-admin{background:#ff986015;border:1px solid #ff9860;color:#ff9860}
+.wa-role-user{background:#00b8ff15;border:1px solid var(--ac2);color:var(--ac2)}
+.wa-thread-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--br);flex-shrink:0}
+.wa-thread-hdr-name{font-family:var(--fmo);font-size:.82rem;font-weight:500;color:var(--tp);display:flex;align-items:center;gap:8px}
+.wa-thread-hdr-badges{display:flex;gap:6px}
+.wa-thread-hdr-badge{font-family:var(--fmo);font-size:.58rem;padding:2px 8px;border-radius:10px}
+.wa-thread-hdr-badge.mode{background:#00b8ff15;color:var(--ac2);border:1px solid #00b8ff30}
+.wa-thread-hdr-badge.status{background:#00ff8815;color:var(--ok);border:1px solid #00ff8830}
+.wa-thread-msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.wa-msg{max-width:82%;padding:10px 14px;border-radius:12px;font-size:.78rem;line-height:1.55;word-break:break-word}
+.wa-msg-user{align-self:flex-end;background:#1a3050;color:var(--tp);border-bottom-right-radius:4px}
+.wa-msg-bot{align-self:flex-start;background:var(--bg-c);border:1px solid var(--br);color:var(--ts);border-bottom-left-radius:4px}
+.wa-msg-bot p{margin:0 0 .4em}
+.wa-msg-bot p:last-child{margin:0}
+.wa-msg-bot code{font-size:.72rem;background:var(--bg-i);padding:1px 4px;border-radius:3px;color:var(--ac)}
+.wa-msg-bot pre{margin:6px 0;padding:8px 10px;background:var(--bg-i);border:1px solid var(--br);border-radius:var(--r);font-size:.68rem;overflow-x:auto;white-space:pre-wrap}
+.wa-msg-sys{align-self:center;background:#ff386010;border:1px dashed var(--er);color:var(--er);font-family:var(--fmo);font-size:.68rem;padding:6px 14px;border-radius:8px;max-width:90%;text-align:center}
+.wa-msg-time{font-size:.52rem;color:var(--td);margin-top:4px}
+.wa-msg-tools{margin-top:6px;padding:0;font-family:var(--fmo);font-size:.62rem}
+.wa-msg-tools .wa-tl-row{display:flex;align-items:center;gap:6px;padding:2px 0}
+.wa-msg-tools .wa-tl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.wa-msg-tools .wa-tl-dot.ok{background:var(--ok)}
+.wa-msg-tools .wa-tl-dot.err{background:var(--er)}
+.wa-msg-tools .wa-tl-name{color:var(--ts)}
+.wa-thread-ro{padding:10px 16px;border-top:1px solid var(--br);text-align:center;font-family:var(--fmo);font-size:.65rem;color:var(--td);font-style:italic;flex-shrink:0}
+.wa-disconnected{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--td);font-family:var(--fmo);font-size:.78rem;text-align:center;padding:20px}
+.wa-disconnected svg{opacity:.4}
+@media(max-width:768px){
+  .wa-panel-body{flex-direction:column}
+  .wa-panel-col-list{width:100%;max-height:40%;border-right:none;border-bottom:1px solid var(--br)}
+  .wa-conv-preview{max-width:70vw}
+  .wa-msg{max-width:90%}
+}
+
+/* ── WHATSAPP SETUP CONFIG ── */
+.wa-cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;border-top:1px solid var(--br);padding-top:14px}
+.wa-cfg-section{display:flex;flex-direction:column;gap:6px}
+.wa-cfg-section .fl{margin-bottom:2px}
+.wa-cfg-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.wa-cfg-toggle input[type="checkbox"]{display:none}
+.wa-cfg-toggle .toggle-track{width:36px;height:20px;background:var(--br);border-radius:10px;position:relative;transition:var(--tr)}
+.wa-cfg-toggle input:checked + .toggle-track{background:var(--ac)}
+.wa-cfg-toggle .toggle-track::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--tp);border-radius:50%;transition:var(--tr)}
+.wa-cfg-toggle input:checked + .toggle-track::after{left:18px}
+.wa-cfg-toggle-label{font-family:var(--fmo);font-size:.72rem;color:var(--ts)}
+.wa-cfg-select{padding:6px 10px;background:var(--bg-i);border:1px solid var(--br);border-radius:var(--r);color:var(--tp);font-family:var(--fmo);font-size:.72rem;outline:none;cursor:pointer;width:100%;max-width:220px}
+.wa-cfg-select option{background:var(--bg-c);color:var(--tp)}
+.wa-cfg-select:focus{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac-d)}
+@media(max-width:768px){
+  .wa-cfg-grid{grid-template-columns:1fr}
+}
+
 /* ── TASKS PANEL ── */
 .tasks-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
 .tasks-toolbar{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--br);flex-shrink:0}
@@ -218,6 +295,25 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .vault-tab.active{color:var(--ac);border-bottom-color:var(--ac)}
 .vault-info{font-family:var(--fmo);font-size:.55rem;color:var(--td);opacity:.6;margin-top:10px;padding:6px 10px;border-left:2px solid var(--ac-m)}
 .vault-empty{padding:20px;text-align:center;font-family:var(--fmo);font-size:.7rem;color:var(--td);opacity:.5}
+/* ── TOTP ── */
+.totp-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-i);border:1px solid var(--br);border-radius:var(--r);transition:var(--tr)}
+.totp-item:hover{border-color:var(--ac-m)}
+.totp-meta{flex:1;min-width:0}
+.totp-name{font-family:var(--fmo);font-size:.75rem;color:var(--tp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.totp-name-input{font-family:var(--fmo);font-size:.75rem;color:var(--tp);background:var(--bg-i);border:1px solid var(--ac);border-radius:4px;padding:1px 6px;outline:none;width:160px}
+.totp-issuer{font-family:var(--fmo);font-size:.52rem;color:var(--td);opacity:.7;margin-top:1px}
+.totp-code{font-family:var(--fmo);font-size:1.6em;letter-spacing:4px;color:var(--ac);cursor:pointer;flex-shrink:0;transition:color .3s;user-select:all;position:relative}
+.totp-code:hover{color:#fff}
+.totp-code .totp-copied{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:.5rem;color:var(--ok);letter-spacing:0;opacity:0;transition:opacity .3s}
+.totp-code .totp-copied.show{opacity:1}
+.totp-timer{display:flex;align-items:center;gap:6px;flex-shrink:0;min-width:48px}
+.totp-secs{font-family:var(--fmo);font-size:.65rem;color:var(--ts);min-width:20px;text-align:right}
+.totp-secs.urgent{color:var(--er)}
+.totp-bar{width:40px;height:3px;background:var(--br);border-radius:2px;overflow:hidden;flex-shrink:0}
+.totp-bar-fill{height:100%;background:var(--ac);border-radius:2px;transition:width 1s linear,background .5s}
+.totp-bar-fill.urgent{background:var(--er)}
+.totp-actions{display:flex;gap:4px;flex-shrink:0}
+@media(max-width:768px){.totp-code{font-size:1.2em;letter-spacing:2px}.totp-item{flex-wrap:wrap;gap:6px}.totp-timer{order:3;width:100%}.totp-bar{flex:1}}
 
 /* Vault modal */
 .vault-modal{position:fixed;inset:0;background:#000a;z-index:9500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
@@ -859,12 +955,28 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="setup-step-t"><span class="step-num">1</span> AI Engine</div>
         <div class="setup-grid">
 
+          <!-- Kimi -->
+          <div class="setup-card" id="sc-kimi">
+            <div class="setup-hdr">
+              <div class="setup-ico">&#x1f680;</div>
+              <div class="setup-info"><div class="setup-title">Moonshot &mdash; Kimi</div><div class="setup-desc">api.kimi.com &middot; Coding specialist</div></div>
+              <span class="badge badge-ok setup-badge">Default</span>
+            </div>
+            <div class="setup-fg"><label class="fl">API Key</label><input class="fi" type="password" id="setup-kimi-key" placeholder="sk-kimi-..."></div>
+            <div class="setup-chips" id="chips-kimi">
+              <button class="chip active" data-m="kimi-for-coding">Kimi Coding ★</button>
+            </div>
+            <div class="setup-fg"><label class="fl">Model</label><input class="fi" type="text" id="setup-kimi-model" value="kimi-for-coding"></div>
+            <button class="setup-apply" id="apply-kimi">Apply</button>
+            <div class="setup-msg" id="msg-kimi">&#x2713; Applied</div>
+          </div>
+
           <!-- Anthropic -->
           <div class="setup-card" id="sc-anthropic">
             <div class="setup-hdr">
               <div class="setup-ico">&#x1f9e0;</div>
               <div class="setup-info"><div class="setup-title">Anthropic &mdash; Claude</div><div class="setup-desc">console.anthropic.com/settings/keys</div></div>
-              <span class="badge badge-ok setup-badge">Recommended</span>
+              <span class="badge badge-ok setup-badge">Premium</span>
             </div>
             <div class="setup-fg"><label class="fl">API Key</label><input class="fi" type="password" id="setup-ant-key" placeholder="sk-ant-api03-..."></div>
             <div class="setup-chips" id="chips-ant">
@@ -875,22 +987,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <div class="setup-fg"><label class="fl">Model</label><input class="fi" type="text" id="setup-ant-model" value="claude-sonnet-4-6"></div>
             <button class="setup-apply" id="apply-ant">Apply</button>
             <div class="setup-msg" id="msg-ant">&#x2713; Applied</div>
-          </div>
-
-          <!-- Kimi -->
-          <div class="setup-card" id="sc-kimi">
-            <div class="setup-hdr">
-              <div class="setup-ico">&#x1f680;</div>
-              <div class="setup-info"><div class="setup-title">Moonshot &mdash; Kimi</div><div class="setup-desc">api.kimi.com &middot; Coding specialist</div></div>
-              <span class="badge badge-ok setup-badge">Recommended</span>
-            </div>
-            <div class="setup-fg"><label class="fl">API Key</label><input class="fi" type="password" id="setup-kimi-key" placeholder="sk-kimi-..."></div>
-            <div class="setup-chips" id="chips-kimi">
-              <button class="chip active" data-m="kimi-for-coding">Kimi Coding ★</button>
-            </div>
-            <div class="setup-fg"><label class="fl">Model</label><input class="fi" type="text" id="setup-kimi-model" value="kimi-for-coding"></div>
-            <button class="setup-apply" id="apply-kimi">Apply</button>
-            <div class="setup-msg" id="msg-kimi">&#x2713; Applied</div>
           </div>
 
           <!-- Qwen / DashScope -->
@@ -1036,16 +1132,57 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             </div>
           </div>
 
-          <div style="margin-top:14px;border-top:1px solid var(--br);padding-top:14px">
-            <label class="fl">Allowed Numbers</label>
-            <div style="display:flex;gap:8px;margin-top:4px">
-              <input class="fi" type="text" id="wa-allow-input" placeholder="+33612345678" style="max-width:220px">
-              <button class="btn-o" id="wa-add-num">Add</button>
+          <!-- WhatsApp config grid -->
+          <div class="wa-cfg-grid">
+            <!-- Left column: mode + admins -->
+            <div class="wa-cfg-section">
+              <label class="fl">Bot Mode</label>
+              <select class="wa-cfg-select" id="wa-cfg-mode">
+                <option value="personal">Personal — your own WhatsApp</option>
+                <option value="autonomous">Autonomous — dedicated number</option>
+              </select>
+
+              <label class="fl" style="margin-top:10px">AI Mode</label>
+              <select class="wa-cfg-select" id="wa-cfg-ai-mode">
+                <option value="core">Core — single model</option>
+                <option value="core-agent">Core-Agent — Haiku routing</option>
+              </select>
+
+              <label class="fl" style="margin-top:10px">Admins</label>
+              <div style="display:flex;gap:8px">
+                <input class="fi" type="text" id="wa-admin-input" placeholder="+33612345678" style="max-width:180px">
+                <button class="btn-o" id="wa-add-admin">Add</button>
+              </div>
+              <div class="tag-list" id="wa-admin-tags"></div>
             </div>
-            <div class="tag-list" id="wa-allow-tags"></div>
-            <div style="margin-top:8px">
-              <button class="btn-o" id="wa-save-allow" style="display:none">Save allowed numbers</button>
+
+            <!-- Right column: allowed + blacklist + toggles -->
+            <div class="wa-cfg-section">
+              <label class="fl">Allowed Numbers</label>
+              <div style="display:flex;gap:8px">
+                <input class="fi" type="text" id="wa-allow-input" placeholder="+33612345678 or *" style="max-width:180px">
+                <button class="btn-o" id="wa-add-num">Add</button>
+              </div>
+              <div class="tag-list" id="wa-allow-tags"></div>
+
+              <label class="fl" style="margin-top:10px">Blacklist</label>
+              <div style="display:flex;gap:8px">
+                <input class="fi" type="text" id="wa-blacklist-input" placeholder="+33612345678" style="max-width:180px">
+                <button class="btn-o" id="wa-add-blacklist">Add</button>
+              </div>
+              <div class="tag-list" id="wa-blacklist-tags"></div>
+
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+                <label class="wa-cfg-toggle">
+                  <input type="checkbox" id="wa-cfg-vault2fa">
+                  <span class="toggle-track"></span>
+                  <span class="wa-cfg-toggle-label">Vault 2FA via WhatsApp</span>
+                </label>
+              </div>
             </div>
+          </div>
+          <div style="margin-top:12px;text-align:right">
+            <button class="btn-o" id="wa-save-config" style="display:none;color:var(--ac);border-color:var(--ac)">Save WhatsApp config</button>
           </div>
         </div>
       </div>
@@ -1144,14 +1281,14 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <button class="compact-btn" id="compact-btn" title="Compact context">&#x27f3; Compact</button>
         </div>
         <div class="mdl-bar" id="mdl-bar">
-          <button class="mdl-chip active" id="mdl-haiku" data-model="claude-haiku-4-5">Haiku</button>
-          <button class="mdl-chip" id="mdl-sonnet" data-model="claude-sonnet-4-6">Sonnet</button>
-          <button class="mdl-chip" id="mdl-opus" data-model="claude-opus-4-6">Opus</button>
-          <span class="mdl-sep"></span>
-          <button class="mdl-chip" id="mdl-kimi" data-model="kimi-for-coding">Kimi</button>
+          <button class="mdl-chip active" id="mdl-kimi" data-model="kimi-for-coding">Kimi</button>
           <button class="mdl-chip" id="mdl-qflash" data-model="qwen3.5-flash">Qwen Flash</button>
           <button class="mdl-chip" id="mdl-qmax" data-model="qwen3-max">Qwen Max</button>
           <button class="mdl-chip" id="mdl-qcoder" data-model="qwen3-coder-plus">Qwen Coder</button>
+          <span class="mdl-sep"></span>
+          <button class="mdl-chip" id="mdl-haiku" data-model="claude-haiku-4-5">Haiku</button>
+          <button class="mdl-chip" id="mdl-sonnet" data-model="claude-sonnet-4-6">Sonnet</button>
+          <button class="mdl-chip" id="mdl-opus" data-model="claude-opus-4-6">Opus</button>
         </div>
         <div class="chat-msgs" id="chat-msgs"></div>
         <div class="ctx-bar">
@@ -1369,6 +1506,31 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
   </div>
 
+  <!-- ═══ WHATSAPP PANEL ═══ -->
+  <div class="pnl" id="pnl-whatsapp">
+    <div class="wa-panel-wrap">
+      <div class="wa-panel-hdr">
+        <div class="wa-panel-hdr-left">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <span style="font-family:var(--fm);font-weight:600;font-size:.95rem">WhatsApp</span>
+          <span class="wa-panel-mode-badge" id="wa-panel-mode">--</span>
+        </div>
+        <div class="wa-panel-hdr-right">
+          <span class="wa-status" id="wa-panel-status"><span class="dot off"></span><span>--</span></span>
+        </div>
+      </div>
+      <div class="wa-panel-body">
+        <div class="wa-panel-col wa-panel-col-list" id="wa-conv-list"></div>
+        <div class="wa-panel-col wa-panel-col-thread" id="wa-thread-view">
+          <div class="wa-empty-state" id="wa-thread-empty">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--td)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            <span>Select a conversation to view</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ CONFIG PANEL ═══ -->
   <div class="pnl" id="pnl-config">
     <div class="cfg-wrap">
@@ -1391,6 +1553,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <span id="vault-count"><span>0 secrets</span></span> stored &bull; AES-256 encrypted &bull; <span id="master-pw-status" style="color:var(--ac)">checking...</span>
             </div>
           </div>
+          <label class="wa-cfg-toggle" onclick="event.stopPropagation()" style="margin-left:auto">
+            <input type="checkbox" id="vault-enabled-toggle" checked onchange="toggleVaultEnabled(this.checked)">
+            <span class="toggle-track"></span>
+          </label>
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--td)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
@@ -1403,8 +1569,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="cfg-row">
           <div><label class="fl">Provider</label>
             <select class="fi" id="cfg-provider" style="cursor:pointer">
-              <option value="anthropic">Anthropic (Claude)</option>
               <option value="kimi">Kimi (Moonshot)</option>
+              <option value="anthropic">Anthropic (Claude)</option>
               <option value="dashscope">DashScope (Qwen)</option>
               <option value="openai">OpenAI</option>
               <option value="deepseek">DeepSeek</option>
@@ -1413,11 +1579,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <option value="custom">Custom</option>
             </select>
           </div>
-          <div><label class="fl">Model</label><input class="fi" id="cfg-model" placeholder="claude-haiku-4-5"></div>
+          <div><label class="fl">Model</label><input class="fi" id="cfg-model" placeholder="kimi-for-coding"></div>
         </div>
         <div class="cfg-row">
           <div><label class="fl">API Key</label><input class="fi" id="cfg-apikey" type="password" placeholder="sk-..."></div>
-          <div><label class="fl">Base URL (optional)</label><input class="fi" id="cfg-baseurl" placeholder="https://api.anthropic.com"></div>
+          <div><label class="fl">Base URL (optional)</label><input class="fi" id="cfg-baseurl" placeholder="https://api.kimi.com/coding/v1"></div>
         </div>
         <div class="fl" style="margin-bottom:4px">Quick Models</div>
         <div class="cfg-model-chips" id="cfg-model-chips"></div>
@@ -1527,12 +1693,21 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="vault-tabs">
         <button class="vault-tab active" data-tab="blacklist" onclick="switchPrivacyTab('blacklist')">Blacklist</button>
         <button class="vault-tab" data-tab="autodetected" onclick="switchPrivacyTab('autodetected')">Auto-detected</button>
+        <button class="vault-tab" data-tab="totp" onclick="switchPrivacyTab('totp')">TOTP (2FA)</button>
       </div>
       <div class="vault-list" id="privacy-list">
         <div class="vault-empty">No protected words yet</div>
       </div>
       <button class="vault-add-btn" id="privacy-add-btn" onclick="openProtectedModal()" style="margin-top:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Protected Word</button>
-      <div class="vault-info">These words will NEVER be sent to the AI. The AI sees aliases like __vault_my_name__ instead.</div>
+      <div class="vault-info" id="privacy-info">These words will NEVER be sent to the AI. The AI sees aliases like __vault_my_name__ instead.</div>
+      <!-- TOTP panel (hidden by default) -->
+      <div id="totp-panel" style="display:none">
+        <div class="vault-list" id="totp-list">
+          <div class="vault-empty">No TOTP entries — add your first 2FA code</div>
+        </div>
+        <button class="vault-add-btn" onclick="openTOTPModal()" style="margin-top:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add TOTP Entry</button>
+        <div class="vault-info">TOTP codes rotate every 30s. Secrets are AES-256 encrypted on device.</div>
+      </div>
     </div>
     <!-- Master Password & Backup -->
     <div class="cfg-card" style="margin-bottom:16px">
@@ -1792,6 +1967,51 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
 </div>
 
+<!-- ═══ TOTP ADD MODAL ═══ -->
+<div class="vault-modal" id="totp-modal">
+  <div class="vault-modal-box">
+    <div class="vault-modal-title" id="totp-modal-title">Add TOTP Entry</div>
+    <div style="display:flex;gap:0;margin-bottom:12px;border-bottom:1px solid var(--br)">
+      <button class="vault-tab active" id="totp-mode-manual" onclick="switchTOTPMode('manual')" data-tab="manual">Manual</button>
+      <button class="vault-tab" id="totp-mode-uri" onclick="switchTOTPMode('uri')" data-tab="uri">Paste URI</button>
+    </div>
+    <div id="totp-form-manual">
+      <div class="vault-modal-field">
+        <label>Name</label>
+        <input id="totp-name" placeholder="e.g. GitHub, AWS, Google">
+      </div>
+      <div class="vault-modal-field">
+        <label>Secret (Base32)</label>
+        <div class="vault-modal-pw">
+          <input id="totp-secret" type="password" placeholder="e.g. JBSWY3DPEHPK3PXP" style="text-transform:uppercase">
+          <button class="vault-modal-eye" onclick="toggleVaultPw('totp-secret')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+      </div>
+      <div class="vault-modal-field">
+        <label>Issuer <span style="opacity:.5">(optional)</span></label>
+        <input id="totp-issuer" placeholder="e.g. GitHub Inc.">
+      </div>
+    </div>
+    <div id="totp-form-uri" style="display:none">
+      <div class="vault-modal-field">
+        <label>OTPAuth URI</label>
+        <div class="vault-modal-pw">
+          <input id="totp-uri" type="password" placeholder="otpauth://totp/Label?secret=...&issuer=...">
+          <button class="vault-modal-eye" onclick="toggleVaultPw('totp-uri')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+      </div>
+      <div class="vault-modal-field">
+        <label>Name override <span style="opacity:.5">(optional — uses URI label if empty)</span></label>
+        <input id="totp-uri-name" placeholder="Leave empty to use URI label">
+      </div>
+    </div>
+    <div class="vault-modal-footer">
+      <button class="vault-modal-cancel" onclick="closeTOTPModal()">Cancel</button>
+      <button class="vault-modal-save" onclick="saveTOTPEntry()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ AGENT EDITOR MODAL ═══ -->
 <div class="agent-editor" id="agent-editor">
   <div class="agent-editor-box">
@@ -2010,20 +2230,20 @@ const S = {
   session: null,
   sessions: [],
   chatMode: 'core',
-  chatModel: 'claude-haiku-4-5',
+  chatModel: 'kimi-for-coding',
   verbose: false,
   streaming: false
 };
 
 const SESS_API = '/api/core/sessions';
 const CHAT_MODELS = {
-  'claude-haiku-4-5': {key:'haiku', label:'Haiku'},
-  'claude-sonnet-4-6': {key:'sonnet', label:'Sonnet'},
-  'claude-opus-4-6': {key:'opus', label:'Opus'},
   'kimi-for-coding': {key:'kimi', label:'Kimi'},
   'qwen3.5-flash': {key:'qflash', label:'Qwen Flash'},
   'qwen3-max': {key:'qmax', label:'Qwen Max'},
-  'qwen3-coder-plus': {key:'qcoder', label:'Qwen Coder'}
+  'qwen3-coder-plus': {key:'qcoder', label:'Qwen Coder'},
+  'claude-haiku-4-5': {key:'haiku', label:'Haiku'},
+  'claude-sonnet-4-6': {key:'sonnet', label:'Sonnet'},
+  'claude-opus-4-6': {key:'opus', label:'Opus'}
 };
 let _trashOpen = false;
 let _trashSessions = [];
@@ -2049,7 +2269,7 @@ const NAV = [
   {id:'config',lbl:'Settings',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'}
 ];
 
-const TITLES = {setup:'Setup',chat:'Chat',files:'Files',workspace:'Workspace',agents:'Agents',skills:'Skills',tasks:'Tasks',logs:'Logs',monitor:'System Monitor',services:'Services',config:'Settings'};
+const TITLES = {setup:'Setup',chat:'Chat',files:'Files',workspace:'Workspace',agents:'Agents',skills:'Skills',tasks:'Tasks',logs:'Logs',monitor:'System Monitor',services:'Services',whatsapp:'WhatsApp',config:'Settings'};
 
 // ═══ BUILD NAV ═══
 (function buildNav(){
@@ -2086,6 +2306,7 @@ function show(name) {
   if (name !== 'monitor' && typeof stopMonitorPolling === 'function') stopMonitorPolling();
   if (name === 'services' && typeof loadServices === 'function') loadServices();
   if (name === 'config' && typeof loadConfig === 'function') loadConfig();
+  if (name === 'whatsapp' && typeof loadWhatsAppPanel === 'function') loadWhatsAppPanel();
   // mobile: close sidebar
   if (window.innerWidth <= 768) { $('sb').classList.add('col'); $('sb-overlay').classList.remove('show'); }
 }
@@ -2134,7 +2355,7 @@ let chatAutoScroll = true;
 let chatPromptHist = [];
 let chatHistIdx = -1;
 let chatDraft = '';
-let chatQueue = []; // queued messages to send after current stream ends
+// chatQueue removed — replaced by mid-stream injection via /v1/chat/inject
 const THINKING_TEXTS = [
   'Analyzing request...', 'Processing data...', 'Reasoning through options...',
   'Connecting the dots...', 'Formulating response...', 'Evaluating approach...',
@@ -2225,6 +2446,31 @@ function addMsg(role, content, opts = {}) {
   chatMsgs.push({role, content, ts: opts.time || timeStr()});
   scrollChat(true);
   return {wrap, bubble, body};
+}
+
+// DOM-only user bubble (no chatMsgs push — synced via SSE user_injected)
+function _appendUserBubbleOnly(text) {
+  const el = chatEl();
+  maybeDateSep();
+  const wrap = document.createElement('div');
+  wrap.className = 'msg msg-user';
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  avatar.textContent = '▹';
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = text;
+  const time = document.createElement('div');
+  time.className = 'msg-time';
+  time.textContent = timeStr();
+  body.appendChild(bubble);
+  body.appendChild(time);
+  wrap.appendChild(body);
+  wrap.appendChild(avatar);
+  el.appendChild(wrap);
+  scrollChat(true);
 }
 
 // ═══ THINKING ═══
@@ -2470,26 +2716,28 @@ async function sendChat() {
   const text = ta.value.trim();
   if (!text) return;
 
-  // If streaming, queue the message instead of blocking
+  // If streaming, try to inject into active stream (mid-stream injection)
   if (chatStreaming) {
-    chatQueue.push(text);
     chatPromptHist.push(text);
     chatHistIdx = chatPromptHist.length;
     ta.value = '';
     ta.style.height = 'auto';
-    // Display the user message in DOM (proper styling via addMsg) but
-    // remove it from chatMsgs — it will be re-added at drain time so
-    // message order stays correct: [user1, assistant1, user2, ...]
-    const qref = addMsg('user', text);
-    chatMsgs.pop(); // undo the push — re-added when queue drains
-    qref.wrap.classList.add('queued-user'); // mark for cleanup at drain
-    // Show transient queue notice (not stored in chatMsgs)
-    const notice = document.createElement('div');
-    notice.className = 'msg msg-bot queue-notice';
-    notice.innerHTML = `<div class="msg-avatar">◈</div><div class="msg-body"><div class="msg-bubble" style="opacity:.6;font-style:italic">Queued — will process after current task (${chatQueue.length} in queue)</div></div>`;
-    chatEl().appendChild(notice);
-    scrollChat(true);
-    return;
+    try {
+      const resp = await fetch('/api/core/v1/chat/inject', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({session_id: S.session, content: text})
+      });
+      const result = await resp.json();
+      if (result.ok) {
+        // Show message in DOM only — chatMsgs synced via SSE user_injected event
+        _appendUserBubbleOnly(text);
+        return;
+      }
+    } catch (e) {
+      console.warn('Inject failed, falling back to normal send:', e);
+    }
+    // Injection failed (no active session) — fall through to normal send
   }
 
   // Save to prompt history
@@ -2610,6 +2858,19 @@ async function _sendChatDirect(text) {
         else if (curEvent === 'tool_denied' || parsed.type === 'tool_denied') {
           if (botRef) resolveApprovalUI(botRef.body, parsed.call_id, false, parsed.reason);
         }
+        else if (curEvent === 'user_injected' || parsed.type === 'user_injected') {
+          // Server confirms inject was applied — sync chatMsgs for persistence
+          chatMsgs.push({role: 'user', content: parsed.content});
+          sessSave();
+          // Start new bot bubble for the continued response
+          if (botRef && fullContent) {
+            botRef.bubble.classList.remove('streaming');
+            botRef.bubble.innerHTML = marked.parse(fullContent, {renderer: mdRender});
+            if (chatMsgs.length > 1) chatMsgs[chatMsgs.length - 2].content = fullContent;
+          }
+          botRef = null;
+          fullContent = '';
+        }
         else if (curEvent === 'context_usage' || parsed.type === 'context_usage') {
           // Store for future context bar display
         }
@@ -2651,19 +2912,6 @@ async function _sendChatDirect(text) {
   sessSave();
   updateCtxBar();
 
-  // Drain queue — process next queued message if any
-  if (chatQueue.length > 0) {
-    const next = chatQueue.shift();
-    // Remove queue notices and queued-user DOM elements
-    document.querySelectorAll('.queue-notice').forEach(n => n.remove());
-    document.querySelectorAll('.queued-user').forEach(n => n.remove());
-    // NOW add the queued user message to chatMsgs (after the assistant response)
-    // so order is correct: [user1, assistant1, user2, ...]
-    addMsg('user', next);
-    _sendChatDirect(next);
-    return;
-  }
-  document.querySelectorAll('.queue-notice').forEach(n => n.remove());
   setStreamUI(false);
 }
 
@@ -2671,7 +2919,6 @@ function stopStream() {
   if (chatAC) { chatAC.abort(); chatAC = null; }
   removeThinking();
   chatStreaming = false;
-  chatQueue = [];
   setStreamUI(false);
 }
 
@@ -2756,7 +3003,6 @@ async function sessNew() {
   chatDraft = '';
   lastMsgDate = '';
   chatStreaming = false;
-  chatQueue = [];
   setStreamUI(false);
   $('chat-msgs').innerHTML = '';
   setChatMode('core', false);
@@ -3217,16 +3463,23 @@ $('apply-tg')?.addEventListener('click', applyTelegram);
 
 // ═══ SETUP: WHATSAPP ═══
 let _waNumbers = [];
+let _waAdmins = [];
+let _waBlacklist = [];
 let _waPolling = null;
+let _waConnected = false;
+let _waNavInjected = false;
+let _waMode = 'personal';
 
 async function waRefreshStatus() {
   try {
     const r = await fetch('/api/core/v1/whatsapp/status');
-    if (!r.ok) { waSetStatus('off', 'Service unavailable'); return; }
+    if (!r.ok) { _waConnected = false; waSetStatus('off', 'Service unavailable'); waUpdateNav(); return; }
     const d = await r.json();
     waApplyStatus(d);
   } catch {
+    _waConnected = false;
     waSetStatus('off', 'Connection error');
+    waUpdateNav();
   }
 }
 
@@ -3238,6 +3491,7 @@ function waApplyStatus(d) {
   const reconnect = $('wa-reconnect');
 
   if (d.connected || d.status === 'connected') {
+    _waConnected = true;
     waSetStatus('on', 'Connected');
     if (phone && d.phone) phone.textContent = '— ' + d.phone;
     if (desc) desc.textContent = 'Linked and running';
@@ -3246,6 +3500,7 @@ function waApplyStatus(d) {
     if (reconnect) reconnect.style.display = 'none';
     if (_waPolling) { clearInterval(_waPolling); _waPolling = setInterval(waRefreshStatus, 30000); }
   } else if (d.qr) {
+    _waConnected = false;
     waSetStatus('wait', 'Scan QR code');
     if (phone) phone.textContent = '';
     if (desc) desc.textContent = 'Scan QR to link your WhatsApp account';
@@ -3255,6 +3510,7 @@ function waApplyStatus(d) {
     const img = $('wa-qr-img');
     if (img) img.innerHTML = '<img src="' + d.qr + '" alt="QR">';
   } else {
+    _waConnected = false;
     waSetStatus('off', d.status || 'Disconnected');
     if (phone) phone.textContent = '';
     if (desc) desc.textContent = 'Not connected';
@@ -3262,6 +3518,10 @@ function waApplyStatus(d) {
     if (logout) logout.style.display = 'none';
     if (reconnect) reconnect.style.display = 'inline-flex';
   }
+  waUpdateNav();
+  // Sync panel header status
+  const ps = $('wa-panel-status');
+  if (ps) ps.innerHTML = $('wa-status')?.innerHTML || '';
 }
 
 function waSetStatus(state, text) {
@@ -3270,57 +3530,133 @@ function waSetStatus(state, text) {
   el.innerHTML = '<span class="dot ' + state + '"></span><span>' + text + '</span>';
 }
 
+// ── Dynamic nav injection ──
+function waUpdateNav() {
+  const nav = $('sb-nav');
+  if (!nav) return;
+  const existing = $('nav-whatsapp');
+  if (_waConnected && !existing) {
+    // Insert before the services separator (before config)
+    const configBtn = $('nav-config');
+    const svcSep = configBtn?.previousElementSibling;
+    const btn = document.createElement('button');
+    btn.className = 'sb-item';
+    btn.id = 'nav-whatsapp';
+    btn.title = 'WhatsApp';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="lbl">WhatsApp</span>';
+    btn.addEventListener('click', () => show('whatsapp'));
+    if (svcSep) nav.insertBefore(btn, svcSep);
+    else nav.appendChild(btn);
+    _waNavInjected = true;
+  } else if (!_waConnected && existing) {
+    existing.remove();
+    _waNavInjected = false;
+    // If user was on whatsapp panel, redirect to setup
+    if (S.panel === 'whatsapp') show('setup');
+  }
+}
+
+// ── Load full WhatsApp config ──
 async function waLoadConfig() {
   try {
     const r = await fetch('/api/core/v1/whatsapp/config');
     if (!r.ok) return;
     const d = await r.json();
+    // allow_from
     const raw = d.allow_from || '';
     _waNumbers = raw === '*' ? ['*'] : raw.split(',').map(s => s.trim()).filter(Boolean);
-    waRenderTags();
+    waRenderTagList('wa-allow-tags', _waNumbers, 'allow');
+    // admins
+    const rawA = d.admins || '';
+    _waAdmins = rawA ? rawA.split(',').map(s => s.trim()).filter(Boolean) : [];
+    waRenderTagList('wa-admin-tags', _waAdmins, 'admin');
+    // blacklist
+    const rawB = d.blacklist || '';
+    _waBlacklist = rawB ? rawB.split(',').map(s => s.trim()).filter(Boolean) : [];
+    waRenderTagList('wa-blacklist-tags', _waBlacklist, 'blacklist');
+    // mode
+    _waMode = d.mode || 'personal';
+    const modeEl = $('wa-cfg-mode');
+    if (modeEl) modeEl.value = _waMode;
+    // AI mode
+    const aiEl = $('wa-cfg-ai-mode');
+    if (aiEl) aiEl.value = d.default_mode || 'core';
+    // vault 2fa
+    const v2fa = $('wa-cfg-vault2fa');
+    if (v2fa) v2fa.checked = (d.vault_2fa === 'on');
+    // Update panel mode badge
+    waUpdateModeBadge(d.mode || 'personal');
   } catch {}
 }
 
-function waRenderTags() {
-  const container = $('wa-allow-tags');
+function waUpdateModeBadge(mode) {
+  const badge = $('wa-panel-mode');
+  if (badge) badge.textContent = mode === 'autonomous' ? 'Autonomous' : 'Personal';
+}
+
+// ── Generic tag list renderer ──
+function waRenderTagList(containerId, arr, type) {
+  const container = $(containerId);
   if (!container) return;
   container.innerHTML = '';
-  _waNumbers.forEach((num, idx) => {
+  arr.forEach((val, idx) => {
     const tag = document.createElement('span');
     tag.className = 'tag';
-    tag.innerHTML = num + ' <span class="tag-x" data-idx="' + idx + '">\u2715</span>';
+    tag.innerHTML = esc(val) + ' <span class="tag-x" data-idx="' + idx + '" data-type="' + type + '">\u2715</span>';
     tag.querySelector('.tag-x').addEventListener('click', function() {
-      _waNumbers.splice(parseInt(this.dataset.idx), 1);
-      waRenderTags();
-      $('wa-save-allow').style.display = 'inline-flex';
+      const i = parseInt(this.dataset.idx);
+      const t = this.dataset.type;
+      if (t === 'allow') { _waNumbers.splice(i, 1); waRenderTagList('wa-allow-tags', _waNumbers, 'allow'); }
+      else if (t === 'admin') { _waAdmins.splice(i, 1); waRenderTagList('wa-admin-tags', _waAdmins, 'admin'); }
+      else if (t === 'blacklist') { _waBlacklist.splice(i, 1); waRenderTagList('wa-blacklist-tags', _waBlacklist, 'blacklist'); }
+      waShowSaveBtn();
     });
     container.appendChild(tag);
   });
 }
 
-function waAddNumber() {
-  const input = $('wa-allow-input');
+function waShowSaveBtn() {
+  const btn = $('wa-save-config');
+  if (btn) btn.style.display = 'inline-flex';
+}
+
+// ── Add number helpers ──
+function waAddToList(inputId, arr, containerId, type) {
+  const input = $(inputId);
   const val = input?.value.trim();
   if (!val) return;
-  if (!_waNumbers.includes(val)) {
-    _waNumbers.push(val);
-    waRenderTags();
-    $('wa-save-allow').style.display = 'inline-flex';
+  if (!arr.includes(val)) {
+    arr.push(val);
+    waRenderTagList(containerId, arr, type);
+    waShowSaveBtn();
   }
   if (input) input.value = '';
 }
 
-async function waSaveAllowed() {
+function waAddNumber() { waAddToList('wa-allow-input', _waNumbers, 'wa-allow-tags', 'allow'); }
+function waAddAdmin() { waAddToList('wa-admin-input', _waAdmins, 'wa-admin-tags', 'admin'); }
+function waAddBlacklist() { waAddToList('wa-blacklist-input', _waBlacklist, 'wa-blacklist-tags', 'blacklist'); }
+
+// ── Save full config ──
+async function waSaveConfig() {
   try {
-    const allow_from = _waNumbers.join(',') || '*';
+    const payload = {
+      mode: $('wa-cfg-mode')?.value || 'personal',
+      default_mode: $('wa-cfg-ai-mode')?.value || 'core',
+      admins: _waAdmins.join(','),
+      allow_from: _waNumbers.join(',') || '*',
+      blacklist: _waBlacklist.join(','),
+      vault_2fa: $('wa-cfg-vault2fa')?.checked ? 'on' : 'off'
+    };
     const r = await fetch('/api/core/v1/whatsapp/config', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({allow_from})
+      body: JSON.stringify(payload)
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    toast('Allowed numbers saved');
-    $('wa-save-allow').style.display = 'none';
+    toast('WhatsApp config saved');
+    $('wa-save-config').style.display = 'none';
+    waUpdateModeBadge(payload.mode);
   } catch(e) {
     toast('Save failed: ' + e.message, true);
   }
@@ -3336,10 +3672,327 @@ async function waLogout() {
   }
 }
 
+// ── WhatsApp panel: conversations + thread view ──
+let _waSelectedConv = null;
+let _waPanelPolling = null;
+let _waConversations = [];
+
+function loadWhatsAppPanel() {
+  // Sync header
+  const ps = $('wa-panel-status');
+  if (ps) ps.innerHTML = $('wa-status')?.innerHTML || '';
+  const badge = $('wa-panel-mode');
+  if (badge) {
+    const m = $('wa-cfg-mode')?.value || 'personal';
+    badge.textContent = m === 'autonomous' ? 'Autonomous' : 'Personal';
+  }
+  // If bridge disconnected, show disconnected state
+  if (!_waConnected) {
+    waRenderDisconnected();
+    return;
+  }
+  // Load conversations
+  waLoadConversations();
+  // Start polling (30s)
+  waStartPanelPolling();
+}
+
+function waRenderDisconnected() {
+  waStopPanelPolling();
+  const list = $('wa-conv-list');
+  const thread = $('wa-thread-view');
+  if (list) list.innerHTML = '<div class="wa-disconnected"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="var(--td)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span>Bridge disconnected</span><span style="font-size:.65rem;color:var(--td)">Connect via Setup panel</span></div>';
+  if (thread) thread.innerHTML = '';
+}
+
+async function waLoadConversations() {
+  try {
+    const r = await fetch(SESS_API);
+    if (!r.ok) return;
+    const d = await r.json();
+    const sessions = d.sessions || d || [];
+    // Filter: only wa_* sessions, exclude newsletters and groups
+    _waConversations = sessions.filter(s => {
+      if (!s.id || !s.id.startsWith('wa_')) return false;
+      const id = s.id;
+      if (id.includes('@newsletter')) return false;
+      if (id.includes('@g.us')) return false;
+      return true;
+    });
+    waRenderConvList();
+  } catch {}
+}
+
+function waExtractPhone(sessionId) {
+  // wa_<phone>@s.whatsapp.net or wa_<phone>
+  const m = sessionId.match(/^wa_(\d+)/);
+  return m ? '+' + m[1] : sessionId.replace('wa_', '');
+}
+
+function waFormatPhone(phone) {
+  // Format +33642536328 → +33 6 42 53 63 28
+  if (phone.length > 6) {
+    const cc = phone.startsWith('+86') ? phone.slice(0, 3) : phone.startsWith('+1') ? phone.slice(0, 2) : phone.slice(0, 3);
+    const rest = phone.slice(cc.length);
+    if (rest.length % 2 === 1) {
+      return cc + ' ' + rest[0] + ' ' + rest.slice(1).replace(/(\d{2})/g, '$1 ').trim();
+    }
+    return cc + ' ' + rest.replace(/(\d{2})/g, '$1 ').trim();
+  }
+  return phone;
+}
+
+function waIsAdmin(phone) {
+  // Personal mode: bridge phone = auto admin
+  if ((!_waAdmins || _waAdmins.length === 0) && _waMode === 'personal') return true;
+  if (!_waAdmins || _waAdmins.length === 0) return false;
+  const clean = phone.replace(/\s/g, '');
+  return _waAdmins.some(a => a.replace(/\s/g, '') === clean);
+}
+
+function waTimeAgo(ts) {
+  if (!ts) return '';
+  const d = new Date(typeof ts === 'number' && ts > 1e12 ? ts : ts * 1000);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000) return 'now';
+  if (diff < 3600000) return Math.floor(diff / 60000) + 'm';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + 'h';
+  if (diff < 172800000) return 'yesterday';
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
+}
+
+function waRenderConvList() {
+  const list = $('wa-conv-list');
+  if (!list) return;
+  if (_waConversations.length === 0) {
+    list.innerHTML = '<div class="wa-empty-state"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--td)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>No conversations yet</span></div>';
+    return;
+  }
+  list.innerHTML = '';
+  _waConversations.forEach(s => {
+    const phone = waExtractPhone(s.id);
+    const formatted = waFormatPhone(phone);
+    const isAdmin = waIsAdmin(phone);
+    const processing = !!s.processing;
+    const mode = s.mode || 'core';
+    const preview = s.name && s.name !== 'New chat' ? s.name : '';
+    const time = waTimeAgo(s.updatedAt);
+
+    const div = document.createElement('div');
+    div.className = 'wa-conv' + (_waSelectedConv === s.id ? ' active' : '');
+    div.dataset.sid = s.id;
+    div.innerHTML =
+      '<div class="wa-conv-top">' +
+        '<span class="wa-conv-name">' + esc(formatted) + ' <span class="wa-role-tag ' + (isAdmin ? 'wa-role-admin' : 'wa-role-user') + '">' + (isAdmin ? 'admin' : 'user') + '</span></span>' +
+        '<span class="wa-conv-time">' + esc(time) + '</span>' +
+      '</div>' +
+      (preview ? '<div class="wa-conv-preview">' + esc(preview) + '</div>' : '') +
+      '<div class="wa-conv-meta">' +
+        (processing ? '<span class="wa-proc"><span class="wa-proc-dots"><span></span><span></span><span></span></span> processing</span>' : '<span style="color:var(--ok)">' + mode + '</span>') +
+      '</div>';
+    div.addEventListener('click', () => waSelectConv(s.id));
+    list.appendChild(div);
+  });
+}
+
+async function waSelectConv(sessionId) {
+  _waSelectedConv = sessionId;
+  // Update active class
+  document.querySelectorAll('.wa-conv').forEach(c => c.classList.toggle('active', c.dataset.sid === sessionId));
+  // Load thread
+  await waLoadThread(sessionId);
+}
+
+async function waLoadThread(sessionId) {
+  const view = $('wa-thread-view');
+  if (!view) return;
+  try {
+    const r = await fetch(SESS_API + '/' + sessionId);
+    if (!r.ok) { view.innerHTML = '<div class="wa-empty-state"><span>Failed to load conversation</span></div>'; return; }
+    const d = await r.json();
+    waRenderThread(view, d, sessionId);
+  } catch {
+    view.innerHTML = '<div class="wa-empty-state"><span>Failed to load conversation</span></div>';
+  }
+}
+
+function waRenderThread(view, session, sessionId) {
+  const phone = waExtractPhone(sessionId);
+  const formatted = waFormatPhone(phone);
+  const isAdmin = waIsAdmin(phone);
+  const mode = session.mode || 'core';
+  const messages = session.messages || [];
+
+  view.innerHTML = '';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'wa-thread-hdr';
+  hdr.innerHTML =
+    '<div class="wa-thread-hdr-name">' + esc(formatted) +
+      ' <span class="wa-role-tag ' + (isAdmin ? 'wa-role-admin' : 'wa-role-user') + '">' + (isAdmin ? 'admin' : 'user') + '</span></div>' +
+    '<div class="wa-thread-hdr-badges">' +
+      '<span class="wa-thread-hdr-badge status">' + (_waConnected ? 'Connected' : 'Offline') + '</span>' +
+      '<span class="wa-thread-hdr-badge mode">' + esc(mode) + '</span>' +
+    '</div>';
+  view.appendChild(hdr);
+
+  // Messages area
+  const msgs = document.createElement('div');
+  msgs.className = 'wa-thread-msgs';
+
+  // Collect tool call names for inline display
+  const toolMap = {};
+  messages.forEach(m => {
+    if (m.role === 'assistant' && m.tool_calls) {
+      m.tool_calls.forEach(tc => {
+        toolMap[tc.id] = { name: tc.function?.name || 'tool', args: tc.function?.arguments || '' };
+      });
+    }
+  });
+
+  // Build tool results map
+  const toolResults = {};
+  messages.forEach(m => {
+    if (m.role === 'tool' && m.tool_call_id) {
+      const info = toolMap[m.tool_call_id] || {};
+      const isErr = m.content && (m.content.startsWith('Error') || m.content.startsWith('error') || m.content.includes('denied') || m.content.includes('not allowed'));
+      toolResults[m.tool_call_id] = { name: info.name || 'tool', ok: !isErr, denied: m.content && m.content.includes('denied') };
+    }
+  });
+
+  let pendingTools = [];
+
+  messages.forEach(m => {
+    if (m.role === 'user') {
+      // Flush pending tools before user msg
+      if (pendingTools.length > 0) { waFlushTools(msgs, pendingTools); pendingTools = []; }
+      const bubble = document.createElement('div');
+      bubble.className = 'wa-msg wa-msg-user';
+      bubble.textContent = m.content || '';
+      const time = document.createElement('div');
+      time.className = 'wa-msg-time';
+      time.textContent = '';
+      bubble.appendChild(time);
+      msgs.appendChild(bubble);
+    } else if (m.role === 'assistant') {
+      // Flush pending tools
+      if (pendingTools.length > 0) { waFlushTools(msgs, pendingTools); pendingTools = []; }
+      // Collect tool calls for this assistant message
+      if (m.tool_calls && m.tool_calls.length > 0) {
+        m.tool_calls.forEach(tc => {
+          const res = toolResults[tc.id];
+          pendingTools.push({
+            name: tc.function?.name || 'tool',
+            ok: res ? res.ok : true,
+            denied: res ? res.denied : false
+          });
+        });
+      }
+      if (m.content) {
+        // Check for tool denial system messages
+        if (m.content.includes('denied') || m.content.includes('not allowed') || m.content.includes('requires admin')) {
+          const sys = document.createElement('div');
+          sys.className = 'wa-msg wa-msg-sys';
+          sys.textContent = m.content;
+          msgs.appendChild(sys);
+        } else {
+          const bubble = document.createElement('div');
+          bubble.className = 'wa-msg wa-msg-bot';
+          bubble.innerHTML = marked.parse(m.content, { renderer: mdRender });
+          // Append inline tool summary if there were tool calls
+          if (pendingTools.length > 0) {
+            waFlushToolsInline(bubble, pendingTools);
+            pendingTools = [];
+          }
+          const time = document.createElement('div');
+          time.className = 'wa-msg-time';
+          time.textContent = '';
+          bubble.appendChild(time);
+          msgs.appendChild(bubble);
+        }
+      }
+    } else if (m.role === 'tool') {
+      // Tool results are handled via toolResults map above
+    }
+  });
+  // Flush remaining tools
+  if (pendingTools.length > 0) waFlushTools(msgs, pendingTools);
+
+  view.appendChild(msgs);
+
+  // Read-only bar
+  const ro = document.createElement('div');
+  ro.className = 'wa-thread-ro';
+  ro.textContent = 'Read-only \u00b7 ' + (isAdmin ? 'Admin' : 'User') + ' \u00b7 ' + mode;
+  view.appendChild(ro);
+
+  // Scroll to bottom
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function waFlushTools(container, tools) {
+  const wrap = document.createElement('div');
+  wrap.className = 'wa-msg wa-msg-sys';
+  wrap.style.borderColor = 'var(--br)';
+  wrap.style.color = 'var(--ts)';
+  wrap.style.background = 'var(--bg-c)';
+  const inner = tools.map(t => {
+    const dotCls = t.denied ? 'err' : (t.ok ? 'ok' : 'err');
+    return '<span class="wa-tl-row"><span class="wa-tl-dot ' + dotCls + '"></span><span class="wa-tl-name">' + esc(t.name) + '</span></span>';
+  }).join('');
+  wrap.innerHTML = '<div class="wa-msg-tools">' + inner + '</div>';
+  container.appendChild(wrap);
+}
+
+function waFlushToolsInline(bubble, tools) {
+  const wrap = document.createElement('div');
+  wrap.className = 'wa-msg-tools';
+  wrap.innerHTML = tools.map(t => {
+    const dotCls = t.denied ? 'err' : (t.ok ? 'ok' : 'err');
+    return '<span class="wa-tl-row"><span class="wa-tl-dot ' + dotCls + '"></span><span class="wa-tl-name">' + esc(t.name) + '</span></span>';
+  }).join('');
+  bubble.appendChild(wrap);
+}
+
+// ── Polling with Page Visibility API ──
+function waStartPanelPolling() {
+  waStopPanelPolling();
+  _waPanelPolling = setInterval(() => {
+    if (document.hidden || S.panel !== 'whatsapp') return;
+    waLoadConversations();
+    if (_waSelectedConv) waLoadThread(_waSelectedConv);
+  }, 30000);
+}
+
+function waStopPanelPolling() {
+  if (_waPanelPolling) { clearInterval(_waPanelPolling); _waPanelPolling = null; }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    waStopPanelPolling();
+  } else if (S.panel === 'whatsapp' && _waConnected) {
+    waLoadConversations();
+    if (_waSelectedConv) waLoadThread(_waSelectedConv);
+    waStartPanelPolling();
+  }
+});
+
+// ── Event listeners ──
 $('wa-add-num')?.addEventListener('click', waAddNumber);
 $('wa-allow-input')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); waAddNumber(); } });
-$('wa-save-allow')?.addEventListener('click', waSaveAllowed);
+$('wa-add-admin')?.addEventListener('click', waAddAdmin);
+$('wa-admin-input')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); waAddAdmin(); } });
+$('wa-add-blacklist')?.addEventListener('click', waAddBlacklist);
+$('wa-blacklist-input')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); waAddBlacklist(); } });
+$('wa-save-config')?.addEventListener('click', waSaveConfig);
 $('wa-logout')?.addEventListener('click', waLogout);
+// Show save button on any config change
+$('wa-cfg-mode')?.addEventListener('change', waShowSaveBtn);
+$('wa-cfg-ai-mode')?.addEventListener('change', waShowSaveBtn);
+$('wa-cfg-vault2fa')?.addEventListener('change', waShowSaveBtn);
 
 async function waReconnect() {
   const btn = $('wa-reconnect');
@@ -4977,11 +5630,51 @@ function renderModelChips() {
   });
 }
 
+async function loadVaultToggle() {
+  try {
+    const r = await fetch('/api/core/vault/settings');
+    if (!r.ok) return;
+    const d = await r.json();
+    const enabled = d.vault_enabled !== false;
+    const tog = $('vault-enabled-toggle');
+    if (tog) tog.checked = enabled;
+    _applyVaultCardState(enabled);
+  } catch (e) {}
+}
+
+function _applyVaultCardState(enabled) {
+  const card = $('vault-enabled-toggle');
+  if (!card) return;
+  const cfgCard = card.closest('.cfg-card');
+  if (!cfgCard) return;
+  const inner = cfgCard.querySelector('.sec-t');
+  if (enabled) {
+    cfgCard.style.opacity = '';
+    if (inner) inner.style.opacity = '';
+  } else {
+    cfgCard.style.opacity = '0.45';
+  }
+}
+
+async function toggleVaultEnabled(checked) {
+  try {
+    const r = await fetch('/api/core/vault/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vault_enabled: checked })
+    });
+    if (!r.ok) { toast('Failed to update vault setting', true); return; }
+    _applyVaultCardState(checked);
+    toast(checked ? 'Vault enabled' : 'Vault disabled');
+  } catch (e) { toast('Failed to update vault setting', true); }
+}
+
 async function loadConfig() {
   // Load vault + protected + master password status in parallel
   loadVault();
   loadProtected();
   checkMasterPasswordStatus();
+  loadVaultToggle();
   loadUsbDrives();
   try {
     const r = await fetch('/api/system/config');
@@ -5236,8 +5929,12 @@ async function loadProtected() {
 function switchPrivacyTab(tab) {
   _privacyTab = tab;
   document.querySelectorAll('.vault-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  const isTotp = tab === 'totp';
+  $('privacy-list').style.display = isTotp ? 'none' : '';
   $('privacy-add-btn').style.display = tab === 'blacklist' ? '' : 'none';
-  renderProtected();
+  if ($('privacy-info')) $('privacy-info').style.display = isTotp ? 'none' : '';
+  $('totp-panel').style.display = isTotp ? '' : 'none';
+  if (isTotp) { loadTOTP(); } else { stopTOTPTimers(); renderProtected(); }
 }
 
 function renderProtected() {
@@ -5319,6 +6016,229 @@ async function deleteProtectedWord(name) {
     toast('Protection removed');
     loadProtected();
   } catch (e) { toast('Delete failed: ' + e.message, true); }
+}
+
+// ── TOTP (2FA) ─────────────────────────────────────────────
+let _totpEntries = [];
+let _totpCodes = {};   // {name: {code, remaining, period}}
+let _totpRefreshTimer = null;
+let _totpTickTimer = null;
+let _totpMode = 'manual';
+
+async function loadTOTP() {
+  try {
+    const r = await fetch('/api/core/vault/totp');
+    if (!r.ok) return;
+    const d = await r.json();
+    _totpEntries = d.entries || d.totp || [];
+    if (_totpEntries.length) await refreshTOTPCodes();
+    renderTOTP();
+    startTOTPTimers();
+  } catch (e) {}
+}
+
+async function refreshTOTPCodes() {
+  for (const entry of _totpEntries) {
+    try {
+      const r = await fetch('/api/core/vault/totp/' + encodeURIComponent(entry.name) + '/code');
+      if (r.ok) {
+        const d = await r.json();
+        _totpCodes[entry.name] = { code: d.code, remaining: d.remaining, period: d.period || 30 };
+      }
+    } catch (e) {}
+  }
+}
+
+function startTOTPTimers() {
+  stopTOTPTimers();
+  if (!_totpEntries.length) return;
+  // Tick every 1s for local interpolation
+  _totpTickTimer = setInterval(() => {
+    let needsRefresh = false;
+    for (const name in _totpCodes) {
+      _totpCodes[name].remaining = Math.max(0, _totpCodes[name].remaining - 1);
+      if (_totpCodes[name].remaining <= 0) needsRefresh = true;
+    }
+    if (_privacyTab === 'totp') updateTOTPDisplay();
+    if (needsRefresh) refreshTOTPCodes().then(() => { if (_privacyTab === 'totp') renderTOTP(); });
+  }, 1000);
+  // Full refresh every 5s
+  _totpRefreshTimer = setInterval(async () => {
+    await refreshTOTPCodes();
+    if (_privacyTab === 'totp') renderTOTP();
+  }, 5000);
+}
+
+function stopTOTPTimers() {
+  if (_totpRefreshTimer) { clearInterval(_totpRefreshTimer); _totpRefreshTimer = null; }
+  if (_totpTickTimer) { clearInterval(_totpTickTimer); _totpTickTimer = null; }
+}
+
+function updateTOTPDisplay() {
+  for (const name in _totpCodes) {
+    const c = _totpCodes[name];
+    const codeEl = document.querySelector('[data-totp-code="' + CSS.escape(name) + '"]');
+    if (!codeEl) continue;
+    const formatted = String(c.code).padStart(6, '0');
+    codeEl.querySelector('.totp-digits').textContent = formatted.slice(0, 3) + ' ' + formatted.slice(3);
+    const timerEl = codeEl.closest('.totp-item');
+    const secsEl = timerEl.querySelector('.totp-secs');
+    const barEl = timerEl.querySelector('.totp-bar-fill');
+    const pct = (c.remaining / c.period) * 100;
+    secsEl.textContent = c.remaining + 's';
+    secsEl.classList.toggle('urgent', c.remaining < 5);
+    barEl.style.width = pct + '%';
+    barEl.classList.toggle('urgent', c.remaining < 5);
+  }
+}
+
+function renderTOTP() {
+  const el = $('totp-list');
+  if (!_totpEntries.length) {
+    el.innerHTML = '<div class="vault-empty">No TOTP entries — add your first 2FA code</div>';
+    return;
+  }
+  el.innerHTML = _totpEntries.map(entry => {
+    const c = _totpCodes[entry.name] || { code: '------', remaining: 30, period: 30 };
+    const formatted = String(c.code).padStart(6, '0');
+    const codeDisplay = formatted === '------' ? '--- ---' : formatted.slice(0, 3) + ' ' + formatted.slice(3);
+    const pct = (c.remaining / c.period) * 100;
+    const urgent = c.remaining < 5;
+    return '<div class="totp-item">' +
+      '<svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h2m6 0h2"/></svg>' +
+      '<div class="totp-meta">' +
+        '<div class="totp-name" id="totp-name-' + esc(entry.name) + '">' + esc(entry.name) + '</div>' +
+        (entry.issuer ? '<div class="totp-issuer">' + esc(entry.issuer) + '</div>' : '') +
+      '</div>' +
+      '<div class="totp-code" data-totp-code="' + esc(entry.name) + '" onclick="copyTOTPCode(\'' + esc(entry.name).replace(/'/g, "\\'") + '\', this)">' +
+        '<span class="totp-digits">' + codeDisplay + '</span>' +
+        '<span class="totp-copied">&#10003; Copied</span>' +
+      '</div>' +
+      '<div class="totp-timer">' +
+        '<span class="totp-secs' + (urgent ? ' urgent' : '') + '">' + c.remaining + 's</span>' +
+        '<div class="totp-bar"><div class="totp-bar-fill' + (urgent ? ' urgent' : '') + '" style="width:' + pct + '%"></div></div>' +
+      '</div>' +
+      '<div class="totp-actions">' +
+        '<button class="vault-item-btn del" onclick="deleteTOTP(\'' + esc(entry.name).replace(/'/g, "\\'") + '\')">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function copyTOTPCode(name, el) {
+  const c = _totpCodes[name];
+  if (!c || c.code === '------') return;
+  const code = String(c.code).padStart(6, '0');
+  navigator.clipboard.writeText(code).then(() => {
+    const badge = el.querySelector('.totp-copied');
+    badge.classList.add('show');
+    setTimeout(() => badge.classList.remove('show'), 1000);
+  }).catch(() => toast('Copy failed', true));
+}
+
+function renameTOTP(name) {
+  const item = document.querySelector('#totp-name-' + CSS.escape(name));
+  if (!item) return;
+  const oldName = name;
+  const input = document.createElement('input');
+  input.className = 'totp-name-input';
+  input.value = oldName;
+  item.replaceWith(input);
+  input.focus();
+  input.select();
+  const doRename = async () => {
+    const newName = input.value.trim();
+    if (!newName || newName === oldName) { input.replaceWith(item); return; }
+    try {
+      const r = await fetch('/api/core/vault/totp/' + encodeURIComponent(oldName) + '/rename', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_name: newName })
+      });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || 'HTTP ' + r.status); }
+      toast('Renamed to ' + newName);
+      loadTOTP();
+    } catch (e) { toast('Rename failed: ' + e.message, true); input.replaceWith(item); }
+  };
+  input.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); doRename(); } if (e.key === 'Escape') input.replaceWith(item); };
+  input.onblur = doRename;
+}
+
+async function deleteTOTP(name) {
+  if (!confirm('Delete TOTP "' + name + '"? This cannot be undone.')) return;
+  try {
+    const r = await fetch('/api/core/vault/totp/' + encodeURIComponent(name), {
+      method: 'DELETE',
+      headers: { 'X-Vault-Confirm': 'true' }
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    toast('TOTP deleted');
+    delete _totpCodes[name];
+    loadTOTP();
+  } catch (e) { toast('Delete failed: ' + e.message, true); }
+}
+
+function switchTOTPMode(mode) {
+  _totpMode = mode;
+  $('totp-form-manual').style.display = mode === 'manual' ? '' : 'none';
+  $('totp-form-uri').style.display = mode === 'uri' ? '' : 'none';
+  $('totp-mode-manual').classList.toggle('active', mode === 'manual');
+  $('totp-mode-uri').classList.toggle('active', mode === 'uri');
+}
+
+function openTOTPModal() {
+  _totpMode = 'manual';
+  $('totp-name').value = '';
+  $('totp-secret').value = '';
+  $('totp-secret').type = 'password';
+  $('totp-issuer').value = '';
+  $('totp-uri').value = '';
+  $('totp-uri').type = 'password';
+  $('totp-uri-name').value = '';
+  $('totp-form-manual').style.display = '';
+  $('totp-form-uri').style.display = 'none';
+  $('totp-mode-manual').classList.add('active');
+  $('totp-mode-uri').classList.remove('active');
+  $('totp-modal').classList.add('open');
+  setTimeout(() => $('totp-name').focus(), 100);
+}
+
+function closeTOTPModal() { $('totp-modal').classList.remove('open'); }
+
+async function saveTOTPEntry() {
+  let body;
+  if (_totpMode === 'uri') {
+    const uri = $('totp-uri').value.trim();
+    if (!uri) { toast('URI is required', true); return; }
+    // API expects secret field — it detects otpauth:// prefix internally
+    const nameOverride = $('totp-uri-name').value.trim();
+    // Extract label from URI as fallback name: otpauth://totp/Label?... or otpauth://totp/Issuer:Label?...
+    let uriName = nameOverride;
+    if (!uriName) {
+      try { const m = uri.match(/otpauth:\/\/totp\/([^?]+)/); if (m) uriName = decodeURIComponent(m[1]).split(':').pop().trim(); } catch(e) {}
+    }
+    if (!uriName) uriName = 'TOTP-' + Date.now();
+    body = { name: uriName, secret: uri };
+  } else {
+    const name = $('totp-name').value.trim();
+    const secret = $('totp-secret').value.trim().replace(/\s/g, '').toUpperCase();
+    if (!name) { toast('Name is required', true); return; }
+    if (!secret) { toast('Secret is required', true); return; }
+    body = { name, secret };
+    const issuer = $('totp-issuer').value.trim();
+    if (issuer) body.issuer = issuer;
+  }
+  try {
+    const r = await fetch('/api/core/vault/totp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || 'HTTP ' + r.status); }
+    toast('TOTP entry added');
+    closeTOTPModal();
+    loadTOTP();
+  } catch (e) { toast('Failed: ' + e.message, true); }
 }
 
 function toggleVaultPw(inputId) {
@@ -5584,6 +6504,8 @@ async function unlockVaultOverlay() {
     _vaultRevealed = true;
     loadVault();
     loadProtected();
+    // Pre-load TOTP entries (codes will refresh when tab is opened)
+    loadTOTP();
   } catch (e) {
     $('vault-overlay-error').textContent = 'Connection error';
     $('vault-overlay-error').style.display = 'block';
@@ -5595,6 +6517,14 @@ function closeVaultOverlay() {
   $('vault-lock-screen').style.display = 'flex';
   $('vault-unlocked').style.display = 'none';
   _vaultRevealed = false;
+  stopTOTPTimers();
+  // Reset to blacklist tab
+  _privacyTab = 'blacklist';
+  document.querySelectorAll('.vault-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'blacklist'));
+  if ($('totp-panel')) $('totp-panel').style.display = 'none';
+  if ($('privacy-list')) $('privacy-list').style.display = '';
+  if ($('privacy-add-btn')) $('privacy-add-btn').style.display = '';
+  if ($('privacy-info')) $('privacy-info').style.display = '';
 }
 
 function openBackupDownloadModal() {

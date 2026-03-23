@@ -334,6 +334,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tp);
         <div class="done-ico">✅</div>
         <div class="done-title">Device activated!</div>
         <div class="done-sub" id="done-ip">Opening dashboard…</div>
+        <div style="font-size:.72rem;color:var(--td);margin-top:4px">Default AI: Kimi · change anytime in Settings</div>
         <div class="spin"></div>
       </div>
     </div>

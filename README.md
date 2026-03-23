@@ -170,9 +170,25 @@ Chat request → ClawbotCore (:8090)
     → injects available module tools (function calling)
     → calls LLM API directly (for OpenAI-compatible providers)
     → executes tool_calls returned by the LLM
+    → checks for mid-stream injected follow-up messages
     → loops until final answer
     → returns OpenAI-compatible response
 ```
+
+### Mid-Stream Message Injection
+
+ClawbotCore supports **real-time follow-up injection** during active AI conversations — a feature unique to ClawBot, not found in open-source alternatives like Open WebUI.
+
+While the AI is working (tool calls, streaming response), you can send additional messages that get **injected directly into the active tool loop**. The LLM sees your follow-up at the next round and adjusts its response accordingly — just like correcting someone mid-sentence.
+
+```bash
+# Inject a follow-up into an active streaming session
+curl -X POST http://clawbot.local/api/core/v1/chat/inject \
+  -H "Content-Type: application/json" \
+  -d '{"session_id": "your-session-id", "content": "actually, do it in Chinese"}'
+```
+
+Works across all channels: **web dashboard**, **WhatsApp**, and **cloud tunnel**.
 
 ClawbotCore reads the LLM config from `/home/pi/.clawbot/config.json`.
 Changing it in Settings restarts the service automatically.

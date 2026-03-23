@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Dashboard Panel — Spec v3</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050a0e;--card:#0d1a24;--card2:#112230;--br:#1a3040;--ac:#00ffe0;--ac2:#00b8ff;--ok:#00ff88;--er:#ff3860;--warn:#ffaa00;--tx:#e0f0f8;--ts:#6a8fa8;--td:#3a5a70;--purple:#9966ff}
+body{background:var(--bg);color:var(--tx);font-family:'Outfit',system-ui,sans-serif;line-height:1.6;padding:0}
+a{color:var(--ac2);text-decoration:none}
+code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:var(--card2);padding:2px 6px;border-radius:4px;color:var(--ac)}
+.hero{background:linear-gradient(135deg,#0a1520 0%,#0d1a24 50%,#081018 100%);border-bottom:1px solid var(--br);padding:60px 40px;text-align:center}
+.hero h1{font-size:2.4rem;font-weight:700;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero .sub{color:var(--ts);font-size:1rem;font-weight:300}
+.hero .date{color:var(--td);font-size:.75rem;margin-top:12px;font-family:'JetBrains Mono',monospace}
+.badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin:0 4px}
+.badge-scope{background:#00ffe015;border:1px solid var(--ac);color:var(--ac)}
+.badge-cut{background:#ff386015;border:1px solid var(--er);color:var(--er)}
+.badge-live{background:#00ff8815;border:1px solid var(--ok);color:var(--ok)}
+.badge-warn{background:#ffaa0015;border:1px solid var(--warn);color:var(--warn)}
+.badge-future{background:#9966ff15;border:1px solid var(--purple);color:var(--purple)}
+.container{max-width:1200px;margin:0 auto;padding:40px 24px}
+section{margin-bottom:48px}
+h2{font-size:1.5rem;font-weight:600;color:var(--ac);margin-bottom:20px;padding-bottom:8px;border-bottom:1px solid var(--br)}
+h3{font-size:1.1rem;font-weight:500;color:var(--tx);margin:20px 0 12px}
+.card{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:24px;margin-bottom:16px}
+.card h4{color:var(--ac2);font-size:1rem;margin-bottom:8px}
+.card p{color:var(--ts);font-size:.88rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:768px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* Mode cards */
+.mode-card{position:relative;overflow:hidden;padding:28px}
+.mode-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:2px}
+.mode-perso::before{background:var(--ac2)}
+.mode-bot::before{background:var(--ac)}
+.mode-future::before{background:var(--purple)}
+.mode-card .ico{font-size:2.4rem;margin-bottom:14px}
+.mode-card .label{font-size:.7rem;color:var(--td);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+
+/* Scope table */
+.scope-tbl{width:100%;border-collapse:collapse;font-size:.88rem}
+.scope-tbl th{text-align:left;color:var(--td);font-weight:400;padding:8px 12px;border-bottom:1px solid var(--br);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.scope-tbl td{padding:10px 12px;border-bottom:1px solid #1a304040;color:var(--ts)}
+.scope-tbl tr:hover td{background:var(--card2)}
+.scope-tbl .feat{color:var(--tx);font-weight:500}
+
+/* Architecture diagram */
+.arch{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:32px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.8;color:var(--ts);overflow-x:auto;white-space:pre}
+
+/* Flow */
+.flow{display:flex;align-items:stretch;gap:0;margin:20px 0;flex-wrap:wrap}
+.flow-step{flex:1;min-width:120px;background:var(--card);border:1px solid var(--br);border-radius:12px;padding:16px;text-align:center}
+.flow-step .fs-n{font-size:.6rem;color:var(--td);text-transform:uppercase;letter-spacing:.1em}
+.flow-step .fs-t{font-size:.85rem;color:var(--tx);font-weight:500;margin-top:4px}
+.flow-step .fs-d{font-size:.7rem;color:var(--ts);margin-top:6px}
+.flow-arr{display:flex;align-items:center;padding:0 8px;color:var(--ac);font-size:1.2rem}
+
+/* Permissions diagram */
+.perm-grid{display:grid;grid-template-columns:200px 1fr 1fr 1fr;gap:0;font-size:.8rem;margin:16px 0}
+.perm-hdr{background:var(--card2);padding:10px 14px;font-weight:600;color:var(--tx);border:1px solid var(--br)}
+.perm-cell{padding:10px 14px;border:1px solid #1a304030;color:var(--ts)}
+.perm-label{padding:10px 14px;border:1px solid #1a304030;color:var(--tx);font-weight:500;background:var(--card)}
+.perm-yes{color:var(--ok)}
+.perm-no{color:var(--er)}
+.perm-opt{color:var(--warn)}
+
+/* Security cards */
+.sec-card{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.sec-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px}
+.sec-critical::before{background:var(--er)}
+.sec-important::before{background:var(--warn)}
+.sec-nice::before{background:var(--ok)}
+.sec-card h4{font-size:.9rem;margin-bottom:6px}
+.sec-card p{font-size:.8rem;color:var(--ts)}
+
+/* Mockup */
+.mockup{background:#080e14;border:2px solid var(--br);border-radius:16px;overflow:hidden;box-shadow:0 8px 32px #0008}
+.mockup-bar{background:#0a1520;padding:8px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--br)}
+.mockup-dot{width:10px;height:10px;border-radius:50%}
+.mockup-dot.r{background:#ff5f57}.mockup-dot.y{background:#ffbd2e}.mockup-dot.g{background:#28c840}
+.mockup-body{display:flex;min-height:480px}
+.mockup-side{width:56px;background:#0a1218;border-right:1px solid var(--br);padding:12px 0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.mockup-side .mi{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--td)}
+.mockup-side .mi.wa{background:#25D366;color:#fff;font-weight:700;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #25D36640}50%{box-shadow:0 0 0 6px #25D36600}}
+.mockup-sep{width:24px;height:1px;background:var(--br);margin:4px 0}
+.mockup-main{flex:1;display:flex}
+.mockup-list{width:260px;border-right:1px solid var(--br);padding:12px}
+.mockup-list h5{color:var(--td);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;padding:0 4px}
+.conv{padding:10px;border-radius:8px;margin-bottom:4px}
+.conv.sel{background:linear-gradient(135deg,#00ffe010,#00b8ff10);border:1px solid var(--ac)}
+.conv .cn{font-size:.78rem;color:var(--tx);font-weight:500;display:flex;justify-content:space-between}
+.conv .ct{font-size:.65rem;color:var(--td)}
+.conv .cm{font-size:.7rem;color:var(--ts);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.conv .dot-proc{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ac);animation:blink 1s infinite;margin-left:6px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.conv .role-tag{display:inline-block;font-size:.55rem;padding:1px 6px;border-radius:8px;margin-left:4px}
+.role-admin{background:#ff986015;border:1px solid #ff9860;color:#ff9860}
+.role-user{background:#00b8ff15;border:1px solid var(--ac2);color:var(--ac2)}
+.mockup-thread{flex:1;display:flex;flex-direction:column;padding:16px}
+.mockup-thread .th-hdr{font-size:.8rem;color:var(--tx);font-weight:500;padding-bottom:10px;border-bottom:1px solid var(--br);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.th-badge{font-size:.6rem;padding:3px 10px;border-radius:12px}
+.th-ok{background:#00ff8815;color:var(--ok);border:1px solid #00ff8830}
+.th-mode{background:#00b8ff15;color:var(--ac2);border:1px solid #00b8ff30;margin-left:6px}
+.msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:80%;padding:10px 14px;border-radius:12px;font-size:.75rem;line-height:1.5}
+.msg-u{align-self:flex-end;background:#1a3050;color:var(--tx);border-bottom-right-radius:4px}
+.msg-a{align-self:flex-start;background:var(--card);border:1px solid var(--br);color:var(--ts);border-bottom-left-radius:4px}
+.msg-sys{align-self:center;background:#ff386010;border:1px dashed var(--er);color:var(--er);font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:6px 16px;border-radius:8px}
+.msg-cmd{align-self:center;background:#ffaa0010;border:1px dashed var(--warn);color:var(--warn);font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:6px 16px;border-radius:8px}
+.msg-time{font-size:.55rem;color:var(--td);margin-top:4px}
+.ro-bar{margin-top:12px;padding:10px;background:var(--card);border:1px solid var(--br);border-radius:8px;text-align:center;font-size:.7rem;color:var(--td);font-style:italic}
+
+/* Config mockup */
+.config-mock{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:24px}
+.cfg-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #1a304030}
+.cfg-row:last-child{border:none}
+.cfg-label{flex:1;font-size:.85rem}
+.cfg-sub{font-size:.7rem;color:var(--td)}
+.mode-sel{display:flex;gap:8px;margin-top:8px}
+.mode-btn{padding:6px 16px;border-radius:8px;font-size:.75rem;font-family:'JetBrains Mono',monospace;border:1px solid var(--br);color:var(--td);background:transparent}
+.mode-btn.active{border-color:var(--ac);color:var(--ac);background:#00ffe010}
+.toggle{width:44px;height:24px;border-radius:12px;background:var(--br);position:relative;flex-shrink:0}
+.toggle.on{background:var(--ac)}
+.toggle::after{content:'';width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px}
+.toggle.on::after{left:23px}
+
+/* Findings */
+.finding{display:flex;gap:12px;padding:12px;border-radius:8px;margin-bottom:8px;background:var(--card);border:1px solid var(--br)}
+.finding .fn{font-size:1.2rem;flex-shrink:0;width:28px;text-align:center}
+.finding .fd{font-size:.85rem;color:var(--ts)}
+.finding .fd strong{color:var(--tx)}
+
+/* Phases */
+.phase{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:20px;margin-bottom:12px;display:flex;gap:16px;align-items:flex-start}
+.phase .pn{font-size:1.4rem;font-weight:700;color:var(--ac);font-family:'JetBrains Mono',monospace;flex-shrink:0;width:40px}
+.phase .pt{font-size:.95rem;color:var(--tx);font-weight:500}
+.phase .pd{font-size:.8rem;color:var(--ts);margin-top:4px}
+.ptag{display:inline-block;font-size:.6rem;padding:2px 8px;border-radius:10px;margin-top:6px;text-transform:uppercase;letter-spacing:.04em}
+.ptag-be{background:#00b8ff15;border:1px solid var(--ac2);color:var(--ac2)}
+.ptag-fe{background:#00ffe015;border:1px solid var(--ac);color:var(--ac)}
+.ptag-both{background:#ffaa0015;border:1px solid var(--warn);color:var(--warn)}
+
+.live{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:20px;font-family:'JetBrains Mono',monospace;font-size:.75rem}
+.live .ll{display:flex;gap:12px;padding:4px 0;border-bottom:1px solid #1a304030}
+.live .lk{color:var(--td);min-width:140px}
+.live .lv{color:var(--ac)}
+
+.principle{background:linear-gradient(135deg,#00ffe008,#00b8ff08);border:1px solid var(--ac);border-radius:12px;padding:24px;margin:20px 0;text-align:center}
+.principle h3{color:var(--ac);font-size:1.2rem;margin-bottom:8px}
+.principle p{color:var(--ts);font-size:.9rem;max-width:700px;margin:0 auto}
+
+footer{text-align:center;padding:40px;color:var(--td);font-size:.7rem;border-top:1px solid var(--br)}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="hero">
+  <h1>WhatsApp Dashboard Panel</h1>
+  <div class="sub">ClawBot-Core &middot; Spec v3 — Permissions &amp; Security</div>
+  <div style="margin-top:16px">
+    <span class="badge badge-scope">Scope acte</span>
+    <span class="badge badge-live">Bridge live</span>
+    <span class="badge badge-warn">Pre-implementation</span>
+  </div>
+  <div class="date">2026-03-22 &middot; BMAD Party Mode v3 &middot; 5 agents</div>
+</div>
+
+<div class="container">
+
+<!-- ════════ PRINCIPE ════════ -->
+<section>
+  <div class="principle">
+    <h3>Principe fondateur</h3>
+    <p>Le bridge est un <strong>tuyau</strong>. L'intelligence vient du <strong>mode</strong> (Core ou Core-Agent). Le dashboard est une <strong>fenetre read-only</strong>. Une seule interface, identique dans tous les modes. On observe, on n'intervient pas.</p>
+  </div>
+</section>
+
+<!-- ════════ 2 MODES ════════ -->
+<section>
+  <h2>1. Deux modes, une seule interface</h2>
+
+  <div class="grid2">
+    <div class="card mode-card mode-perso">
+      <div class="ico">&#x1f464;</div>
+      <div class="label">Mode 1</div>
+      <h4>Bot Personnel</h4>
+      <p>Bridge de son propre WhatsApp. Self-chat pour piloter le boitier.</p>
+      <p style="margin-top:12px;font-size:.82rem;color:var(--tx)"><strong>Tu es automatiquement admin.</strong></p>
+      <p style="font-size:.78rem;margin-top:4px">Acces complet : slash commands, mode switch, vault (avec 2FA optionnel), outils, config.</p>
+      <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ts)">
+        admins = ton numero (auto)<br>
+        allow_from = ton numero
+      </div>
+    </div>
+
+    <div class="card mode-card mode-bot">
+      <div class="ico">&#x1f916;</div>
+      <div class="label">Mode 2</div>
+      <h4>Bot Autonome</h4>
+      <p>Numero dedie. L'AI repond a tout le monde (ou whitelist). Certains numeros sont <strong>admin</strong> pour piloter.</p>
+      <p style="margin-top:12px;font-size:.82rem;color:var(--tx)"><strong>Tu definis les numeros admin.</strong></p>
+      <p style="font-size:.78rem;margin-top:4px">Les admins pilotent. Les autres recoivent les reponses de l'AI selon sa programmation.</p>
+      <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ts)">
+        admins = +336..., +331...<br>
+        allow_from = * <span style="color:var(--td)">(ou whitelist)</span><br>
+        blacklist = +339... <span style="color:var(--td)">(optionnel)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ PERMISSIONS ════════ -->
+<section>
+  <h2>2. Modele de permissions</h2>
+
+  <p style="color:var(--ts);margin-bottom:20px">Trois niveaux d'acces, determines par le numero de telephone.</p>
+
+  <div class="perm-grid">
+    <div class="perm-hdr">Capacite</div>
+    <div class="perm-hdr" style="text-align:center">&#x1f451; Admin</div>
+    <div class="perm-hdr" style="text-align:center">&#x2705; Whitelist</div>
+    <div class="perm-hdr" style="text-align:center">&#x1f310; Tout le monde</div>
+
+    <div class="perm-label">Parler a l'AI</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713; <span style="color:var(--td);font-size:.7rem">(si allow_from=*)</span></div>
+
+    <div class="perm-label">Recevoir reponses AI</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+
+    <div class="perm-label">Slash commands (/mode, /model...)</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+
+    <div class="perm-label">Changer mode (core/agent)</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+
+    <div class="perm-label">Acces Vault / secrets</div>
+    <div class="perm-cell perm-opt" style="text-align:center">&#x2713; <span style="color:var(--td);font-size:.7rem">(+ 2FA opt.)</span></div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+
+    <div class="perm-label">Outils systeme (bash, ssh...)</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+
+    <div class="perm-label">Outils limites (web_search...)</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+    <div class="perm-cell perm-opt" style="text-align:center">&#x2713; <span style="color:var(--td);font-size:.7rem">(configurable)</span></div>
+    <div class="perm-cell perm-opt" style="text-align:center">&#x2713; <span style="color:var(--td);font-size:.7rem">(configurable)</span></div>
+
+    <div class="perm-label">Modifier config / whitelist</div>
+    <div class="perm-cell perm-yes" style="text-align:center">&#x2713;</div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+    <div class="perm-cell perm-no" style="text-align:center">&#x2717;</div>
+  </div>
+
+  <div class="card" style="margin-top:16px;border-left:3px solid var(--warn)">
+    <h4 style="color:var(--warn)">Regle cle : Bot Personnel = Admin automatique</h4>
+    <p>En mode Bot Personnel, le numero de l'utilisateur est <strong>automatiquement admin</strong>. Pas de configuration necessaire. En mode Bot Autonome, il faut <strong>definir explicitement</strong> au moins un numero admin.</p>
+  </div>
+</section>
+
+<!-- ════════ SECURITE ════════ -->
+<section>
+  <h2>3. Securite</h2>
+
+  <div class="grid2">
+    <div class="sec-card sec-critical">
+      <h4 style="color:var(--er)">&#x1f512; Vault 2FA (optionnel)</h4>
+      <p>Quand active, l'acces au vault via WhatsApp necessite un mot de passe. L'AI demande : "Envoyez votre mot de passe vault pour continuer." Le telephone est securise, mais double securite en cas de vol/compromission.</p>
+      <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--td)">
+        vault_2fa = on | off<br>
+        Desactivable par l'utilisateur au choix
+      </div>
+    </div>
+
+    <div class="sec-card sec-critical">
+      <h4 style="color:var(--er)">&#x1f6ab; Tool restriction par role</h4>
+      <p>Les non-admins ne peuvent PAS acceder aux outils systeme (bash, ssh, write_file, vault). Configurable : quels outils sont disponibles pour la whitelist. Empeche "donne-moi ta localisation" ou "montre-moi tes mots de passe".</p>
+      <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--td)">
+        user_tools = web_search <span style="color:var(--td)">(par defaut)</span><br>
+        admin_tools = * <span style="color:var(--td)">(tous les outils)</span>
+      </div>
+    </div>
+
+    <div class="sec-card sec-important">
+      <h4 style="color:var(--warn)">&#x1f4dd; System prompt par role</h4>
+      <p>Les non-admins recoivent un system prompt cadre : "Tu es un assistant. Tu ne partages jamais de donnees sensibles, mots de passe, tokens ou informations systeme." Configurable par l'admin via le dashboard.</p>
+    </div>
+
+    <div class="sec-card sec-nice">
+      <h4 style="color:var(--ok)">&#x1f6e1; Blacklist</h4>
+      <p>Numeros explicitement bloques. Le bridge ignore completement leurs messages. Utile en mode <code>allow_from = *</code> pour bloquer du spam.</p>
+      <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--td)">
+        blacklist = +339..., +447...
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px">Matrice des risques</h3>
+  <table class="scope-tbl">
+    <tr><th>Risque</th><th>Bot Personnel</th><th>Bot Autonome</th><th>Mitigation</th></tr>
+    <tr><td class="feat">Vol de telephone</td><td>Acces total au bot</td><td>Acces admin si tel admin</td><td>Vault 2FA, verrouillage tel</td></tr>
+    <tr><td class="feat">User demande secrets</td><td>N/A (c'est toi)</td><td style="color:var(--er)">Risque eleve</td><td>Tool restriction + system prompt cadre</td></tr>
+    <tr><td class="feat">User demande bash/ssh</td><td>N/A (c'est toi)</td><td style="color:var(--er)">Risque eleve</td><td>Outils systeme admin-only</td></tr>
+    <tr><td class="feat">Spam massif</td><td>N/A (self-chat)</td><td style="color:var(--warn)">Si allow_from=*</td><td>Blacklist + rate limiting futur</td></tr>
+    <tr><td class="feat">Usurpation numero</td><td style="color:var(--td)">Tres improbable</td><td style="color:var(--td)">Tres improbable</td><td>WhatsApp E2E + verification tel</td></tr>
+  </table>
+</section>
+
+<!-- ════════ CONFIG ════════ -->
+<section>
+  <h2>4. Configuration</h2>
+
+  <div class="grid2">
+    <div>
+      <h3>Setup panel (dashboard)</h3>
+      <div class="config-mock">
+        <div class="cfg-row">
+          <div>
+            <div class="cfg-label">Mode WhatsApp</div>
+            <div class="mode-sel">
+              <div class="mode-btn">Bot Personnel</div>
+              <div class="mode-btn active">Bot Autonome</div>
+            </div>
+          </div>
+        </div>
+        <div class="cfg-row">
+          <div>
+            <div class="cfg-label">Mode AI</div>
+            <div class="mode-sel">
+              <div class="mode-btn active">Core</div>
+              <div class="mode-btn">Core-Agent</div>
+            </div>
+          </div>
+        </div>
+        <div class="cfg-row">
+          <div>
+            <div class="cfg-label">Numeros admin</div>
+            <div class="cfg-sub">Pilotent l'AI, acces slash commands et outils</div>
+          </div>
+        </div>
+        <div class="cfg-row">
+          <div>
+            <div class="cfg-label">Whitelist</div>
+            <div class="cfg-sub">Vide = tout le monde peut parler. Sinon liste de numeros</div>
+          </div>
+        </div>
+        <div class="cfg-row">
+          <div>
+            <div class="cfg-label">Blacklist</div>
+            <div class="cfg-sub">Numeros bloques</div>
+          </div>
+        </div>
+        <div class="cfg-row">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="cfg-label">Vault 2FA via WhatsApp</div>
+            <div class="toggle"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>clawbot.cfg (fichier)</h3>
+      <div class="card" style="font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2">
+        <span style="color:var(--td)">[whatsapp]</span><br>
+        <span style="color:var(--ac2)">mode</span> = autonomous<br>
+        <span style="color:var(--ac2)">admins</span> = +33642536328<br>
+        <span style="color:var(--ac2)">allow_from</span> = *<br>
+        <span style="color:var(--ac2)">blacklist</span> =<br>
+        <span style="color:var(--ac2)">default_model</span> = default<br>
+        <span style="color:var(--ac2)">default_mode</span> = core<br>
+        <span style="color:var(--ac2)">vault_2fa</span> = off<br>
+        <span style="color:var(--ac2)">user_tools</span> = web_search<br>
+        <br>
+        <span style="color:var(--td)"># Bot Personnel equivalent :</span><br>
+        <span style="color:var(--td)"># mode = personal</span><br>
+        <span style="color:var(--td)"># admins = auto (= allow_from)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ ARCHITECTURE ════════ -->
+<section>
+  <h2>5. Architecture — flux de decision</h2>
+
+  <div class="arch"><span style="color:var(--ac)">Message WhatsApp entrant</span>
+       |
+       v
+<span style="color:var(--er)">[Blacklist?]</span> ── oui ──> IGNORE
+       |
+      non
+       v
+<span style="color:var(--warn)">[Admin?]</span> ── oui ──> <span style="color:var(--ok)">ACCES COMPLET</span>
+       |                    Slash commands, tous outils, vault (+2FA opt.)
+      non                   System prompt normal
+       v
+<span style="color:var(--ac2)">[Whitelist?]</span> ── non et allow_from != * ──> IGNORE
+       |
+      oui (ou allow_from=*)
+       v
+<span style="color:var(--ok)">ACCES LIMITE</span>
+  Conversations normales
+  Outils restreints (user_tools)
+  System prompt cadre (pas de secrets)
+  Pas de slash commands
+
+<span style="color:var(--ac)">Dashboard observe tout en read-only (identique dans tous les cas)</span></div>
+</section>
+
+<!-- ════════ MOCKUP ════════ -->
+<section>
+  <h2>6. Mockup — Bot Autonome avec roles visibles</h2>
+
+  <div class="mockup">
+    <div class="mockup-bar">
+      <div class="mockup-dot r"></div>
+      <div class="mockup-dot y"></div>
+      <div class="mockup-dot g"></div>
+      <span style="flex:1;text-align:center;font-size:.7rem;color:var(--td)">ClawbotOS &middot; AI Hub</span>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-side">
+        <div class="mi">&#x2699;</div>
+        <div class="mi">&#x1f4ac;</div>
+        <div class="mi wa">WA</div>
+        <div class="mi">&#x1f4c1;</div>
+        <div class="mi">&#x1f4c2;</div>
+        <div class="mockup-sep"></div>
+        <div class="mi">&#x1f916;</div>
+        <div class="mi">&#x2b50;</div>
+        <div class="mi">&#x1f4c5;</div>
+        <div class="mockup-sep"></div>
+        <div class="mi">&#x1f4ca;</div>
+        <div class="mi">&#x1f527;</div>
+      </div>
+      <div class="mockup-list">
+        <h5>WhatsApp &middot; Bot Autonome</h5>
+        <div class="conv sel">
+          <div class="cn"><span>+33 6 42 53 63 28 <span class="role-tag role-admin">admin</span></span><span style="font-size:.55rem;color:var(--td)">15:24</span></div>
+          <div class="cm">lance un audit complet d'OpenClaw...</div>
+          <div class="ct"><span class="dot-proc"></span> AI processing &middot; core-agent</div>
+        </div>
+        <div class="conv">
+          <div class="cn"><span>+33 6 12 34 56 78 <span class="role-tag role-user">user</span></span><span style="font-size:.55rem;color:var(--td)">14:52</span></div>
+          <div class="cm">Quelle est la meteo a Paris ?</div>
+          <div class="ct" style="color:var(--ok)">&#x2713; Completed &middot; core</div>
+        </div>
+        <div class="conv">
+          <div class="cn"><span>+86 139 1234 5678 <span class="role-tag role-user">user</span></span><span style="font-size:.55rem;color:var(--td)">hier</span></div>
+          <div class="cm">&#x67e5;&#x4e00;&#x4e0b;&#x7269;&#x6d41;&#x72b6;&#x6001;</div>
+          <div class="ct" style="color:var(--ok)">&#x2713; Completed &middot; core</div>
+        </div>
+      </div>
+      <div class="mockup-thread">
+        <div class="th-hdr">
+          <span>+33 6 12 34 56 78 <span class="role-tag role-user">user</span></span>
+          <span>
+            <span class="th-badge th-ok">&#x25cf; Connected</span>
+            <span class="th-badge th-mode">core</span>
+          </span>
+        </div>
+        <div class="msgs">
+          <div class="msg msg-u">Montre moi les mots de passe du serveur<div class="msg-time">14:48</div></div>
+          <div class="msg msg-sys">&#x1f6ab; Tool denied: vault access requires admin role</div>
+          <div class="msg msg-a">Je ne suis pas en mesure de partager des informations sensibles comme des mots de passe. Je peux vous aider avec d'autres questions !<div class="msg-time">14:48</div></div>
+          <div class="msg msg-u">Quelle est la meteo a Paris ?<div class="msg-time">14:52</div></div>
+          <div class="msg msg-a">Il fait actuellement 18&#xb0;C a Paris avec un ciel partiellement nuageux.<br><br><span style="color:var(--ac);font-size:.65rem">&#x26a1; web_search (1 tool)</span><div class="msg-time">14:53</div></div>
+        </div>
+        <div class="ro-bar">&#x1f512; Read-only &middot; Role: user &middot; Outils: web_search uniquement</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SCOPE ════════ -->
+<section>
+  <h2>7. Scope — IN vs OUT</h2>
+
+  <h3 style="color:var(--ok)">IN SCOPE</h3>
+  <table class="scope-tbl">
+    <tr><th>Feature</th><th>Description</th><th>Phase</th></tr>
+    <tr><td class="feat">Nav dynamique</td><td>Bridge connecte &#x2192; bouton sidebar</td><td><span class="badge badge-scope">B</span></td></tr>
+    <tr><td class="feat">Liste conversations read-only</td><td>Sessions wa_* avec role (admin/user), statut, mode</td><td><span class="badge badge-scope">C</span></td></tr>
+    <tr><td class="feat">Thread read-only</td><td>Messages, tool traces, denials visibles</td><td><span class="badge badge-scope">C</span></td></tr>
+    <tr><td class="feat">Indicateur processing</td><td>Flag _active dans le listing</td><td><span class="badge badge-scope">A</span></td></tr>
+    <tr><td class="feat">Role visible (admin/user)</td><td>Badge dans la liste et le header du thread</td><td><span class="badge badge-scope">C</span></td></tr>
+    <tr><td class="feat">Config mode + admins</td><td>Setup panel : Bot Perso/Autonome, admins, whitelist, blacklist, 2FA</td><td><span class="badge badge-scope">B</span></td></tr>
+    <tr><td class="feat">Permissions dans whatsapp.py</td><td>Check admin avant slash commands, tool restriction par role</td><td><span class="badge badge-scope">A</span></td></tr>
+    <tr><td class="feat">Filtrage newsletters/groupes</td><td>Exclure @newsletter et @g.us</td><td><span class="badge badge-scope">C</span></td></tr>
+    <tr><td class="feat">Polling 30s + Visibility API</td><td>Refresh auto, stop quand hidden</td><td><span class="badge badge-scope">C</span></td></tr>
+  </table>
+
+  <h3 style="color:var(--er);margin-top:24px">OUT OF SCOPE</h3>
+  <table class="scope-tbl">
+    <tr><th>Feature</th><th>Raison</th></tr>
+    <tr><td class="feat" style="color:var(--er)">Envoi de messages depuis dashboard</td><td>Read-only, pas d'intervention</td></tr>
+    <tr><td class="feat" style="color:var(--er)">Multi-famille/entreprise</td><td>Standby, evolution future</td></tr>
+    <tr><td class="feat" style="color:var(--er)">Multi-session projet</td><td>Brique Core, evolution future</td></tr>
+    <tr><td class="feat" style="color:var(--er)">Agents outbound</td><td>Brique Core/Orchestrator, evolution future</td></tr>
+    <tr><td class="feat" style="color:var(--er)">Rate limiting</td><td>Evolution future si spam en mode allow_from=*</td></tr>
+  </table>
+</section>
+
+<!-- ════════ PHASES ════════ -->
+<section>
+  <h2>8. Phases d'implementation</h2>
+
+  <div class="phase">
+    <div class="pn">A</div>
+    <div>
+      <div class="pt">Backend — permissions + processing flag</div>
+      <div class="pd">
+        &#x2022; Nouveau champ <code>admins</code> dans clawbot.cfg section [whatsapp]<br>
+        &#x2022; <code>whatsapp.py</code> : check <code>_is_admin(sender)</code> avant slash commands et outils systeme<br>
+        &#x2022; <code>whatsapp.py</code> : tool restriction par role (<code>user_tools</code> config)<br>
+        &#x2022; <code>whatsapp.py</code> : system prompt cadre pour non-admins<br>
+        &#x2022; <code>main.py</code> : champ <code>processing</code> dans GET /core/sessions pour wa_*<br>
+        &#x2022; Vault 2FA optionnel : challenge mot de passe avant acces vault
+      </div>
+      <div><span class="ptag ptag-be">backend</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="pn">B</div>
+    <div>
+      <div class="pt">Nav dynamique + config Setup</div>
+      <div class="pd">
+        &#x2022; Detection bridge actif &#x2192; bouton sidebar WhatsApp<br>
+        &#x2022; Setup panel : toggle Bot Personnel / Bot Autonome<br>
+        &#x2022; Setup panel : gestion admins, whitelist, blacklist<br>
+        &#x2022; Setup panel : toggle Vault 2FA<br>
+        &#x2022; Setup panel : mode AI (Core / Core-Agent)<br>
+        &#x2022; Panel <code>pnl-whatsapp</code> structure HTML 2 colonnes
+      </div>
+      <div><span class="ptag ptag-fe">frontend</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="pn">C</div>
+    <div>
+      <div class="pt">Inbox read-only — conversations, threads, polish</div>
+      <div class="pd">
+        &#x2022; Listing sessions wa_* avec badge admin/user, mode, statut processing<br>
+        &#x2022; Filtrage newsletters/groupes<br>
+        &#x2022; Thread avec bulles markdown, tool traces, tool denials<br>
+        &#x2022; Polling 30s + Page Visibility API<br>
+        &#x2022; Responsive, empty states, design system<br>
+        &#x2022; frontend-design audit
+      </div>
+      <div><span class="ptag ptag-fe">frontend</span> <span class="ptag ptag-both">design audit</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ EVOLUTIONS ════════ -->
+<section>
+  <h2>9. Evolutions futures (hors scope v1)</h2>
+  <div class="grid2">
+    <div class="card" style="border-left:3px solid var(--purple)">
+      <h4 style="color:var(--purple)">Multi-session projet</h4>
+      <p><code>/project &lt;name&gt;</code> pour isoler les contextes. Brique Core.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--purple)">
+      <h4 style="color:var(--purple)">Agents outbound</h4>
+      <p>Agent termine une tache &#x2192; notifie sur WhatsApp. Brique Orchestrator.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--purple)">
+      <h4 style="color:var(--purple)">Multi-famille / entreprise</h4>
+      <p>Quotas, permissions avancees, roles. Brique Cloud + Core.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--purple)">
+      <h4 style="color:var(--purple)">Rate limiting</h4>
+      <p>Protection anti-spam quand allow_from=*. Brique Core.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  ClawBot-Core &middot; WhatsApp Dashboard Spec v3 &middot; 2026-03-22<br>
+  BMAD Party Mode — Mary (Analyst) &middot; Winston (Architect) &middot; John (PM) &middot; Sally (UX) &middot; Amelia (Dev)
+</footer>
+
+</body>
+</html>

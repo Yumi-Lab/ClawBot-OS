@@ -61,6 +61,8 @@ The setup will:
   2. Display a QR code to link your device
   3. Wait for cloud activation
 
+Default AI: Kimi (change anytime in Settings)
+
 Press OK to continue..." ${WT} ${WW}
 }
 
@@ -187,6 +189,7 @@ show_qr_and_wait() {
     clear
     echo ""
     echo "  ✅ Device activated!"
+    echo "  Default AI: Kimi"
     echo "  Access your dashboard at: http://$(get_ip)"
     echo ""
     sleep 3
@@ -207,6 +210,7 @@ headless_wait() {
     echo "  │  MAC : ${MAC}                     │"
     echo "  │  IP  : ${ip:-no network yet}                          │"
     echo "  │                                                │"
+    echo "  │  AI   : Kimi (default)                          │"
     echo "  │  Cloud : waiting for activation...             │"
     echo "  │  Scan the QR code on the device case           │"
     echo "  │  or visit:                                     │"
