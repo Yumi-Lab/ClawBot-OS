@@ -26,3 +26,4 @@ src/custompios_path
 # Secrets (never commit API keys)
 *.env
 config.json
+openclaw-snapshot*.txt

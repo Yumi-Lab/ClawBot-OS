@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit VPN YumiNet — Infrastructure Complète</title>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111820;
+    --surface2: #1a2230;
+    --border: #1e2a3a;
+    --cyan: #00ffe0;
+    --cyan-dim: #00b8a3;
+    --green: #00ff88;
+    --red: #ff4466;
+    --orange: #ffaa33;
+    --yellow: #ffe066;
+    --text: #e0e8f0;
+    --text-dim: #7a8a9a;
+    --fr: #3b82f6;
+    --de: #f59e0b;
+    --usa: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 2rem;
+    color: var(--cyan);
+    text-align: center;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--text-dim);
+    margin-bottom: 2.5rem;
+    font-size: 0.9rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .card.fr::before { background: var(--fr); }
+  .card.de::before { background: var(--de); }
+  .card.usa::before { background: var(--red); }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .flag { font-size: 1.8rem; }
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .card-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: auto;
+  }
+  .status-badge.active {
+    background: rgba(0, 255, 136, 0.1);
+    color: var(--green);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .stat {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .stat-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  .stat-value.warn { color: var(--orange); }
+  .stat-value.ok { color: var(--green); }
+  .stat-value.bad { color: var(--red); }
+  .full-width { grid-column: 1 / -1; }
+  .section-title {
+    font-size: 1.3rem;
+    color: var(--cyan);
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--cyan-dim);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-weight: 600;
+  }
+  td {
+    padding: 0.7rem 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  tr:hover { background: rgba(0, 255, 224, 0.03); }
+  .mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .tag-fr { background: rgba(59,130,246,0.15); color: var(--fr); }
+  .tag-de { background: rgba(245,158,11,0.15); color: var(--de); }
+  .tag-usa { background: rgba(239,68,68,0.15); color: var(--red); }
+  .tag-ok { background: rgba(0,255,136,0.1); color: var(--green); }
+  .tag-warn { background: rgba(255,170,51,0.1); color: var(--orange); }
+  .tag-same { background: rgba(0,255,224,0.1); color: var(--cyan); }
+  .config-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    color: var(--text-dim);
+  }
+  .config-block .key { color: var(--cyan); }
+  .config-block .val { color: var(--green); }
+  .config-block .comment { color: #4a5a6a; }
+  .bar-container {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s;
+  }
+  .bar.ok { background: var(--green); }
+  .bar.warn { background: var(--orange); }
+  .bar.bad { background: var(--red); }
+  .notes {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+  }
+  .notes strong { color: var(--orange); }
+  .topology {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+  }
+  .topo-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    text-align: center;
+    min-width: 140px;
+  }
+  .topo-node .name { font-weight: 700; font-size: 0.9rem; }
+  .topo-node .ip { font-family: monospace; font-size: 0.75rem; color: var(--text-dim); }
+  .topo-arrow {
+    color: var(--cyan-dim);
+    font-size: 1.5rem;
+  }
+  .topo-node.fr { border-color: var(--fr); }
+  .topo-node.de { border-color: var(--de); }
+  .topo-node.usa { border-color: var(--red); }
+  .topo-node.client { border-color: var(--cyan); }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .footer {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<h1>Audit VPN YumiNet</h1>
+<p class="subtitle">Infrastructure OpenVPN — 3 serveurs, 30 clients, 3 continents &nbsp;|&nbsp; Mis à jour : 24/03/2026</p>
+
+<!-- ============================================ -->
+<!-- SERVER CARDS -->
+<!-- ============================================ -->
+
+<div class="grid">
+
+  <!-- FR -->
+  <div class="card fr">
+    <div class="card-header">
+      <span class="flag">🇫🇷</span>
+      <div>
+        <div class="card-title">Warehouse France</div>
+        <div class="card-subtitle">vpn.yumi-lab.com · SmartPi One</div>
+      </div>
+      <span class="status-badge active"><span class="status-dot"></span> Active</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-label">IP Publique</div>
+        <div class="stat-value mono">92.169.71.224</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Hébergement</div>
+        <div class="stat-value">Domicile (NAT)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">CPU</div>
+        <div class="stat-value">4× ARM Cortex-A7</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">RAM</div>
+        <div class="stat-value ok">211 / 992 MB</div>
+        <div class="bar-container"><div class="bar ok" style="width:21%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Disque</div>
+        <div class="stat-value ok">5.4 / 14 GB</div>
+        <div class="bar-container"><div class="bar ok" style="width:40%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Temp CPU</div>
+        <div class="stat-value warn">70°C</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Uptime</div>
+        <div class="stat-value mono">7j 02h</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Clients .ovpn</div>
+        <div class="stat-value">10</div>
+      </div>
+      <div class="stat full-width">
+        <div class="stat-label">OS</div>
+        <div class="stat-value mono" style="font-size:0.8rem">Armbian Bookworm · Linux 6.6.75-sunxi</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DE -->
+  <div class="card de">
+    <div class="card-header">
+      <span class="flag">🇩🇪</span>
+      <div>
+        <div class="card-title">Yumi Germany</div>
+        <div class="card-subtitle">IONOS VPS · Francfort</div>
+      </div>
+      <span class="status-badge active"><span class="status-dot"></span> Active</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-label">IP Publique</div>
+        <div class="stat-value mono">212.227.202.68</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Hébergement</div>
+        <div class="stat-value">IONOS VPS</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">CPU</div>
+        <div class="stat-value">1× EPYC-Milan</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">RAM</div>
+        <div class="stat-value warn">248 / 422 MB</div>
+        <div class="bar-container"><div class="bar warn" style="width:59%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Disque</div>
+        <div class="stat-value warn">15 / 28 GB</div>
+        <div class="bar-container"><div class="bar warn" style="width:55%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Swap utilisé</div>
+        <div class="stat-value warn">157 MB</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Uptime</div>
+        <div class="stat-value mono">16j 10h</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Clients .ovpn</div>
+        <div class="stat-value">20</div>
+      </div>
+      <div class="stat full-width">
+        <div class="stat-label">OS</div>
+        <div class="stat-value mono" style="font-size:0.8rem">Debian 12 Bookworm · Linux 6.1.0-43-amd64</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USA -->
+  <div class="card usa">
+    <div class="card-header">
+      <span class="flag">🇺🇸</span>
+      <div>
+        <div class="card-title">Yumi USA</div>
+        <div class="card-subtitle">IONOS VPS · Saint-Louis</div>
+      </div>
+      <span class="status-badge active"><span class="status-dot"></span> Active</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-label">IP Publique</div>
+        <div class="stat-value mono">108.175.12.160</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Hébergement</div>
+        <div class="stat-value">IONOS VPS</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">CPU</div>
+        <div class="stat-value">1× EPYC-Milan</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">RAM</div>
+        <div class="stat-value warn">255 / 425 MB</div>
+        <div class="bar-container"><div class="bar warn" style="width:60%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Disque</div>
+        <div class="stat-value ok">8.9 / 30 GB</div>
+        <div class="bar-container"><div class="bar ok" style="width:32%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Swap utilisé</div>
+        <div class="stat-value">98 MB</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Uptime</div>
+        <div class="stat-value mono">20j 18h</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Clients .ovpn</div>
+        <div class="stat-value">10</div>
+      </div>
+      <div class="stat full-width">
+        <div class="stat-label">OS</div>
+        <div class="stat-value mono" style="font-size:0.8rem">Debian 13 Trixie · Linux 6.12.73-amd64</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================ -->
+<!-- TOPOLOGY -->
+<!-- ============================================ -->
+
+<h2 class="section-title">Topologie réseau</h2>
+
+<div class="topology">
+  <div class="topo-node client">
+    <div class="name">📱 Clients</div>
+    <div class="ip">Tunnelblick / OpenVPN Connect</div>
+    <div class="ip">30 certificats (10×3)</div>
+  </div>
+  <span class="topo-arrow">→ UDP 1194 →</span>
+  <div class="topo-node fr">
+    <div class="name">🇫🇷 FR</div>
+    <div class="ip">92.169.71.224</div>
+    <div class="ip">SmartPi · NAT</div>
+  </div>
+  <div class="topo-node de">
+    <div class="name">🇩🇪 DE</div>
+    <div class="ip">212.227.202.68</div>
+    <div class="ip">IONOS VPS</div>
+  </div>
+  <div class="topo-node usa">
+    <div class="name">🇺🇸 USA</div>
+    <div class="ip">108.175.12.160</div>
+    <div class="ip">IONOS VPS</div>
+  </div>
+</div>
+
+<div class="notes">
+  <strong>⚠️ Particularité FR :</strong> Le serveur France est un SmartPi One derrière un routeur domestique (NAT).
+  Le port 1194/UDP est forwardé. L'IP publique (92.169.71.224) peut changer si pas de DDNS.
+  DNS : <code>vpn.yumi-lab.com</code> pointe vers cette IP.
+</div>
+
+<!-- ============================================ -->
+<!-- COMPARATIF -->
+<!-- ============================================ -->
+
+<h2 class="section-title">Comparatif détaillé</h2>
+
+<table>
+  <tr>
+    <th>Paramètre</th>
+    <th><span class="tag tag-fr">🇫🇷 FR</span></th>
+    <th><span class="tag tag-de">🇩🇪 DE</span></th>
+    <th><span class="tag tag-usa">🇺🇸 USA</span></th>
+  </tr>
+  <tr>
+    <td>Protocole</td>
+    <td><span class="tag tag-same">UDP 1194</span></td>
+    <td><span class="tag tag-same">UDP 1194</span></td>
+    <td><span class="tag tag-same">UDP 1194</span></td>
+  </tr>
+  <tr>
+    <td>Chiffrement</td>
+    <td><span class="tag tag-same">AES-256-GCM</span></td>
+    <td><span class="tag tag-same">AES-256-GCM</span></td>
+    <td><span class="tag tag-same">AES-256-GCM</span></td>
+  </tr>
+  <tr>
+    <td>Auth</td>
+    <td><span class="tag tag-same">SHA512</span></td>
+    <td><span class="tag tag-same">SHA512</span></td>
+    <td><span class="tag tag-same">SHA512</span></td>
+  </tr>
+  <tr>
+    <td>TLS</td>
+    <td><span class="tag tag-same">tls-crypt</span></td>
+    <td><span class="tag tag-same">tls-crypt</span></td>
+    <td><span class="tag tag-same">tls-crypt</span></td>
+  </tr>
+  <tr>
+    <td>IPv4 VPN</td>
+    <td class="mono">10.8.0.0/24</td>
+    <td class="mono">10.8.0.0/24</td>
+    <td class="mono">10.8.0.0/24</td>
+  </tr>
+  <tr>
+    <td>IPv6 VPN</td>
+    <td class="mono">fddd:1194:…/64</td>
+    <td class="mono">fddd:1194:…/64</td>
+    <td class="mono">fddd:1194:…/64</td>
+  </tr>
+  <tr>
+    <td>Redirect Gateway</td>
+    <td><span class="tag tag-ok">def1 ipv6</span></td>
+    <td><span class="tag tag-ok">def1 ipv6</span></td>
+    <td><span class="tag tag-ok">def1 ipv6</span></td>
+  </tr>
+  <tr>
+    <td>DNS poussé</td>
+    <td class="mono">8.8.8.8, 8.8.4.4</td>
+    <td class="mono">8.8.8.8, 8.8.4.4</td>
+    <td class="mono">8.8.8.8, 8.8.4.4</td>
+  </tr>
+  <tr>
+    <td>block-outside-dns</td>
+    <td><span class="tag tag-ok">oui</span></td>
+    <td><span class="tag tag-ok">oui</span></td>
+    <td><span class="tag tag-ok">oui</span></td>
+  </tr>
+  <tr>
+    <td>NAT</td>
+    <td>SNAT → 192.168.50.90</td>
+    <td>MASQ + SNAT → IP pub</td>
+    <td>SNAT → 108.175.12.160</td>
+  </tr>
+  <tr>
+    <td>Keepalive</td>
+    <td class="mono">10 / 120</td>
+    <td class="mono">10 / 120</td>
+    <td class="mono">10 / 120</td>
+  </tr>
+  <tr>
+    <td>SSH user</td>
+    <td><span class="tag tag-warn">pi (sudo)</span></td>
+    <td><span class="tag tag-ok">root</span></td>
+    <td><span class="tag tag-ok">root</span></td>
+  </tr>
+  <tr>
+    <td>Hardware</td>
+    <td>ARM H3 4-core</td>
+    <td>AMD EPYC 1-core</td>
+    <td>AMD EPYC 1-core</td>
+  </tr>
+  <tr>
+    <td>RAM totale</td>
+    <td>992 MB</td>
+    <td><span class="tag tag-warn">422 MB</span></td>
+    <td><span class="tag tag-warn">425 MB</span></td>
+  </tr>
+  <tr>
+    <td>Disque</td>
+    <td>14 GB (SD)</td>
+    <td>28 GB (SSD)</td>
+    <td>30 GB (SSD)</td>
+  </tr>
+  <tr>
+    <td>Clients .ovpn</td>
+    <td>Warehouse 1–10</td>
+    <td>yumi_de 1–20</td>
+    <td>yumi_usa 1–10</td>
+  </tr>
+  <tr>
+    <td>Chemin .ovpn</td>
+    <td class="mono">/home/pi/</td>
+    <td class="mono">/etc/openvpn/clients/</td>
+    <td class="mono">/etc/openvpn/clients/</td>
+  </tr>
+  <tr>
+    <td>Services co-hébergés</td>
+    <td>Docker</td>
+    <td>Apache (5 sites), Node.js</td>
+    <td>Docker</td>
+  </tr>
+  <tr>
+    <td>Sécurité</td>
+    <td>fail2ban</td>
+    <td>fail2ban, UFW</td>
+    <td>fail2ban</td>
+  </tr>
+</table>
+
+<!-- ============================================ -->
+<!-- CONFIG COMMUNE -->
+<!-- ============================================ -->
+
+<h2 class="section-title">Configuration serveur commune (harmonisée 24/03/2026)</h2>
+
+<div class="config-block"><span class="key">port</span> <span class="val">1194</span>
+<span class="key">proto</span> <span class="val">udp</span>
+<span class="key">dev</span> <span class="val">tun</span>
+<span class="key">ca</span> ca.crt
+<span class="key">cert</span> server.crt
+<span class="key">key</span> server.key
+<span class="key">dh</span> dh.pem
+<span class="key">auth</span> <span class="val">SHA512</span>
+<span class="key">tls-crypt</span> tc.key
+<span class="key">topology</span> <span class="val">subnet</span>
+<span class="key">server</span> <span class="val">10.8.0.0 255.255.255.0</span>
+<span class="key">server-ipv6</span> <span class="val">fddd:1194:1194:1194::/64</span>
+<span class="key">push</span> "<span class="val">redirect-gateway def1 ipv6 bypass-dhcp</span>"
+<span class="key">ifconfig-pool-persist</span> ipp.txt
+<span class="key">push</span> "<span class="val">dhcp-option DNS 8.8.8.8</span>"
+<span class="key">push</span> "<span class="val">dhcp-option DNS 8.8.4.4</span>"
+<span class="key">push</span> "<span class="val">block-outside-dns</span>"
+<span class="key">keepalive</span> <span class="val">10 120</span>
+<span class="key">user</span> nobody
+<span class="key">group</span> nogroup
+<span class="key">persist-key</span>
+<span class="key">persist-tun</span>
+<span class="key">verb</span> <span class="val">3</span>
+<span class="key">crl-verify</span> crl.pem
+<span class="key">explicit-exit-notify</span>
+
+<span class="comment"># Seul FR ajoute : local 192.168.50.90 (derrière NAT)</span></div>
+
+<!-- ============================================ -->
+<!-- FICHIERS LOCAUX -->
+<!-- ============================================ -->
+
+<h2 class="section-title">Fichiers .ovpn locaux (Mac)</h2>
+
+<table>
+  <tr>
+    <th>Serveur</th>
+    <th>Tunnelblick (macOS)</th>
+    <th>OpenVPN Connect (cross-platform)</th>
+    <th>Noms</th>
+  </tr>
+  <tr>
+    <td><span class="tag tag-fr">FR</span></td>
+    <td class="mono">~/Downloads/YumiNet_VPN/FR/tunnelblick/</td>
+    <td class="mono">~/Downloads/YumiNet_VPN/FR/openvpn_connect/</td>
+    <td>Warehouse1–10.ovpn</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-de">DE</span></td>
+    <td class="mono">~/Downloads/YumiNet_VPN/DE/tunnelblick/</td>
+    <td class="mono">~/Downloads/YumiNet_VPN/DE/openvpn_connect/</td>
+    <td>yumi_de1–10.ovpn</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-usa">USA</span></td>
+    <td class="mono">~/Downloads/YumiNet_VPN/USA/tunnelblick/</td>
+    <td class="mono">~/Downloads/YumiNet_VPN/USA/openvpn_connect/</td>
+    <td>yumi_usa1–10.ovpn</td>
+  </tr>
+</table>
+
+<!-- ============================================ -->
+<!-- ALERTES -->
+<!-- ============================================ -->
+
+<h2 class="section-title">Alertes & recommandations</h2>
+
+<div class="notes">
+  <strong>🇩🇪 DE — RAM critique :</strong> 422 MB total, 248 MB utilisé, 157 MB de swap actif.
+  Apache + 5 sites web + Node.js consomment beaucoup. Risque d'OOM si pic de trafic VPN + web simultané.
+  <br><em>Recommandation : envisager upgrade RAM ou déplacer certains sites.</em>
+</div>
+
+<div class="notes">
+  <strong>🇫🇷 FR — Température CPU :</strong> 70°C au repos, pas de ventilation active sur le SmartPi One.
+  En été ou sous charge, risque de throttling à 80°C+.
+  <br><em>Recommandation : ajouter un dissipateur ou un ventilateur 5V.</em>
+</div>
+
+<div class="notes">
+  <strong>🇺🇸 USA — AEAD Replay warnings :</strong> Logs montrent des warnings AEAD Decrypt depuis le client yumi_usa1 (39.144.129.153 = IP chinoise).
+  Causé par la latence élevée et le réordonnancement de paquets UDP à travers le GFW, pas un problème de sécurité.
+  <br><em>Recommandation : ajouter <code>replay-window 256 30</code> dans server.conf si persistant.</em>
+</div>
+
+<div class="notes">
+  <strong>🇫🇷 FR — IP dynamique :</strong> L'IP publique 92.169.71.224 est une IP résidentielle Free/Orange.
+  Elle peut changer après un reboot du routeur.
+  <br><em>Recommandation : DNS dynamique (vpn.yumi-lab.com) + script cron ddclient.</em>
+</div>
+
+<!-- ============================================ -->
+<!-- HISTORIQUE -->
+<!-- ============================================ -->
+
+<h2 class="section-title">Historique des changements</h2>
+
+<table>
+  <tr><th>Date</th><th>Serveur</th><th>Changement</th></tr>
+  <tr>
+    <td class="mono">24/03/2026</td>
+    <td><span class="tag tag-de">DE</span> <span class="tag tag-usa">USA</span></td>
+    <td>Harmonisation IPv6 : ajout <code>server-ipv6</code>, <code>redirect-gateway ipv6</code>, suppression <code>block-ipv6</code></td>
+  </tr>
+  <tr>
+    <td class="mono">07/03/2026</td>
+    <td><span class="tag tag-de">DE</span></td>
+    <td>Arrêt service TCP 443 (<code>openvpn@server</code> masqué), Apache récupère le port 443 direct</td>
+  </tr>
+  <tr>
+    <td class="mono">06/03/2026</td>
+    <td><span class="tag tag-usa">USA</span></td>
+    <td>Arrêt service TCP 443 (<code>openvpn-server@server-tcp</code> disabled), passage UDP only</td>
+  </tr>
+  <tr>
+    <td class="mono">06/03/2026</td>
+    <td><span class="tag tag-fr">FR</span> <span class="tag tag-de">DE</span> <span class="tag tag-usa">USA</span></td>
+    <td>Harmonisation configs : SHA512, tls-crypt, DNS Google, block-outside-dns, regeneration clients .ovpn</td>
+  </tr>
+  <tr>
+    <td class="mono">03/03/2026</td>
+    <td><span class="tag tag-de">DE</span></td>
+    <td>Installation OpenVPN serveur, création PKI Easy-RSA, 10 clients initiaux</td>
+  </tr>
+  <tr>
+    <td class="mono">03/03/2026</td>
+    <td><span class="tag tag-usa">USA</span></td>
+    <td>Installation OpenVPN serveur, création PKI, 10 clients</td>
+  </tr>
+</table>
+
+<div class="footer">
+  Audit VPN YumiNet — Généré le 24/03/2026 — Infrastructure : 3 serveurs, 30+ certificats clients, protocole UDP 1194
+</div>
+
+</body>
+</html>
